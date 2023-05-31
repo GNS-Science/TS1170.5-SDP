@@ -59,9 +59,9 @@ jobs:
       - name: list files
         run: ls -l .
 
-      - name: Submit coverage report if this is Linux
-        if: runner.os == 'Linux'
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true # optional (default = false)
-          verbose: true # optional (default = false)
+      # - name: Submit coverage report if this is Linux
+      #   if: runner.os == 'Linux'
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     fail_ci_if_error: true # optional (default = false)
+      #     verbose: true # optional (default = false)
