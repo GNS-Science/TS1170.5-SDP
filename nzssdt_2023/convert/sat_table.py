@@ -4,8 +4,9 @@
 import pathlib
 
 import pandas as pd
+from functools import lru_cache
 
-from . import RESOURCES_FOLDER
+from nzssdt_2023 import RESOURCES_FOLDER
 
 APoEs = [f"APoE: 1/{rp}" for rp in [25, 100, 250, 500, 1000, 2500]]
 site_class_labels = [
@@ -37,24 +38,34 @@ def flatten_df(df: pd.DataFrame):
     )
     return df3
 
+class SatTable():
 
-def named_location_df(flat_dataframe: pd.DataFrame):
-    sites = list(flat_dataframe.location)
-    named_sites = [site for site in sites if "~" not in site]
-    return flat_dataframe.loc[named_sites, :]
+    def __init__(self, raw_table: pd.DataFrame):
+        self.raw_table = raw_table
 
+    @lru_cache
+    def flatten(self):
+        return flatten_df(self.raw_table)
 
-def grid_location_df(flat_dataframe: pd.DataFrame):
-    sites = list(flat_dataframe.location)
-    grid_sites = [site for site in sites if "~" in site]
-    return flat_dataframe.loc[grid_sites, :]
+    def named_location_df(self):
+        df = self.flatten()
+        sites = list(df.location.unique())
+        named_sites = [site for site in sites if "~" not in site]
+        return df[df.location.isin(named_sites)]
 
+    def grid_location_df(self):
+        df = self.flatten()
+        sites = list(df.location.unique())
+        grid_sites = [site for site in sites if "~" in site]
+        return df[df.location.isin(grid_sites)]
 
 if __name__ == "__main__":
     filename = "SaT-variables_v5_corrected-locations.pkl"
     df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, filename))
 
-    flat = flatten_df(df)
+    sat_table = SatTable(df)
+    flat = sat_table.flatten()
+
     flat.to_json(
         pathlib.Path(RESOURCES_FOLDER, "flat_table_v5.json.zip"),
         index=False,
