@@ -6,7 +6,7 @@ import pathlib
 import click
 import nzshm_model
 
-from .versioning import VersionInfo, standard_output_filename
+from .versioning import VersionInfo, standard_output_filename, read_version_list, write_version_list
 
 
 @click.group()
@@ -15,15 +15,19 @@ def cli():
 
 
 @cli.command("lsv")
+@click.option("--verbose", "-V", is_flag=True, default=False)
 @click.option(
     "--resources_path",
     "-R",
     default=lambda: pathlib.Path(pathlib.Path(os.getcwd()).parent, "resources"),
 )
-def list_versions(resources_path):
+def list_versions(resources_path, verbose):
     """List the available versions of NZSSDT 2023"""
-    click.echo("Resources path: %s" % resources_path)
+    if verbose:
+        click.echo("Resources path: %s" % resources_path)
 
+    for version_info in read_version_list():
+        click.echo(version_info)
 
 @cli.command("add")
 @click.argument("input_path", type=click.Path(exists=True))
@@ -44,6 +48,8 @@ def append_version(
         click.echo("Input path: %s" % input_path)
         click.echo("Version: %s" % version_number)
 
+    current_versions = read_version_list()
+
     nm_ver = (
         nzshm_model.get_model_version(nzshm_model_version).version
         if nzshm_model_version
@@ -56,7 +62,10 @@ def append_version(
         input_filename=pathlib.Path(input_path).name,
         output_filename=standard_output_filename(version_number),
     )
-    click.echo(vi)
+
+    current_versions.append(vi)
+    write_version_list(current_versions)
+    click.echo(f"Wrote our new version {vi}")
 
 
 if __name__ == "__main__":
