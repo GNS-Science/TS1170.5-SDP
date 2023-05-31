@@ -2,9 +2,9 @@
 """Copied from Anne Hulsey's example"""
 
 import pathlib
+from functools import lru_cache
 
 import pandas as pd
-from functools import lru_cache
 
 from nzssdt_2023 import RESOURCES_FOLDER
 
@@ -31,33 +31,35 @@ def flatten_df(df: pd.DataFrame):
     df3.level_3 = df3.level_3.apply(lambda x: int(x.replace("APoE: 1/", "")))
     df3 = df3.rename(
         columns={
-            "level_0": "location",
+            "level_0": "Location",
             "level_2": "Site Soil Class",
-            "level_3": "APoE: 1/n",
+            "level_3": "APoE (1/n)",
         }
     )
-    return df3
+    return df3.set_index(["Location", "APoE (1/n)", "Site Soil Class"])
 
-class SatTable():
 
+class SatTable:
     def __init__(self, raw_table: pd.DataFrame):
         self.raw_table = raw_table
 
     @lru_cache
     def flatten(self):
-        return flatten_df(self.raw_table)
+        return flatten_df(self.raw_table).sort_index()
 
     def named_location_df(self):
         df = self.flatten()
-        sites = list(df.location.unique())
+        sites = list(df.index.get_level_values("Location"))
+        # print(sites, len(sites))
         named_sites = [site for site in sites if "~" not in site]
-        return df[df.location.isin(named_sites)]
+        return df[df.index.get_level_values("Location").isin(named_sites)]
 
     def grid_location_df(self):
         df = self.flatten()
-        sites = list(df.location.unique())
+        sites = list(df.index.get_level_values("Location"))
         grid_sites = [site for site in sites if "~" in site]
-        return df[df.location.isin(grid_sites)]
+        return df[df.index.get_level_values("Location").isin(grid_sites)]
+
 
 if __name__ == "__main__":
     filename = "SaT-variables_v5_corrected-locations.pkl"

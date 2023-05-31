@@ -6,7 +6,12 @@ import pathlib
 import click
 import nzshm_model
 
-from .versioning import VersionInfo, standard_output_filename, read_version_list, write_version_list
+from .versioning import (
+    VersionInfo,
+    read_version_list,
+    standard_output_filename,
+    write_version_list,
+)
 
 
 @click.group()
@@ -28,6 +33,7 @@ def list_versions(resources_path, verbose):
 
     for version_info in read_version_list():
         click.echo(version_info)
+
 
 @cli.command("add")
 @click.argument("input_path", type=click.Path(exists=True))

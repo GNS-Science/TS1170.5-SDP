@@ -1,11 +1,11 @@
 #! versioning.py
 """Define data structure and input output utilities for the resource versions."""
 
-from dataclasses import dataclass, field
-from typing import Union, Iterable
 import dataclasses
 import json
 import pathlib
+from dataclasses import dataclass, field
+from typing import Iterable, Union
 
 import nzshm_common
 import nzshm_model
@@ -13,6 +13,7 @@ import nzshm_model
 from . import RESOURCES_FOLDER
 
 VERSION_LIST_FILENAME = "version_list.json"
+
 
 def standard_output_filename(version: Union[int, "VersionInfo"]):
     # print(type(version))
@@ -39,8 +40,9 @@ def read_version_list():
         return []
     return json.load(open(vl))
 
+
 def write_version_list(new_list: Iterable[VersionInfo]):
     """creates/updates the version list."""
     vl = pathlib.Path(RESOURCES_FOLDER, VERSION_LIST_FILENAME)
-    with open(vl, 'w') as fout:
-        json.dump([dataclasses.asdict(vi) for vi in new_list], fout, indent = 2)
+    with open(vl, "w") as fout:
+        json.dump([dataclasses.asdict(vi) for vi in new_list], fout, indent=2)
