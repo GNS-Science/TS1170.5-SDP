@@ -11,7 +11,7 @@ for use by NZ engineering community for seismic design calculations.
 
 **NB:**
 
- - data herein is derived from **[NSHM 2022](https:nshm.gms.cri.nz) and was produced by the **Siesmic Risk Working Group** (ref ....)
+ - data herein is derived from the **[NZ National Seismic Hazard Model 2022](https://www.gns.cri.nz/research-projects/national-seismic-hazard-model/)** and was produced by the **Siesmic Risk Working Group** (ref ....)
  - we include a simple versioning system for traceability.
  - we include the original data as supplied from SRWG.
  - we also include python scripts for translating from the source dataframe form into the final form.
