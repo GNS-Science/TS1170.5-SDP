@@ -76,7 +76,7 @@ def build_version_one(description=None):
     for infile in [
         "location_replacements.json",
         "major_faults.geojson",
-        "polygons.geojson",
+        "urban_area_polygons.geojson",
     ]:
         in_path = pathlib.Path(RESOURCES_FOLDER, "v1", infile)
         vi.manifest.append(IncludedFile(str(in_path.relative_to(RESOURCES_FOLDER))))

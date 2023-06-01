@@ -34,7 +34,7 @@
         "filepath": "v1/major_faults.geojson"
       },
       {
-        "filepath": "v1/polygons.geojson"
+        "filepath": "v1/urban_area_polygons.geojson"
       }
     ],
     "nzshm_common_lib_version": "0.6.0",
