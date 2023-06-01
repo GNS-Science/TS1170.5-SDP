@@ -15,8 +15,8 @@ def version_info_fixture():
         nzshm_model_version=nzshm_model.CURRENT_VERSION,  # nzshm_model.CURRENT_VERSION  # default to latest
         # nzshm_common_lib_version = nzshm_common.__version__
         # nzshm_model_lib_version = nzshm_model.__version__
-        input_filename="ABC",
-        output_filename=standard_output_filename(V),
+        # input_filename="ABC",
+        # output_filename=standard_output_filename(V),
     )
 
 
@@ -36,4 +36,3 @@ class TestVersionInfo(object):
         assert nv.nzshm_common_lib_version == nzshm_common.__version__
         assert nv.nzshm_model_lib_version == nzshm_model.__version__
         assert nv.nzshm_model_version == nzshm_model.CURRENT_VERSION
-        assert nv.input_filename == "ABC"

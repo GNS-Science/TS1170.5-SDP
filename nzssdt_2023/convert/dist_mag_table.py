@@ -9,7 +9,7 @@ class DistMagTable:
     def __init__(self, csv_path: Union[str, pathlib.Path]):
         self.csv_path = csv_path
         if not pathlib.Path(csv_path).exists():
-            raise ValueError("Invalid csv path: {csv_path}")
+            raise ValueError(f"Invalid csv path: {csv_path}")
         self.raw_table = pd.read_csv(self.csv_path)
 
     @lru_cache

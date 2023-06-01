@@ -5,7 +5,7 @@ import dataclasses
 import json
 import pathlib
 from dataclasses import dataclass, field
-from typing import Iterable, Union
+from typing import Iterable, List, Union
 
 import nzshm_common
 import nzshm_model
@@ -23,12 +23,23 @@ def standard_output_filename(version: Union[int, "VersionInfo"]):
 
 
 @dataclass(frozen=True)
+class ConvertedFile:
+    input_filepath: str
+    output_filepath: str
+
+
+@dataclass(frozen=True)
+class IncludedFile:
+    filepath: str
+
+
+@dataclass(frozen=True)
 class VersionInfo:
     version_number: int = field(hash=True)
     nzshm_model_version: str  # nzshm_model.CURRENT_VERSION  # default to latest
-    input_filename: str
-    output_filename: str
     description: Union[str, None] = None
+    conversions: List[ConvertedFile] = field(default_factory=list)
+    manifest: List[IncludedFile] = field(default_factory=list)
     nzshm_common_lib_version: str = nzshm_common.__version__
     nzshm_model_lib_version: str = nzshm_model.__version__
 

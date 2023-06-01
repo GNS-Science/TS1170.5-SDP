@@ -10,7 +10,7 @@ from nzssdt_2023.convert import SatTable
 @pytest.fixture(scope="module")
 def sat_table():
     filename = "SaT-variables_v5_corrected-locations.pkl"
-    df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, "input", filename))
+    df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, "input", "v1", filename))
     return SatTable(df)
 
 

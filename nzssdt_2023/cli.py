@@ -4,14 +4,9 @@ import os
 import pathlib
 
 import click
-import nzshm_model
 
-from .versioning import (
-    VersionInfo,
-    read_version_list,
-    standard_output_filename,
-    write_version_list,
-)
+from nzssdt_2023.build import build_version_one
+from nzssdt_2023.versioning import read_version_list, write_version_list
 
 
 @click.group()
@@ -36,42 +31,26 @@ def list_versions(resources_path, verbose):
 
 
 @cli.command("add")
-@click.argument("input_path", type=click.Path(exists=True))
 @click.argument("version_number", type=int)
-@click.option(
-    "--resources_path",
-    "-R",
-    default=lambda: pathlib.Path(pathlib.Path(os.getcwd()).parent, "resources"),
-)
-@click.option("--nzshm_model_version", "-N")
+@click.option("--nzshm_model_version", "-N", default="NSHM_v1.0.4")
 @click.option("--verbose", "-V", is_flag=True, default=False)
-def append_version(
-    resources_path, input_path, version_number, nzshm_model_version, verbose
-):
+def build_and_append_version(version_number, nzshm_model_version, verbose):
     """Add a new published version of NZSSDT 2023"""
     if verbose:
-        click.echo("Resources path: %s" % resources_path)
-        click.echo("Input path: %s" % input_path)
-        click.echo("Version: %s" % version_number)
+        click.echo("nzshm_model_version: %s" % nzshm_model_version)
+        click.echo("build version: %s" % version_number)
 
-    current_versions = read_version_list()
+    if version_number == 1:
+        vi = build_version_one()
 
-    nm_ver = (
-        nzshm_model.get_model_version(nzshm_model_version).version
-        if nzshm_model_version
-        else nzshm_model.CURRENT_VERSION
-    )
+        # update the version list
+        current_versions = read_version_list()
+        current_versions.append(vi)
+        write_version_list(current_versions)
+        click.echo(f"Wrote our new version {vi}")
+        return
 
-    vi = VersionInfo(
-        version_number=version_number,
-        nzshm_model_version=nm_ver,
-        input_filename=pathlib.Path(input_path).name,
-        output_filename=standard_output_filename(version_number),
-    )
-
-    current_versions.append(vi)
-    write_version_list(current_versions)
-    click.echo(f"Wrote our new version {vi}")
+    click.echo("did nothing, sorry")
 
 
 if __name__ == "__main__":
