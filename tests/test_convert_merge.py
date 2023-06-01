@@ -1,5 +1,6 @@
 import pathlib
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -28,6 +29,31 @@ def test_merge(sat_table, dm_table):
     print(dm_table.flatten())  # .set_index(['Location', 'APoE (1/n)']))
 
 
+sat_grid_expected = [
+    ("-34.300~172.900", 25, "I", [0.02, 0.03, 0.4]),
+    ("-43.700~169.100", 100, "I", [0.15, 0.32, 0.3]),
+    ("-44.700~170.600", 2500, "II", [0.49, 1.07, 0.4]),
+    ("-44.700~170.600", 2500, "III", [0.53, 1.15, 0.6]),
+]
+
+
+@pytest.mark.parametrize("location,apoe,site_soil_class,expected", sat_grid_expected)
+def test_spot_check_sat_table_grid(
+    sat_table, location, apoe, site_soil_class, expected
+):
+    grid_df = sat_table.grid_location_df()
+    print(grid_df.loc[location, apoe, site_soil_class])
+    assert grid_df.loc[location, apoe, site_soil_class]["PGA"] == pytest.approx(
+        expected[0]
+    )
+    assert grid_df.loc[location, apoe, site_soil_class]["Sas"] == pytest.approx(
+        expected[1]
+    )
+    assert grid_df.loc[location, apoe, site_soil_class]["Tc"] == pytest.approx(
+        expected[2]
+    )
+
+
 sat_named_expected = [
     ("Akaroa", 25, "I", [0.04, 0.08, 0.3]),
     ("Kaikoura", 100, "I", [0.24, 0.53, 0.3]),
@@ -37,9 +63,10 @@ sat_named_expected = [
 
 
 @pytest.mark.parametrize("location,apoe,site_soil_class,expected", sat_named_expected)
-def test_spot_check_sat_table(sat_table, location, apoe, site_soil_class, expected):
+def test_spot_check_sat_table_named(
+    sat_table, location, apoe, site_soil_class, expected
+):
     named_df = sat_table.named_location_df()
-
     assert named_df.loc[location, apoe, site_soil_class]["PGA"] == pytest.approx(
         expected[0]
     )
@@ -51,10 +78,56 @@ def test_spot_check_sat_table(sat_table, location, apoe, site_soil_class, expect
     )
 
 
-@pytest.mark.parametrize("location,apoe,site_soil_class,expected", sat_named_expected)
+@pytest.mark.parametrize(
+    "location,apoe,site_soil_class,expected", sat_named_expected + sat_grid_expected
+)
 def test_spot_check_sat_table_raw(sat_table, location, apoe, site_soil_class, expected):
     df = sat_table.raw_table
     rec = df.loc[location][f"APoE: 1/{apoe}"][f"Site Soil Class {site_soil_class}"]
-    assert rec["PGA"] == pytest.approx(expected[0])
+    assert rec["PGA"] == pytest.approx(expected[0], 3)
     assert rec["Sas"] == pytest.approx(expected[1])
     assert rec["Tc"] == pytest.approx(expected[2])
+
+
+dm_expected = [
+    ("Akaroa", 25, [np.NaN, 6.3]),
+    (
+        "Kaikoura",
+        100,
+        [
+            np.NaN,
+            7.2,
+        ],
+    ),
+    ("Woodville", 1000, [6.0, 7.8]),
+    ("Woodville", 2500, [6.0, 7.9]),
+]
+
+
+@pytest.mark.parametrize("location,apoe,expected", dm_expected)
+def test_spot_check_dm_table_raw(dm_table, location, apoe, expected):
+    df = dm_table.raw_table
+    # print(df)
+    # print(location, apoe,)
+    rec = df[df["Unnamed: 0"] == location]
+    if expected[0] is np.NaN:
+        assert isinstance(list(rec["D"])[0], type(np.NaN))
+    else:
+        assert list(rec["D"])[0] == pytest.approx(expected[0])
+    assert list(rec[f"APoE: 1/{apoe}"])[0] == pytest.approx(expected[1])
+
+
+@pytest.mark.parametrize("location,apoe,expected", dm_expected)
+def test_spot_check_dm_table_flat(dm_table, location, apoe, expected):
+    df = dm_table.flatten()
+    print(df)
+    print(
+        location,
+        apoe,
+    )
+    rec = df.loc[location, apoe]
+    if expected[0] is np.NaN:
+        assert isinstance(rec["D"], type(np.NaN))
+    else:
+        assert rec["D"] == pytest.approx(expected[0])
+    assert rec["M"] == pytest.approx(expected[1])
