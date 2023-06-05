@@ -28,6 +28,7 @@ def build_version_one(description=None):
         index=False,
         orient="table",
         indent=2,
+        double_precision=3,
     )
     vi.conversions.append(
         ConvertedFile(
@@ -44,6 +45,7 @@ def build_version_one(description=None):
         index=False,
         orient="table",
         indent=2,
+        double_precision=3,
     )
     vi.conversions.append(
         ConvertedFile(
