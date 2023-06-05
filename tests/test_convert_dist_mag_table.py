@@ -21,10 +21,3 @@ def test_convert_dm_table(dm_table):
 def test_flatten_dm_table(dm_table):
     flat = dm_table.flatten()
     assert len(list(flat.index)) == 27678
-
-
-# def test_dm_table_components(dm_table):
-#     df = dm_table.flatten()
-#     df_named = dm_table.named_location_df()
-#     df_grid = dm_table.grid_location_df()
-#     assert len(list(df.index)) == len(list(df_named.index)) + len(list(df_grid.index))
