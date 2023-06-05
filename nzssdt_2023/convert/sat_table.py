@@ -12,6 +12,8 @@ APoEs = [f"APoE: 1/{rp}" for rp in [25, 100, 250, 500, 1000, 2500]]
 site_class_labels = [
     f"Site Soil Class {n}" for n in ["I", "II", "III", "IV", "V", "VI"]
 ]
+
+
 parameters = ["PGA", "Sas", "Tc"]
 
 
@@ -26,6 +28,7 @@ def flatten_df(df: pd.DataFrame):
             .reset_index()
             .drop(columns=["index"])
         )
+
     df3 = param_dfs[0].merge(param_dfs[1]).merge(param_dfs[2])
     df3.level_2 = df3.level_2.apply(lambda x: x.replace("Site Soil Class ", ""))
     df3.level_3 = df3.level_3.apply(lambda x: int(x.replace("APoE: 1/", "")))
@@ -36,7 +39,7 @@ def flatten_df(df: pd.DataFrame):
             "level_3": "APoE (1/n)",
         }
     )
-    return df3.set_index(["Location", "APoE (1/n)", "Site Soil Class"])
+    return df3.sort_values(by=["APoE (1/n)", "Site Soil Class"])
 
 
 class SatTable:
@@ -45,20 +48,19 @@ class SatTable:
 
     @lru_cache
     def flatten(self):
-        return flatten_df(self.raw_table).sort_index()
+        return flatten_df(self.raw_table)  # .sort_index()
 
     def named_location_df(self):
         df = self.flatten()
-        sites = list(df.index.get_level_values("Location"))
-        # print(sites, len(sites))
+        sites = list(df.Location.unique())
         named_sites = [site for site in sites if "~" not in site]
-        return df[df.index.get_level_values("Location").isin(named_sites)]
+        return df[df.Location.isin(named_sites)]
 
     def grid_location_df(self):
         df = self.flatten()
-        sites = list(df.index.get_level_values("Location"))
+        sites = list(df.Location.unique())
         grid_sites = [site for site in sites if "~" in site]
-        return df[df.index.get_level_values("Location").isin(grid_sites)]
+        return df[df.Location.isin(grid_sites)]
 
 
 if __name__ == "__main__":

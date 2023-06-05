@@ -42,16 +42,14 @@ def test_spot_check_sat_table_grid(
     sat_table, location, apoe, site_soil_class, expected
 ):
     grid_df = sat_table.grid_location_df()
-    print(grid_df.loc[location, apoe, site_soil_class])
-    assert grid_df.loc[location, apoe, site_soil_class]["PGA"] == pytest.approx(
-        expected[0]
-    )
-    assert grid_df.loc[location, apoe, site_soil_class]["Sas"] == pytest.approx(
-        expected[1]
-    )
-    assert grid_df.loc[location, apoe, site_soil_class]["Tc"] == pytest.approx(
-        expected[2]
-    )
+    filtered_df = grid_df[
+        (grid_df.Location == location)
+        & (grid_df["APoE (1/n)"] == apoe)
+        & (grid_df["Site Soil Class"] == site_soil_class)
+    ]
+    assert filtered_df["PGA"].values[0] == pytest.approx(expected[0])
+    assert filtered_df["Sas"].values[0] == pytest.approx(expected[1])
+    assert filtered_df["Tc"].values[0] == pytest.approx(expected[2])
 
 
 sat_named_expected = [
@@ -67,15 +65,15 @@ def test_spot_check_sat_table_named(
     sat_table, location, apoe, site_soil_class, expected
 ):
     named_df = sat_table.named_location_df()
-    assert named_df.loc[location, apoe, site_soil_class]["PGA"] == pytest.approx(
-        expected[0]
-    )
-    assert named_df.loc[location, apoe, site_soil_class]["Sas"] == pytest.approx(
-        expected[1]
-    )
-    assert named_df.loc[location, apoe, site_soil_class]["Tc"] == pytest.approx(
-        expected[2]
-    )
+    filtered_df = named_df[
+        (named_df.Location == location)
+        & (named_df["APoE (1/n)"] == apoe)
+        & (named_df["Site Soil Class"] == site_soil_class)
+    ]
+
+    assert filtered_df["PGA"].values[0] == pytest.approx(expected[0])
+    assert filtered_df["Sas"].values[0] == pytest.approx(expected[1])
+    assert filtered_df["Tc"].values[0] == pytest.approx(expected[2])
 
 
 @pytest.mark.parametrize(

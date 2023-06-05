@@ -1,12 +1,12 @@
 #! versioning.py
 """Define data structure and input output utilities for the resource versions."""
-
 import dataclasses
 import json
 import pathlib
 from dataclasses import dataclass, field
 from typing import Iterable, List, Union
 
+import dacite
 import nzshm_common
 import nzshm_model
 
@@ -49,7 +49,8 @@ def read_version_list():
     vl = pathlib.Path(RESOURCES_FOLDER, VERSION_LIST_FILENAME)
     if not vl.exists():
         return []
-    return json.load(open(vl))
+    version_list = json.load(open(vl))
+    return [dacite.from_dict(data_class=VersionInfo, data=vi) for vi in version_list]
 
 
 def write_version_list(new_list: Iterable[VersionInfo]):

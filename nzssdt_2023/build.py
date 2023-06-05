@@ -25,7 +25,7 @@ def build_version_one(description=None):
     out_path = pathlib.Path(RESOURCES_FOLDER, "v1", "named_locations.json")
     sat.named_location_df().to_json(
         out_path,
-        index=True,
+        index=False,
         orient="table",
         indent=2,
     )
@@ -41,7 +41,7 @@ def build_version_one(description=None):
     out_path = pathlib.Path(RESOURCES_FOLDER, "v1", "grid_locations.json")
     sat.grid_location_df().to_json(
         out_path,
-        index=True,
+        index=False,
         orient="table",
         indent=2,
     )

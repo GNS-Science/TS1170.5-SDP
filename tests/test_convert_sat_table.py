@@ -35,3 +35,21 @@ def test_sat_table_components(sat_table):
     df_named = sat_table.named_location_df()
     df_grid = sat_table.grid_location_df()
     assert len(list(df.index)) == len(list(df_named.index)) + len(list(df_grid.index))
+
+
+def test_sat_table_retains_original_location_order(sat_table):
+    top_ten = [
+        "Kaitaia",
+        "Kerikeri",
+        "Haruru",
+        "Paihia",
+        "Opua",
+        "Kawakawa",
+        "Moerewa",
+        "Kaikohe",
+        "Hikurangi",
+        "Ngunguru",
+    ]
+    assert list(sat_table.raw_table.index)[:10] == top_ten
+    print(sat_table.flatten().Location.values[:10])
+    assert list(sat_table.flatten().Location.values)[:10] == top_ten
