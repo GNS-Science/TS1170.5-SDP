@@ -8,7 +8,8 @@ from nzssdt_2023 import RESOURCES_FOLDER
 from nzssdt_2023.convert import SatTable, DistMagTable
 
 from decimal import Decimal
-from typing import Tuple, Iterator, Iterable
+from typing import Tuple, Iterator, Iterable, List
+from itertools import islice
 
 from borb.pdf import SingleColumnLayout
 from borb.pdf import PageLayout
@@ -25,17 +26,25 @@ from borb.pdf import Alignment
 from borb.pdf.page.page_size import PageSize
 
 
-def build_report_doc(table_id: str = "C1", apoe: Tuple[chr, int] = ("a", 25), rowdata=Iterable[Tuple]):
+def build_report_page(table_id: str = "C1", apoe: Tuple[chr, int] = ("a", 25), rowdata=List[List], table_part: int = 1):
+    # create Document
+    doc: Document = Document()
+
+    # create Page
+    page: Page = Page()
+
 
     PAGE_SIZE = PageSize.A4_LANDSCAPE
-    doc: Document = Document()
     page: Page = Page(width=PAGE_SIZE.value[0], height=PAGE_SIZE.value[1])
-    doc.add_page(page)
+
     layout: PageLayout = SingleColumnLayout(page)
 
+    # add Page to Document
+    doc.add_page(page)
+
     SSS = ["I", "II", "III", "IV", "V", "VI"]
-    cotd = "continued"
-    TITLE = f"TABLE {table_id}({apoe[0]}) {cotd}: SITE DEMAND PARAMETERS FOR AN ANNUAL PROBABILITY OF EXCEEDANCE"
+    # cotd = "continued"
+    TITLE = f"TABLE {table_id}({apoe[0]}) part {table_part}: SITE DEMAND PARAMETERS FOR AN ANNUAL PROBABILITY OF EXCEEDANCE"
     TITLE += f" OF 1/{apoe[1]}"
     layout.add(
         Paragraph(
@@ -49,7 +58,7 @@ def build_report_doc(table_id: str = "C1", apoe: Tuple[chr, int] = ("a", 25), ro
     # create a FixedColumnWidthTable
     table = FixedColumnWidthTable(
         number_of_columns=3 + (6 * 3),
-        number_of_rows=32,
+        number_of_rows=2 + len(rowdata),
         # adjust the ratios of column widths for this FixedColumnWidthTable
         column_widths=[Decimal(3), Decimal(0.5), Decimal(0.5)]
         + 6 * [Decimal(0.5), Decimal(0.5), Decimal(0.5)],
@@ -159,7 +168,7 @@ def build_report_doc(table_id: str = "C1", apoe: Tuple[chr, int] = ("a", 25), ro
     table.set_padding_on_all_cells(Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5))
     layout.add(table)
 
-    return doc
+    return page
 
 
 @pytest.fixture(scope="module")
@@ -183,35 +192,32 @@ def table_rows(sat_table: SatTable, dm_table: DistMagTable, apoe: int) -> Iterat
     count = 0
     for location in df.Location.unique():
         ldf = df[df.Location == location]
+        rec = dmt.loc[location, apoe]
+        _d = "n/a" if pd.isna(rec["D"]) else int(rec["D"])
         for tup in ldf.itertuples():
-            rec = dmt.loc[location, apoe]
-            _d = "n/a" if pd.isna(rec["D"]) else int(rec["D"])
             row = [location, str(rec['M']),  str(_d)]
             for tup2 in ldf[ldf["APoE (1/n)"] == apoe].itertuples():
                 row += [str(round(tup2.PGA, 2)), str(round(tup2.Sas, 2)), str(round(tup2.Tc, 1))]
         yield row
         count +=1
 
-        if count >= 30:
-            break
+
+
+def chunks(items, chunk_size):
+    iterator = iter(items)
+    while chunk := list(islice(iterator, chunk_size)):
+        yield chunk
 
 # @pytest.mark.skip('WIP')
 def test_report_sat_table(sat_table, dm_table):
 
-    # count = 0
-    # for r in table_rows(sat_table, dm_table, 2500):
-    #     print(r)
-    #     count += 1
-    #     if count > 116:
-    #         assert 0
+    report: Document = Document()
 
     apoe = ('f', 1000)
-    rows = table_rows(sat_table, dm_table, apoe[1])
+    for idx, chunk in enumerate(chunks(table_rows(sat_table, dm_table, apoe[1]), 30)):
+        print(f"process page {idx+1}")
+        report.add_page(build_report_page("C1", apoe, list(chunk), table_part=idx+1))
 
-    # for r in rows:
-    #     print(r)
-    # assert 0
-    report = build_report_doc("C1", apoe, rows)
     with open(
         pathlib.Path(RESOURCES_FOLDER, "named_report.pdf"), "wb"
     ) as out_file_handle:
