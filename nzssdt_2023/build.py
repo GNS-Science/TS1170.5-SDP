@@ -76,7 +76,6 @@ def build_version_one(description=None):
 
     # add remaining unmodified files to the manifest
     for infile in [
-        "location_replacements.json",
         "major_faults.geojson",
         "urban_area_polygons.geojson",
     ]:
