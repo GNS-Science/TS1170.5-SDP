@@ -2,11 +2,11 @@ import pathlib
 
 import pandas as pd
 import pytest
-from borb.pdf import PDF, Document
+from borb.pdf import Document
 
 from nzssdt_2023 import RESOURCES_FOLDER
 from nzssdt_2023.convert import DistMagTable, SatTable
-from nzssdt_2023.report import build_report_page, chunks, generate_table_rows
+from nzssdt_2023.report import build_report_page, generate_table_rows
 
 
 @pytest.fixture(scope="module")
@@ -23,18 +23,14 @@ def dm_table():
     return DistMagTable(csv_path)
 
 
-@pytest.mark.skip("WIP")
 def test_report_sat_table(sat_table, dm_table):
 
+    named_df = sat_table.named_location_df()
+    d_and_m_df = dm_table.flatten()
+
     report: Document = Document()
+    table_rows = list(generate_table_rows(named_df, d_and_m_df, apoe=25))[:5]
+    page = build_report_page("C1", apoe=("1", 25), rowdata=table_rows, table_part=1)
+    report.add_page(page)
 
-    table_rows = generate_table_rows(sat_table, dm_table)
-
-    apoe = ("f", 1000)
-    for idx, chunk in enumerate(chunks(table_rows, apoe[1]), 30):
-        report.add_page(build_report_page("C1", apoe, list(chunk), table_part=idx + 1))
-
-    with open(
-        pathlib.Path(RESOURCES_FOLDER, "named_report.pdf"), "wb"
-    ) as out_file_handle:
-        PDF.dumps(out_file_handle, report)
+    assert report.get_page(0) == page
