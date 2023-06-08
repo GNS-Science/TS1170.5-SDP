@@ -1,13 +1,12 @@
 import pathlib
-import pytest
 
 import pandas as pd
-from borb.pdf import Document
-from borb.pdf import PDF
+import pytest
+from borb.pdf import PDF, Document
 
 from nzssdt_2023 import RESOURCES_FOLDER
-from nzssdt_2023.convert import SatTable, DistMagTable
-from nzssdt_2023.report import build_report_page, generate_table_rows, chunks
+from nzssdt_2023.convert import DistMagTable, SatTable
+from nzssdt_2023.report import build_report_page, chunks, generate_table_rows
 
 
 @pytest.fixture(scope="module")

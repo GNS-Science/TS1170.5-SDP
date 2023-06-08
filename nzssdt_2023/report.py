@@ -1,25 +1,26 @@
 import pathlib
+from decimal import Decimal
+from itertools import islice
+from typing import Iterator, List, Tuple
 
 import pandas as pd
-
-from decimal import Decimal
-from typing import Tuple, Iterator, List
-from itertools import islice
-
-from borb.pdf import SingleColumnLayout
-from borb.pdf import PageLayout
-from borb.pdf import FixedColumnWidthTable
-from borb.pdf import TableCell
-from borb.pdf import Paragraph
-from borb.pdf import HeterogeneousParagraph, ChunkOfText
-from borb.pdf import Document
-from borb.pdf import Page
-from borb.pdf import PDF
-from borb.pdf import Alignment
+from borb.pdf import (
+    PDF,
+    Alignment,
+    ChunkOfText,
+    Document,
+    FixedColumnWidthTable,
+    HeterogeneousParagraph,
+    Page,
+    PageLayout,
+    Paragraph,
+    SingleColumnLayout,
+    TableCell,
+)
 from borb.pdf.page.page_size import PageSize
 
 from nzssdt_2023 import RESOURCES_FOLDER
-from nzssdt_2023.convert import SatTable, DistMagTable
+from nzssdt_2023.convert import DistMagTable, SatTable
 
 MAX_PAGE_ROWS = 30
 SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
@@ -28,7 +29,7 @@ APOE_MAPPINGS = list(zip("abcdef", [25, 100, 250, 500, 1000, 2500]))
 
 def build_report_page(
     table_id: str = "C1",
-    apoe: Tuple[chr, int] = ("a", 25),
+    apoe: Tuple[str, int] = ("a", 25),
     rowdata=List[List],
     table_part: int = 1,
 ):
@@ -37,11 +38,8 @@ def build_report_page(
     doc: Document = Document()
 
     # create Page
-    page: Page = Page()
-
     PAGE_SIZE = PageSize.A4_LANDSCAPE
     page: Page = Page(width=PAGE_SIZE.value[0], height=PAGE_SIZE.value[1])
-
     layout: PageLayout = SingleColumnLayout(page)
 
     # add Page to Document
