@@ -1,4 +1,5 @@
 import pathlib
+import csv
 from decimal import Decimal
 from itertools import islice
 from typing import Iterator, List, Tuple
@@ -24,8 +25,8 @@ from nzssdt_2023.convert import DistMagTable, SatTable
 
 MAX_PAGE_ROWS = 30
 SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
-APOE_MAPPINGS = list(zip("abcdef", [25, 100, 250, 500, 1000, 2500]))
-
+APOE_MAPPINGS = list(zip("abcdef", [25, 50, 100, 250, 500, 1000, 2500]))
+VERTICAL_BUFFER = 40
 
 def build_report_page(
     table_id: str = "C1",
@@ -39,19 +40,19 @@ def build_report_page(
 
     # create Page
     PAGE_SIZE = PageSize.A4_LANDSCAPE
-    page: Page = Page(width=PAGE_SIZE.value[0], height=PAGE_SIZE.value[1])
+    page: Page = Page(width=PAGE_SIZE.value[0], height=PAGE_SIZE.value[1] + VERTICAL_BUFFER)
     layout: PageLayout = SingleColumnLayout(page)
 
     # add Page to Document
     doc.add_page(page)
 
-    heading = f"TABLE {table_id}({apoe[0]}) part {table_part}: SITE DEMAND PARAMETERS FOR AN ANNUAL"
-    heading += f" PROBABILITY OF EXCEEDANCE OF 1/{apoe[1]}"
+    heading = f"TABLE {table_id}({apoe[0]}) part {table_part}: Site demand parameters for an annual"
+    heading += f" probability of exceedance of 1/{apoe[1]}"
     layout.add(
         Paragraph(
             heading,
-            font="Helvetica",
-            font_size=Decimal(12),
+            font="Helvetica-bold",
+            font_size=Decimal(10),
             horizontal_alignment=Alignment.CENTERED,
         )
     )
@@ -87,7 +88,7 @@ def build_report_page(
             TableCell(
                 Paragraph(
                     "Location",
-                    font="Helvetica-bold",
+                    font="Helvetica-bold-oblique",
                     font_size=Decimal(9),
                     horizontal_alignment=Alignment.LEFT,
                 )
@@ -96,7 +97,7 @@ def build_report_page(
             TableCell(
                 Paragraph(
                     "M",
-                    font="Helvetica-bold",
+                    font="Helvetica-bold-oblique",
                     font_size=Decimal(9),
                     horizontal_alignment=Alignment.CENTERED,
                 )
@@ -105,7 +106,7 @@ def build_report_page(
             TableCell(
                 Paragraph(
                     "D",
-                    font="Helvetica-bold",
+                    font="Helvetica-bold-oblique",
                     font_size=Decimal(9),
                     horizontal_alignment=Alignment.CENTERED,
                 )
@@ -115,14 +116,14 @@ def build_report_page(
             table.add(
                 Paragraph(
                     "PGA",
-                    font="Helvetica-bold",
+                    font="Helvetica-bold-oblique",
                     font_size=Decimal(9),
                     horizontal_alignment=Alignment.CENTERED,
                 )
             ).add(
                 HeterogeneousParagraph(
                     [
-                        ChunkOfText("S", font="Helvetica-bold", font_size=Decimal(9)),
+                        ChunkOfText("S", font="Helvetica-bold-oblique", font_size=Decimal(9)),
                         ChunkOfText(
                             "as",
                             font="Helvetica-bold",
@@ -137,7 +138,7 @@ def build_report_page(
                     [
                         ChunkOfText(
                             "T",
-                            font="Helvetica-bold",
+                            font="Helvetica-bold-oblique",
                             font_size=Decimal(9),
                         ),
                         ChunkOfText(
@@ -161,6 +162,7 @@ def build_report_page(
         table.add(
             Paragraph(
                 row[0],
+                font="Helvetica",
                 font_size=Decimal(9),
                 horizontal_alignment=Alignment.LEFT,
             )
@@ -169,7 +171,8 @@ def build_report_page(
         for cell in row[1:]:
             table.add(
                 Paragraph(
-                    cell,
+                    str(cell),
+                    font="Helvetica",
                     font_size=Decimal(9),
                     horizontal_alignment=Alignment.CENTERED,
                 )
@@ -180,6 +183,16 @@ def build_report_page(
     )
     layout.add(table)
 
+    # page footer
+    layout.add(
+        Paragraph(
+            f"page {table_part}",
+            font="Helvetica",
+            font_size=Decimal(9),
+            horizontal_alignment=Alignment.CENTERED,
+            vertical_alignment=Alignment.BOTTOM
+        )
+    )
     return page
 
 
@@ -187,17 +200,23 @@ def generate_table_rows(
     sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, apoe: int
 ) -> Iterator:
 
+    def format_D(value, apoe: int) -> str:
+        """NB NaN in the source dataframe has different meanings, depending on the apoe..."""
+        if pd.isna(value):
+            return "n/a" if apoe < 500 else ">20"
+        return int(value)
+    
     for location in sat_table_flat.Location.unique():
         location_df = sat_table_flat[sat_table_flat.Location == location]
         rec = dm_table_flat.loc[location, apoe]
-        _d = "n/a" if pd.isna(rec["D"]) else int(rec["D"])
+        d_str = format_D(rec["D"], apoe)
         for tup in location_df.itertuples():
-            row = [location, str(rec["M"]), str(_d)]
+            row = [location, rec["M"], d_str]
             for tup2 in location_df[location_df["APoE (1/n)"] == apoe].itertuples():
                 row += [
-                    str(round(tup2.PGA, 2)),
-                    str(round(tup2.Sas, 2)),
-                    str(round(tup2.Tc, 1)),
+                    round(tup2.PGA, 2),
+                    round(tup2.Sas, 2),
+                    round(tup2.Tc, 1),
                 ]
         yield row
 
@@ -233,13 +252,27 @@ if __name__ == "__main__":
 
         for apoe in APOE_MAPPINGS:
 
-            filename = f"{report_names[report_grp]}_location_report_apoe({apoe[1]}).pdf"
+            filename = f"{report_names[report_grp]}_location_report_apoe({apoe[1]})"
             print(f"report: {filename}")
 
             report: Document = Document()
 
-            table_rows = generate_table_rows(location_df, d_and_m_df, apoe[1])
+            table_rows = list(generate_table_rows(location_df, d_and_m_df, apoe[1]))
 
+            ### CSV
+            with open(
+                pathlib.Path(RESOURCES_FOLDER, filename+".csv"), "w"
+            ) as out_csv:            
+                writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
+                header = ["location", "M", "D"] 
+                for sss in SOIL_CLASSES:
+                    for attr in ['PGA', 'Sas', 'Tc']:
+                        header.append(f'{sss}-{attr}')
+                writer.writerow(header)
+                for row in table_rows:
+                    writer.writerow(row)
+        
+            ### PDF
             for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_ROWS)):
                 report.add_page(
                     build_report_page(
@@ -248,6 +281,6 @@ if __name__ == "__main__":
                 )
 
             with open(
-                pathlib.Path(RESOURCES_FOLDER, filename), "wb"
+                pathlib.Path(RESOURCES_FOLDER, filename+".pdf"), "wb"
             ) as out_file_handle:
                 PDF.dumps(out_file_handle, report)
