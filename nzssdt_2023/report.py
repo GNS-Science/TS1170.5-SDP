@@ -1,8 +1,8 @@
-import pathlib
 import csv
+import pathlib
 from decimal import Decimal
 from itertools import islice
-from typing import Iterator, List, Tuple
+from typing import Iterator, List, Tuple, Union
 
 import pandas as pd
 from borb.pdf import (
@@ -28,8 +28,9 @@ SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
 APOE_MAPPINGS = list(zip("abcdef", [25, 50, 100, 250, 500, 1000, 2500]))
 VERTICAL_BUFFER = 40
 
+
 def build_report_page(
-    table_id: str = "C1",
+    table_id: str,
     apoe: Tuple[str, int] = ("a", 25),
     rowdata=List[List],
     table_part: int = 1,
@@ -40,7 +41,9 @@ def build_report_page(
 
     # create Page
     PAGE_SIZE = PageSize.A4_LANDSCAPE
-    page: Page = Page(width=PAGE_SIZE.value[0], height=PAGE_SIZE.value[1] + VERTICAL_BUFFER)
+    page: Page = Page(
+        width=PAGE_SIZE.value[0], height=PAGE_SIZE.value[1] + VERTICAL_BUFFER
+    )
     layout: PageLayout = SingleColumnLayout(page)
 
     # add Page to Document
@@ -123,7 +126,9 @@ def build_report_page(
             ).add(
                 HeterogeneousParagraph(
                     [
-                        ChunkOfText("S", font="Helvetica-bold-oblique", font_size=Decimal(9)),
+                        ChunkOfText(
+                            "S", font="Helvetica-bold-oblique", font_size=Decimal(9)
+                        ),
                         ChunkOfText(
                             "as",
                             font="Helvetica-bold",
@@ -190,7 +195,7 @@ def build_report_page(
             font="Helvetica",
             font_size=Decimal(9),
             horizontal_alignment=Alignment.CENTERED,
-            vertical_alignment=Alignment.BOTTOM
+            vertical_alignment=Alignment.BOTTOM,
         )
     )
     return page
@@ -199,13 +204,12 @@ def build_report_page(
 def generate_table_rows(
     sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, apoe: int
 ) -> Iterator:
-
-    def format_D(value, apoe: int) -> str:
+    def format_D(value, apoe: int) -> Union[str, int]:
         """NB NaN in the source dataframe has different meanings, depending on the apoe..."""
         if pd.isna(value):
             return "n/a" if apoe < 500 else ">20"
         return int(value)
-    
+
     for location in sat_table_flat.Location.unique():
         location_df = sat_table_flat[sat_table_flat.Location == location]
         rec = dm_table_flat.loc[location, apoe]
@@ -229,6 +233,8 @@ def chunks(items, chunk_size):
 
 if __name__ == "__main__":
 
+    OUTPUT_FOLDER = pathlib.Path(RESOURCES_FOLDER.parent, "reports", "v1")
+
     # TODO shift this into the CLI
     def sat_table():
         filename = "SaT-variables_v5_corrected-locations.pkl"
@@ -245,8 +251,9 @@ if __name__ == "__main__":
     grid_df = sat.grid_location_df()
     d_and_m_df = dm_table().flatten()
 
-    report_grps = list(zip([1, 2], [named_df, grid_df]))
-    report_names = ["", "named", "gridded"]
+    report_grps = list(zip([0, 1], [named_df, grid_df]))
+    report_grp_titles = ["3.4", "3.5"]
+    report_names = ["named", "gridded"]
 
     for report_grp, location_df in report_grps:
 
@@ -260,27 +267,28 @@ if __name__ == "__main__":
             table_rows = list(generate_table_rows(location_df, d_and_m_df, apoe[1]))
 
             ### CSV
-            with open(
-                pathlib.Path(RESOURCES_FOLDER, filename+".csv"), "w"
-            ) as out_csv:            
+            with open(pathlib.Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
                 writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
-                header = ["location", "M", "D"] 
+                header = ["location", "M", "D"]
                 for sss in SOIL_CLASSES:
-                    for attr in ['PGA', 'Sas', 'Tc']:
-                        header.append(f'{sss}-{attr}')
+                    for attr in ["PGA", "Sas", "Tc"]:
+                        header.append(f"{sss}-{attr}")
                 writer.writerow(header)
                 for row in table_rows:
                     writer.writerow(row)
-        
+
             ### PDF
             for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_ROWS)):
                 report.add_page(
                     build_report_page(
-                        f"C{report_grp}", apoe, list(chunk), table_part=idx + 1
+                        f"{report_grp_titles[report_grp]}",
+                        apoe,
+                        list(chunk),
+                        table_part=idx + 1,
                     )
                 )
 
             with open(
-                pathlib.Path(RESOURCES_FOLDER, filename+".pdf"), "wb"
+                pathlib.Path(OUTPUT_FOLDER, filename + ".pdf"), "wb"
             ) as out_file_handle:
                 PDF.dumps(out_file_handle, report)

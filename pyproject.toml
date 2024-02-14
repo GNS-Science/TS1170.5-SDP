@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nzssdt-2023"
-version = "0.1.0"
+version = "0.2.0"
 description = "Data resource library for the NZ Seismic Site Demand Table 2023"
 authors = ["NZ NSHM team <nshm@gns.cri.nz>"]
 license = "AGPL3"
@@ -13,8 +13,6 @@ cli = 'nzssdt_2023.cli:cli'
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
 pandas = "^2.0.2"
-nzshm-model = "^0.3.0"
-nzshm-common = "^0.6.0"
 click = "^8.1.3"
 dacite = "^1.8.1"
 borb = "^2.1.13"
@@ -31,6 +29,8 @@ pytest = ">7.0"
 pytest-cov  = { version = "^2.12.0"}
 tox = "^4.5.2"
 twine = "^4.0.2"
+nzshm-model = "^0.7.0"
+nzshm-common = "^0.6.1"
 
 [build-system]
 requires = ["poetry-core"]

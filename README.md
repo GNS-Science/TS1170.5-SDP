@@ -28,6 +28,13 @@ This version contains the following files, all located in the [resources/v1](res
 
  * Use https://geojson.tools to upload and view these geojson files.
 
+### PDF/CSV reports
+
+The tables intended for publication by Standards NZ are located in [reports/v1](reports/v1) folder:
+
+ - tables are provided in CSV and PDF form.
+ - tables are produced using nzsddt_20203/report.py
+
 
 ## Manifest
 
