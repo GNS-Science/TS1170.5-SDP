@@ -2,7 +2,7 @@ import csv
 import pathlib
 from decimal import Decimal
 from itertools import islice
-from typing import Iterator, List, Tuple
+from typing import Iterator, List, Tuple, Union
 
 import pandas as pd
 from borb.pdf import (
@@ -204,11 +204,11 @@ def build_report_page(
 def generate_table_rows(
     sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, apoe: int
 ) -> Iterator:
-    def format_D(value, apoe: int) -> str:
+    def format_D(value, apoe: int) -> Union[str, int]:
         """NB NaN in the source dataframe has different meanings, depending on the apoe..."""
         if pd.isna(value):
             return "n/a" if apoe < 500 else ">20"
-        return str(value)
+        return int(value)
 
     for location in sat_table_flat.Location.unique():
         location_df = sat_table_flat[sat_table_flat.Location == location]
