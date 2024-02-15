@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0] 2024-02-15
+
+### Changed
+ - fixed APOE_MAPPINGS in report.py so that g/2500 tables are included
+ - updated the g/f2500 reports wiht correct table names
+
 ## [0.2.0] 2024-02-15
 
 ### Changed

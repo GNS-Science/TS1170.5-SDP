@@ -25,7 +25,7 @@ from nzssdt_2023.convert import DistMagTable, SatTable
 
 MAX_PAGE_ROWS = 30
 SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
-APOE_MAPPINGS = list(zip("abcdef", [25, 50, 100, 250, 500, 1000, 2500]))
+APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
 VERTICAL_BUFFER = 40
 
 
