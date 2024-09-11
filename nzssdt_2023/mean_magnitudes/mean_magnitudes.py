@@ -28,6 +28,16 @@ def prob_to_rate(prob: "npt.NDArray") -> "npt.NDArray":
 
 
 def calculate_mean_magnitude(disagg: "npt.NDArray", bins: "npt.NDArray"):
+    """
+    Calculate the mean magnitude for a single site using the magnitude disaggregation.
+
+    Parameters:
+        disaggregation: The probability contribution to hazard of the magnitude bins (in apoe).
+        bins: The bin centers of the magnitude disaggregation.
+
+    Returns:
+        the mean magnitude
+    """
     shape_bins = bins.shape
     shape_disagg = disagg.shape
     if (
@@ -54,6 +64,32 @@ def get_mean_mags(
     poes: Iterable[model.ProbabilityEnum],
     hazard_agg: model.AggregationEnum,
 ) -> Generator[Dict[str, Any], None, None]:
+    """
+    The mean magnitudes for a collection of sites.
+
+    This function uses `toshi-hazard-store` to retrieve disaggregations from the database and therefore requires read
+    access. It assumes all disaggregations are done for magnitude only (i.e., not distance, epsilon, etc.)
+
+    Parameters:
+        hazard_id: the hazard id of the model in the database.
+        locations: the site locations for which to obtain the mean magnitude.
+        vs30s: the site vs30 values for which to obtain the mean magnitude.
+        imts: the intensity measure types for which to obtain the mean magnitude.
+        poes: the probability of exeedances for which to obtain the mean magnitude.
+        aggregate: the hazard curve aggregation at which to obtain the mean magnitude (e.g. mean, 20th percentile, etc.)
+
+    Yields:
+        A dict for each location, vs30, imt, poe, aggregate with keys:
+            location_id: str, the locaiton id from `nzshm-common` if the location has one
+            name: str, the location name from `nzshm-common` if the location has one
+            lat: float, the latitude
+            lon: float, the longitude
+            vs30: int, the vs30
+            poe: model.ProbabilityEnum, the probability of exeedance
+            imt: str, the intensity measure type
+            imtl: float, the intensity level of the hazard curve at the poe of interest
+            mag: float, the mean magnitude
+    """
 
     clocs = [loc.code for loc in locations]
     disaggs = query.get_disagg_aggregates(
