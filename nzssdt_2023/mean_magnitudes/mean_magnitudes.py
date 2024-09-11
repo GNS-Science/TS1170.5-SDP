@@ -2,7 +2,6 @@ import csv
 from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable
 
 import numpy as np
-from nzshm_common.grids import load_grid
 from nzshm_common.location.code_location import CodedLocation
 from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store import model, query
@@ -177,7 +176,8 @@ if __name__ == "__main__":
     # grid_01 = set([CodedLocation(*pt, 0.001) for pt in load_grid('NZ_0_1_NB_1_1')])
     # locations = list(grid_01)
     locations = [
-        CodedLocation(*lat_lon(_id), 0.001) for _id in LOCATION_LISTS["SRWG214"]["locations"][0:10]
+        CodedLocation(*lat_lon(_id), 0.001)
+        for _id in LOCATION_LISTS["SRWG214"]["locations"][0:10]
     ]
 
     # hazard_agg = model.AggregationEnum._90
