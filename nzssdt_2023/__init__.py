@@ -1,7 +1,7 @@
 import os
 import pathlib
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 RESOURCES_FOLDER = pathlib.Path(
     pathlib.PurePath(os.path.realpath(__file__)).parent.parent, "resources"
