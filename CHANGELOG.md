@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.0] 2024-09-11
+
+### Added
+ - mean magnitude calculation using disaggregations retrieved via `toshi-hazard-post`
+
 ## [0.3.0] 2024-02-15
 
 ### Changed
