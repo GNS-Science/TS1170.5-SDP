@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{include = "nzssdt_2023"}]
 
 [tool.poetry.scripts]
-cli = 'nzssdt_2023.cli:cli'
+publish = 'nzssdt_2023.scripts.publish_cli:cli'
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
