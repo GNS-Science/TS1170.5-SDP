@@ -1,9 +1,21 @@
 # Changelog
 
+## [0.5.0] TBD
+
+### Added
+ - new `nzssdt_2023.data_creation` package for Annes process steps
+ - new `nzssdt_2023.scripts` package for cli scripts
+ - mkdocs with some intitial structure and standard NSHM doc pages.
+
+### Changed
+ - migrated report.py into new `publish` package
+ - minor typing improvents
+ - renamed `nzssdt_2023\cli.py` -> `nzssdt_2023\scripts\publish_cli.py`
+
 ## [0.4.0] 2024-09-11
 
 ### Added
- - mean magnitude calculation using disaggregations retrieved via `toshi-hazard-post`
+ - `mean_magnitudes` package with calculations using disaggregations retrieved via `toshi-hazard-post`
 
 ## [0.3.0] 2024-02-15
 

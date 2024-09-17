@@ -4,7 +4,7 @@ import dataclasses
 import json
 import pathlib
 from dataclasses import dataclass, field
-from typing import Iterable, List, Union
+from typing import Iterable, List, Optional, Union
 
 import dacite
 import nzshm_common
@@ -37,7 +37,7 @@ class IncludedFile:
 class VersionInfo:
     version_number: int = field(hash=True)
     nzshm_model_version: str  # nzshm_model.CURRENT_VERSION  # default to latest
-    description: Union[str, None] = None
+    description: Optional[str] = None
     conversions: List[ConvertedFile] = field(default_factory=list)
     manifest: List[IncludedFile] = field(default_factory=list)
     nzshm_common_lib_version: str = nzshm_common.__version__

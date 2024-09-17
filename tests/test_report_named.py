@@ -6,7 +6,7 @@ from borb.pdf import Document
 
 from nzssdt_2023 import RESOURCES_FOLDER
 from nzssdt_2023.convert import DistMagTable, SatTable
-from nzssdt_2023.report import build_report_page, generate_table_rows
+from nzssdt_2023.publish.report import build_report_page, generate_table_rows
 
 
 @pytest.fixture(scope="module")
