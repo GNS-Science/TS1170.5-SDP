@@ -1,3 +1,6 @@
+"""
+Some developer oriented docs about this module.
+"""
 import os
 import re
 
