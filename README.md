@@ -8,4 +8,4 @@
 
 TLDR:
 
- - [usage for seismic engineers](nzssdt-2023/usage/#for-seismic-engineers)
+ - [usage for seismic engineers](docs/usage.md#for-seismic-engineers)

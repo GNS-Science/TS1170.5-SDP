@@ -15,7 +15,7 @@ for use by NZ engineering community for seismic design calculations.
 
 ### PDF/CSV reports
 
-The tables intended for publication by Standards NZ are located in [reports/v1](reports/v1) folder:
+The tables intended for publication by Standards NZ are located in [reports/v1](https://github.com/GNS-Science/nzssdt-2023/blob/main/reports) folder:
 
  - tables are provided in CSV and PDF form.
  - tables are produced using nzsddt_20203/report.py

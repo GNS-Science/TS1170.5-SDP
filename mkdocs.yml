@@ -2,7 +2,7 @@ site_name: NZSSDT Documentation
 site_url: https://gns-science.github.io/nzssdt-2023
 repo_url: https://github.com/GNS-Science/nzssdt-2023
 repo_name: GNS-Science/nzssdt-2023
-strict: false
+strict: true
 watch:
   - nzssdt_2023
   - docs
