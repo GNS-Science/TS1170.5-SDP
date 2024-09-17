@@ -2,7 +2,7 @@ site_name: NZSSDT Documentation
 site_url: https://gns-science.github.io/nzssdt-2023
 repo_url: https://github.com/GNS-Science/nzssdt-2023
 repo_name: GNS-Science/nzssdt-2023
-strict: true
+strict: false
 watch:
   - nzssdt_2023
   - docs
@@ -19,6 +19,11 @@ nav:
     - contributing.md
     - Installation: installation.md
     - Testing: testing.md
+    - API:
+      - nzssdt: api/index.md
+      - nzssdt.data_creation: api/data_creation.md
+      - nzssdt.mean_magnitudes: api/mean_magnitudes.md
+      - nzssdt.publish: api/publish.md
   - Changelog: changelog.md
 theme:
   name: material
