@@ -5,6 +5,7 @@
 ### Added
  - new `nzssdt_2023.data_creation` package for Annes process steps
  - new `nzssdt_2023.scripts` package for cli scripts
+ - mkdocs with some intitial structure and standard NSHM doc pages.
 
 ### Changed
  - migrated report.py into new `publish` package
