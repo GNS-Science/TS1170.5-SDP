@@ -5,13 +5,14 @@ import h5py
 import ast
 import pandas as pd
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple, List
+
 if TYPE_CHECKING:
     import numpy.typing as npt
     import pandas.typing as pdt
 
 
-def extract_spectra(data_file: str) -> ("npt.NDArray", dict):
+def extract_spectra(data_file: str) -> Tuple["npt.NDArray", dict]:
     """Extract the uniform hazard spectra from the hdf5
 
     Args:
@@ -29,7 +30,7 @@ def extract_spectra(data_file: str) -> ("npt.NDArray", dict):
     return acc_spectra, imtls
 
 
-def extract_vs30s(data_file: str) -> list:
+def extract_vs30s(data_file: str) -> List[int]:
     """Extract the vs30 values from the hdf5
 
     Args:
@@ -45,7 +46,7 @@ def extract_vs30s(data_file: str) -> list:
     return vs30_list
 
 
-def extract_quantiles(data_file: str) -> list:
+def extract_quantiles(data_file: str) -> List[float]:
     """Extract hazard quantiles from the hdf5
 
     Args:
@@ -77,7 +78,7 @@ def extract_sites(data_file: str) -> "pdt.DataFrame":
     return sites
 
 
-def extract_APoEs(data_file: str) -> (list, list):
+def extract_APoEs(data_file: str) -> Tuple[List[str], List[int]]:
     """Extract uniform hazard spectra annual probabilities of exceedance from the hdf5
 
     Args:
