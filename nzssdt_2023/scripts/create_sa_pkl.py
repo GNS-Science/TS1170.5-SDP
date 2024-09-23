@@ -6,8 +6,8 @@ sa_name = "SaT-variables_mini"
 
 site_list = ["Auckland", "Christchurch", "Dunedin", "Wellington"]
 
-hazard_param = {}
-hazard_param["hazard_id"] = hazard_id
-hazard_param["site_list"] = site_list
+# hazard_param: dict[str, str | list[str]] = {}
+# hazard_param["hazard_id"] = hazard_id
+# hazard_param["site_list"] = site_list
 
-gen.create_sa_pkl(hf_name, sa_name, hazard_param)
+gen.create_sa_pkl(hf_name, sa_name, hazard_id, site_list)

@@ -109,7 +109,6 @@ def calculate_hazard_design_intensities(data, hazard_rps, intensity_type="acc"):
                             np.log(np.flip(imtls[imt])),
                         )
                     )
-
     return stats_im_hazard
 
 

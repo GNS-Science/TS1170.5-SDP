@@ -2,8 +2,9 @@
 This module derives the PGA, Sa,s, and Tc parameters from the NSHM hazard curves.
 """
 import ast
+import logging
 import os
-from typing import TYPE_CHECKING, List, Tuple, Optional, Dict
+from typing import TYPE_CHECKING, List, NamedTuple, Optional, Tuple
 
 import h5py
 import numpy as np
@@ -21,56 +22,46 @@ from nzssdt_2023.data_creation.extract_data import (
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
 from nzssdt_2023.data_creation.query_NSHM import agg_list, imt_list, vs30_list
 
+log = logging.getLogger(__name__)
+
 if TYPE_CHECKING:
     import numpy.typing as npt
     import pandas.typing as pdt
 
-sc_dict = {
-    "I": {
-        "representative_vs30": 750,
-        "label": "Site Soil Class I",
-        "lower_bound": 750,
-        "upper_bound": np.nan,
-    },
-    "II": {
-        "representative_vs30": 525,
-        "label": "Site Soil Class II",
-        "lower_bound": 450,
-        "upper_bound": 750,
-    },
-    "III": {
-        "representative_vs30": 375,
-        "label": "Site Soil Class III",
-        "lower_bound": 300,
-        "upper_bound": 450,
-    },
-    "IV": {
-        "representative_vs30": 275,
-        "label": "Site Soil Class IV",
-        "lower_bound": 250,
-        "upper_bound": 300,
-    },
-    "V": {
-        "representative_vs30": 225,
-        "label": "Site Soil Class V",
-        "lower_bound": 200,
-        "upper_bound": 250,
-    },
-    "VI": {
-        "representative_vs30": 175,
-        "label": "Site Soil Class VI",
-        "lower_bound": 150,
-        "upper_bound": 200,
-    },
+
+class SiteClass(NamedTuple):
+    site_class: str
+    representative_vs30: int
+    label: str
+    lower_bound: float
+    upper_bound: float
+
+
+SITE_CLASSES: dict[str, SiteClass] = {
+    "I": SiteClass("I", 750, "Site Soil Class I", 750, np.nan),
+    "II": SiteClass("II", 525, "Site Soil Class II", 450, 750),
+    "III": SiteClass("III", 375, "Site Soil Class III", 300, 450),
+    "IV": SiteClass("IV", 275, "Site Soil Class IV", 250, 300),
+    "V": SiteClass("V", 225, "Site Soil Class V", 200, 250),
+    "VI": SiteClass("VI", 175, "Site Soil Class VI", 150, 200),
 }
 
-lower_bound_parameters = {"controlling_site": "Auckland", "controlling_percentile": 0.9}
+lower_bound_parameters: dict[str, str | float] = {
+    "controlling_site": "Auckland",
+    "controlling_percentile": 0.9,
+}
 
-location_replacements = {
-    "Auckland": ["Manukau City"],
-    "Tauranga": ["Mount Maunganui"],
-    "Wellington": ["Wellington CBD"],
-    "Lower Hutt": ["Wainuiomata", "Eastbourne"],
+
+class LocationReplacement(NamedTuple):
+    preferred_location: str
+    replace_locations: list[str]
+
+
+LOCATION_REPLACEMENTS: dict[str, LocationReplacement] = {
+    "Auckland": LocationReplacement("Auckland", ["Manukau City"]),
+    "Tauranga": LocationReplacement("Tauranga", ["Mount Maunganui"]),
+    "Wellington": LocationReplacement("Wellington", ["Wellington CBD"]),
+    "Lower Hutt": LocationReplacement("Lower Hutt", ["Wainuiomata", "Eastbourne"]),
 }
 
 
@@ -143,15 +134,19 @@ def create_mean_sa_table(data_file: str) -> "pdt.DataFrame":
     index = site_list
 
     APoEs, hazard_rp_list = extract_APoEs(data_file)
-    site_class_list = [f'{sc_dict[sc]["label"]}' for sc in sc_dict]
+    site_class_list = [f"{SITE_CLASSES[sc].label}" for sc in SITE_CLASSES]
     parameters = ["PGA", "Sas", "PSV", "Tc"]
     columns = pd.MultiIndex.from_product([APoEs, site_class_list, parameters])
 
     df = pd.DataFrame(index=index, columns=columns).astype(float)
 
-    for sc in sc_dict.keys():
-        sc_label = sc_dict[sc]["label"]
-        vs30 = sc_dict[sc]["representative_vs30"]
+    log.info("create_mean_sa_table() processesing site classes")
+    for sc in SITE_CLASSES.keys():
+        sc_label = SITE_CLASSES[sc].label
+        vs30 = int(SITE_CLASSES[sc].representative_vs30)
+
+        log.info(f"site class {sc} label: {sc_label} vs30: {vs30}")
+
         i_vs30 = vs30_list.index(vs30)
 
         for APoE in APoEs:
@@ -182,7 +177,7 @@ def update_lower_bound_sa(mean_df: "pdt.DataFrame", data_file: str) -> "pdt.Data
     quantiles = extract_quantiles(data_file)
 
     APoEs, hazard_rp_list = extract_APoEs(data_file)
-    site_class_list = [f'{sc_dict[sc]["label"]}' for sc in sc_dict]
+    site_class_list = [f"{SITE_CLASSES[sc].label}" for sc in SITE_CLASSES]
     parameters = ["PGA Floor", "Sas Floor", "PSV Floor"]
     columns = pd.MultiIndex.from_product([APoEs, site_class_list, parameters])
     index = site_list
@@ -190,12 +185,14 @@ def update_lower_bound_sa(mean_df: "pdt.DataFrame", data_file: str) -> "pdt.Data
 
     controlling_site = lower_bound_parameters["controlling_site"]
     i_site = site_list.index(controlling_site)
-    i_stat = 1 + quantiles.index(lower_bound_parameters["controlling_percentile"])
+    i_stat = 1 + quantiles.index(
+        float(lower_bound_parameters["controlling_percentile"])
+    )
 
-    for sc in sc_dict.keys():
-        sc_label = sc_dict[sc]["label"]
-        vs30 = sc_dict[sc]["representative_vs30"]
-        i_vs30 = vs30_list.index(vs30)
+    for sc in SITE_CLASSES.keys():
+        sc_label = SITE_CLASSES[sc].label
+        vs30 = SITE_CLASSES[sc].representative_vs30
+        i_vs30 = vs30_list.index(int(vs30))
 
         for APoE in APoEs:
             i_rp = hazard_rp_list.index(int(APoE.split("/")[1]))
@@ -293,28 +290,30 @@ def round_sa_parameters(df: "pdt.DataFrame") -> "pdt.DataFrame":
     return df
 
 
-def remove_irrelevant_location_replacements(site_list: List[str]):
+def remove_irrelevant_location_replacements(
+    site_list: List[str], location_replacements: dict[str, LocationReplacement]
+) -> dict[str, LocationReplacement]:
     """
 
     Args:
         site_list: list of sites included in the sa tables
+        location_replacements: list of the location replacements
 
     Returns:
-        location_replacements: updated dictionary of replaments
+        location_replacements: a new dictionary of replacements
 
     """
-
-    key_list = list(location_replacements.keys())
-    for key in key_list:
-        replace_list = location_replacements[key]
-        location_replacements[key] = [
-            site for site in replace_list if site in site_list
-        ]
-
+    new_location_replacements = {}
+    # key_list = list(location_replacements.keys())
+    for key in location_replacements.keys():
         if key not in site_list:
-            del location_replacements[key]
-
-    return location_replacements
+            # del location_replacements[key]
+            continue
+        replace_list = location_replacements[key].replace_locations
+        new_location_replacements[key] = LocationReplacement(
+            key, [site for site in replace_list if site in site_list]
+        )
+    return new_location_replacements
 
 
 def replace_relevant_locations(
@@ -331,18 +330,20 @@ def replace_relevant_locations(
 
     """
     site_list = list(df.index)
-    location_replacements = remove_irrelevant_location_replacements(site_list)
+    location_replacements = remove_irrelevant_location_replacements(
+        site_list, LOCATION_REPLACEMENTS
+    )
 
     if print_locations:
         check_replaced_locations = []
         for location in location_replacements:
             check_replaced_locations.append(location)
-            for replaced_location in location_replacements[location]:
+            for replaced_location in location_replacements[location].replace_locations:
                 check_replaced_locations.append(replaced_location)
         print(df.loc[check_replaced_locations, :])
 
     for location in location_replacements:
-        for replaced_location in location_replacements[location]:
+        for replaced_location in location_replacements[location].replace_locations:
             df.loc[replaced_location, :] = df.loc[location, :]
 
     if print_locations:
@@ -382,7 +383,9 @@ def save_table_to_pkl(
     print(f"Sa parameter .pkl file(s) saved in \n\t{os.getcwd()}")
 
 
-def create_sa_pkl(hf_name: str, sa_name: str, hazard_param: Optional[Dict[str,List[str]]] = None):
+def create_sa_pkl(
+    hf_name: str, sa_name: str, hazard_id: str, site_list: Optional[list[str]] = None
+):
     """Generate sa parameter tables and save as .pkl file
 
     Args:
@@ -392,10 +395,10 @@ def create_sa_pkl(hf_name: str, sa_name: str, hazard_param: Optional[Dict[str,Li
 
     """
 
-    if hazard_param is not None:
-        hazard_id = hazard_param["hazard_id"]
-        site_list = hazard_param["site_list"]
-        sites = q_haz.create_sites_df(site_list=site_list)
+    # if hazard_param is not None:
+    #     hazard_id = hazard_param["hazard_id"]
+    #     site_list = hazard_param["site_list"]
+    sites = q_haz.create_sites_df(site_list=site_list)
 
     # query NSHM
     hcurves, imtl_list = q_haz.retrieve_hazard_curves(
