@@ -3,7 +3,7 @@ This module derives the PGA, Sa,s, and Tc parameters from the NSHM hazard curves
 """
 import ast
 import os
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List, Tuple, Optional, Dict
 
 import h5py
 import numpy as np
@@ -382,7 +382,7 @@ def save_table_to_pkl(
     print(f"Sa parameter .pkl file(s) saved in \n\t{os.getcwd()}")
 
 
-def create_sa_pkl(hf_name: str, sa_name: str, hazard_param: dict = None):
+def create_sa_pkl(hf_name: str, sa_name: str, hazard_param: Optional[Dict[str,List[str]]] = None):
     """Generate sa parameter tables and save as .pkl file
 
     Args:
