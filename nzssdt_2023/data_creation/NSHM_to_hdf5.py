@@ -3,8 +3,9 @@ Some developer oriented docs about this module.
 """
 import os
 import re
-import numpy as np
+
 import h5py
+import numpy as np
 
 g = 9.80665  # gravity in m/s^2
 

@@ -1,31 +1,25 @@
 """
 This module derives the PGA, Sa,s, and Tc parameters from the NSHM hazard curves.
 """
-import os
-import h5py
 import ast
+import os
+from typing import TYPE_CHECKING, List, Tuple
+
+import h5py
 import numpy as np
 import pandas as pd
 
-from nzssdt_2023.data_creation import query_NSHM as q_haz
-from nzssdt_2023.data_creation.query_NSHM import (
-    agg_list,
-    imt_list,
-    vs30_list,
-)
-
 from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
-from nzssdt_2023.data_creation.NSHM_to_hdf5 import period_from_imt, acc_to_vel, g
-
+from nzssdt_2023.data_creation import query_NSHM as q_haz
 from nzssdt_2023.data_creation.extract_data import (
-    extract_spectra,
-    extract_vs30s,
-    extract_sites,
     extract_APoEs,
     extract_quantiles,
+    extract_sites,
+    extract_spectra,
+    extract_vs30s,
 )
-
-from typing import TYPE_CHECKING, Tuple, List
+from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
+from nzssdt_2023.data_creation.query_NSHM import agg_list, imt_list, vs30_list
 
 if TYPE_CHECKING:
     import numpy.typing as npt

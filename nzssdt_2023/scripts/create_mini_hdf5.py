@@ -1,12 +1,11 @@
+from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
 from nzssdt_2023.data_creation.query_NSHM import (
-    hazard_id,
     agg_list,
+    hazard_id,
     imt_list,
     vs30_list,
 )
-
-from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 
 hf_name = "hcurves_mini.hdf5"
 

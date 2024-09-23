@@ -1,6 +1,5 @@
-from nzssdt_2023.data_creation.query_NSHM import hazard_id
 from nzssdt_2023.data_creation import parameter_generation as gen
-
+from nzssdt_2023.data_creation.query_NSHM import hazard_id
 
 hf_name = "hcurves_mini.hdf5"
 sa_name = "SaT-variables_mini"

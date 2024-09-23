@@ -1,11 +1,11 @@
 """
 This module extracts the data and metadata in the hdf5 containing the NSHM data.
 """
-import h5py
 import ast
-import pandas as pd
+from typing import TYPE_CHECKING, List, Tuple
 
-from typing import TYPE_CHECKING, Tuple, List
+import h5py
+import pandas as pd
 
 if TYPE_CHECKING:
     import numpy.typing as npt
