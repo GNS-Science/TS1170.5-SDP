@@ -1,5 +1,8 @@
 """
 Some developer oriented docs about this module.
+
+Todo:
+    * change sites to a constant SITES and check whether a local parameter is needed as well as the global
 """
 import numpy as np
 import pandas as pd

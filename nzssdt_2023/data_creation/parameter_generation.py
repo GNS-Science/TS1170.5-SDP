@@ -99,6 +99,9 @@ def calculate_parameter_arrays(
         PSV: 95% of maximum spectral velocity
         Tc : spectral-acceleration-plateau corner period
 
+    Todo:
+        * add Td calculation
+
     """
     with h5py.File(data_file, "r") as hf:
         imtls = ast.literal_eval(hf["metadata"].attrs["acc_imtls"])
@@ -124,6 +127,9 @@ def create_mean_sa_table(data_file: str) -> "pdt.DataFrame":
 
     Returns:
         df: mutli-index dataframe including all sites, annual probabilities of exceedance, and site classes
+
+    Todo:
+        * add Td
 
     """
     PGA, Sas, PSV, Tc = calculate_parameter_arrays(data_file)
@@ -259,6 +265,9 @@ def round_sa_parameters(df: "pdt.DataFrame") -> "pdt.DataFrame":
     Returns:
         df: mutli-index dataframe updated for the correct number of decimal places
 
+    Todo:
+        * round Sas before calculating Tc
+        * round to n significant digits instead of n decimal places
 
     """
     # round sa parameters for final table
@@ -383,9 +392,9 @@ def save_table_to_pkl(
     print(f"Sa parameter .pkl file(s) saved in \n\t{os.getcwd()}")
 
 
+
 def create_sa_pkl(
-    hf_name: str, sa_name: str, hazard_id: Optional[str] = None, site_list: Optional[list[str]] = None
-):
+    hf_name: str, sa_name: str, hazard_id: Optional[str] = None, site_list: Optional[list[str]] = None, save_floor_flags: bool = False):
     """Generate sa parameter tables and save as .pkl file
 
     Args:
@@ -393,6 +402,7 @@ def create_sa_pkl(
         sa_name: name of .pkl file
         hazard_id: NSHM model id
         site_list: list of sites to include in the sa parameter table
+        save_floor_flags: True saves a .pkl that includes metadata on the lower bound hazard
 
     """
     hazard_id = hazard_id or q_haz.hazard_id
@@ -420,4 +430,4 @@ def create_sa_pkl(
     df = update_lower_bound_sa(df, hf_name)
     df = round_sa_parameters(df)
     df = replace_relevant_locations(df)
-    save_table_to_pkl(df, sa_name)
+    save_table_to_pkl(df, sa_name, save_floor_flags)
