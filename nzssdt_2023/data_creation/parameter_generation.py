@@ -394,10 +394,6 @@ def create_sa_pkl(
         hazard_param: optional dictionary containing NSHM version and list of locations
 
     """
-
-    # if hazard_param is not None:
-    #     hazard_id = hazard_param["hazard_id"]
-    #     site_list = hazard_param["site_list"]
     sites = q_haz.create_sites_df(site_list=site_list)
 
     # query NSHM
