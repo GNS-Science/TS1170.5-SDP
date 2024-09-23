@@ -20,7 +20,7 @@ from nzssdt_2023.data_creation.extract_data import (
     extract_vs30s,
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
-from nzssdt_2023.data_creation.query_NSHM import agg_list, imt_list, vs30_list
+from nzssdt_2023.data_creation.query_NSHM import sites, agg_list, imt_list, vs30_list
 
 log = logging.getLogger(__name__)
 
@@ -384,17 +384,23 @@ def save_table_to_pkl(
 
 
 def create_sa_pkl(
-    hf_name: str, sa_name: str, hazard_id: str, site_list: Optional[list[str]] = None
+    hf_name: str, sa_name: str, hazard_id: Optional[str] = None, site_list: Optional[list[str]] = None
 ):
     """Generate sa parameter tables and save as .pkl file
 
     Args:
         hf_name: name of intermediate hdf5 file with hazard curve data
         sa_name: name of .pkl file
-        hazard_param: optional dictionary containing NSHM version and list of locations
+        hazard_id: NSHM model id
+        site_list: list of sites to include in the sa parameter table
 
     """
-    sites = q_haz.create_sites_df(site_list=site_list)
+    hazard_id = hazard_id or q_haz.hazard_id
+
+    if site_list is None:
+        sites = pd.concat([q_haz.create_sites_df(), q_haz.create_sites_df(named_sites=False)])
+    else:
+        sites = q_haz.create_sites_df(site_list=site_list)
 
     # query NSHM
     hcurves, imtl_list = q_haz.retrieve_hazard_curves(
