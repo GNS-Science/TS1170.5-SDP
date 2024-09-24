@@ -6,5 +6,6 @@
 
 ::: nzssdt_2023.data_creation.extract_data
 
-::: nzssdt_2023.data_creation.parameter_generation
+::: nzssdt_2023.data_creation.sa_parameter_generation
 
+::: nzssdt_2023.data_creation.dm_parameter_generation

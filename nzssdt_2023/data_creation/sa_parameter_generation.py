@@ -20,7 +20,7 @@ from nzssdt_2023.data_creation.extract_data import (
     extract_vs30s,
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
-from nzssdt_2023.data_creation.query_NSHM import sites, agg_list, imt_list, vs30_list
+from nzssdt_2023.data_creation.query_NSHM import agg_list, imt_list, vs30_list
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ lower_bound_parameters: dict[str, str | float] = {
 
 class LocationReplacement(NamedTuple):
     preferred_location: str
-    replace_locations: list[str]
+    replaced_locations: list[str]
 
 
 LOCATION_REPLACEMENTS: dict[str, LocationReplacement] = {
@@ -313,15 +313,14 @@ def remove_irrelevant_location_replacements(
 
     """
     new_location_replacements = {}
-    # key_list = list(location_replacements.keys())
+
     for key in location_replacements.keys():
-        if key not in site_list:
-            # del location_replacements[key]
-            continue
-        replace_list = location_replacements[key].replace_locations
-        new_location_replacements[key] = LocationReplacement(
-            key, [site for site in replace_list if site in site_list]
-        )
+        if key in site_list:
+            replace_list = location_replacements[key].replaced_locations
+            new_location_replacements[key] = LocationReplacement(
+                key, [site for site in replace_list if site in site_list]
+            )
+
     return new_location_replacements
 
 
@@ -347,15 +346,17 @@ def replace_relevant_locations(
         check_replaced_locations = []
         for location in location_replacements:
             check_replaced_locations.append(location)
-            for replaced_location in location_replacements[location].replace_locations:
+            for replaced_location in location_replacements[location].replaced_locations:
                 check_replaced_locations.append(replaced_location)
+        print("\n\noriginal values for replaced locations:")
         print(df.loc[check_replaced_locations, :])
 
     for location in location_replacements:
-        for replaced_location in location_replacements[location].replace_locations:
+        for replaced_location in location_replacements[location].replaced_locations:
             df.loc[replaced_location, :] = df.loc[location, :]
 
     if print_locations:
+        print("\n\nnew values for replaced locations:")
         print(df.loc[check_replaced_locations, :])
 
     return df
@@ -392,9 +393,13 @@ def save_table_to_pkl(
     print(f"Sa parameter .pkl file(s) saved in \n\t{os.getcwd()}")
 
 
-
 def create_sa_pkl(
-    hf_name: str, sa_name: str, hazard_id: Optional[str] = None, site_list: Optional[list[str]] = None, save_floor_flags: bool = False):
+    hf_name: str,
+    sa_name: str,
+    hazard_id: Optional[str] = None,
+    site_list: Optional[list[str]] = None,
+    save_floor_flags: bool = False,
+):
     """Generate sa parameter tables and save as .pkl file
 
     Args:
@@ -408,7 +413,9 @@ def create_sa_pkl(
     hazard_id = hazard_id or q_haz.hazard_id
 
     if site_list is None:
-        sites = pd.concat([q_haz.create_sites_df(), q_haz.create_sites_df(named_sites=False)])
+        sites = pd.concat(
+            [q_haz.create_sites_df(), q_haz.create_sites_df(named_sites=False)]
+        )
     else:
         sites = q_haz.create_sites_df(site_list=site_list)
 

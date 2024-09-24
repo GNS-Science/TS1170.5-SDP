@@ -1,13 +1,8 @@
-from nzssdt_2023.data_creation import parameter_generation as gen
-from nzssdt_2023.data_creation.query_NSHM import hazard_id
+from nzssdt_2023.data_creation import sa_parameter_generation as gen
 
-hf_name = "hcurves_mini.hdf5"
-sa_name = "SaT-variables_mini"
+hf_name = "mini_hcurves.hdf5"
+sa_name = "mini_SaT-variables"
 
 site_list = ["Auckland", "Christchurch", "Dunedin", "Wellington"]
 
-# hazard_param: dict[str, str | list[str]] = {}
-# hazard_param["hazard_id"] = hazard_id
-# hazard_param["site_list"] = site_list
-
-gen.create_sa_pkl(hf_name, sa_name, hazard_id, site_list)
+gen.create_sa_pkl(hf_name, sa_name, site_list=site_list)
