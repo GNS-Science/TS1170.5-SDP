@@ -408,6 +408,9 @@ def create_sa_pkl(
         hazard_id: NSHM model id
         site_list: list of sites to include in the sa parameter table
         save_floor_flags: True saves a .pkl that includes metadata on the lower bound hazard
+        
+    Todo:
+        * add option to pass alternate return periods to to_hdf5.add_uniform_hazard_spectra
 
     """
     hazard_id = hazard_id or q_haz.hazard_id
