@@ -1,4 +1,5 @@
 import pickle as pkl
+from typing import Optional
 
 import numpy as np
 
@@ -6,6 +7,8 @@ from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
 mini = True
+
+site_list: Optional[list[str]] = None
 
 if mini:
     hf_name = "mini_hcurves.hdf5"
@@ -18,8 +21,6 @@ else:
     hf_name = "recreated_hcurves.hdf5"
     sa_name = "recreated_SaT-variables"
     dm_name = "recreated_D-M-tables"
-
-    site_list = None
 
 # generate Sa Parameter Tables
 sa_gen.create_sa_pkl(hf_name, sa_name, site_list=site_list)
