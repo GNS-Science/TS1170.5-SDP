@@ -1,3 +1,8 @@
+"""
+Superceded by create_sa_pkl
+
+TODO: delete??
+"""
 from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
 from nzssdt_2023.data_creation.query_NSHM import (

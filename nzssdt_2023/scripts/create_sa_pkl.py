@@ -1,3 +1,8 @@
+"""
+Superceded by create_parameter_tables
+
+TODO: delete??
+"""
 from nzssdt_2023.data_creation import sa_parameter_generation as gen
 
 hf_name = "mini_hcurves.hdf5"

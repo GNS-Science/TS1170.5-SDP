@@ -4,12 +4,18 @@ Some developer oriented docs about this module.
 Todo:
     * change sites to a constant SITES and check whether a local parameter is needed as well as the global
 """
+import datetime
+import datetime as dt
+import logging
+
 import numpy as np
 import pandas as pd
 from nzshm_common.grids import RegionGrid
 from nzshm_common.location.code_location import CodedLocation
 from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store.query import get_hazard_curves
+
+log = logging.getLogger(__name__)
 
 ### parameters for NSHM query, as required for the TS Site Demand Parameter tables
 ###    note: sites is defined after create_sites_df is defined
@@ -150,6 +156,10 @@ def retrieve_hazard_curves(sites, vs30_list, imt_list, agg_list, hazard_id):
              list   intensities included
     """
 
+    log.info(
+        f"begin retrieve_hazard_curves for {len(sites)} sites; {len(vs30_list)} vs30;  {len(agg_list)} aggs;"
+    )
+
     # call a location to get the imtls that are returned
     res = next(
         get_hazard_curves(
@@ -163,12 +173,35 @@ def retrieve_hazard_curves(sites, vs30_list, imt_list, agg_list, hazard_id):
         [len(vs30_list), len(sites), len(imt_list), len(imtl_list), len(agg_list)]
     )
 
-    print("Querying hazard curves...")
+    log.info("Querying hazard curves...")
 
     # cycle through all hazard parameters
+    count = 0
+    CHUNK = 1000
+    expected_count = (
+        len(sites["latlon"]) * len(vs30_list) * len(imt_list) * len(agg_list)
+    )
+    timings = []
+    t0 = dt.datetime.now()
     for res in get_hazard_curves(
         sites["latlon"], vs30_list, [hazard_id], imt_list, agg_list
     ):
+        count += 1
+        delta = dt.datetime.now() - t0
+        duration = delta.seconds + delta.microseconds / 1e6
+        timings.append(duration)  # time.delta
+        if count % CHUNK == 0:
+            eta = dt.datetime.now() + dt.timedelta(
+                seconds=(expected_count - count) * sum(timings[-10:]) / 10
+            )
+            log.info(
+                f"retrieve_hazard_curves progress: {count} of {expected_count}. "
+                f"Approx {(count/expected_count) * 100:.1f} % progress. "
+                f"Last {CHUNK} curves took {sum(timings):.4f}s. "
+                f"ETA: {eta}"
+            )
+            timings = []
+
         lat = res.lat
         lon = res.lon
         vs30 = res.vs30
@@ -181,6 +214,7 @@ def retrieve_hazard_curves(sites, vs30_list, imt_list, agg_list, hazard_id):
         i_agg = agg_list.index(agg)
 
         hcurves[i_vs30, i_site, i_imt, :, i_agg] = [val.val for val in res.values]
+        t0 = dt.datetime.now()
 
     # # identify any missing data and produce a warning
     site_list = list(sites.index)

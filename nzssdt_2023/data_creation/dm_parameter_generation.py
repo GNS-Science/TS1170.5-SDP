@@ -1,5 +1,8 @@
 """
 This module compiles the magnitude and distances values for the parameter table.
+
+TODO:
+ - optimise data structure to improve on mean-mag csv files
 """
 import os
 from pathlib import Path
@@ -79,6 +82,10 @@ def raw_mag_to_df(raw_df: "pdt.DataFrame", site_list: List[str], APoEs: List[str
 
     Returns:
         df: dataframe with rows: sites and columns: APoEs
+
+
+    TODO:
+     - reorg CDC mean_mag to get this final df shape.
 
     """
     poe_duration = 50

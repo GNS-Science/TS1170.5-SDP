@@ -1,3 +1,11 @@
+"""
+TODO:
+ - extra column Td to each soil/site class
+ - table reorg. Instead of table per APOE, now we want rows per APOE per Auckland
+   (see example, but don't include units!)
+
+"""
+
 import csv
 import pathlib
 from decimal import Decimal

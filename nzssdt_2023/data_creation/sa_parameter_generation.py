@@ -100,7 +100,7 @@ def calculate_parameter_arrays(
         Tc : spectral-acceleration-plateau corner period
 
     Todo:
-        * add Td calculation
+        * add Td calculation (needs equation, how to do lower-bound adjustment)
 
     """
     with h5py.File(data_file, "r") as hf:
@@ -372,6 +372,8 @@ def save_table_to_pkl(
         sa_name: .pkl filename
         save_floor_flags: True saves a .pkl that includes metadata on the lower bound hazard
 
+    TODO:
+     - to json direct rather than to_pickle (or gherkin)
     """
     df = df.copy(deep=True)
 
@@ -421,6 +423,8 @@ def create_sa_pkl(
         )
     else:
         sites = q_haz.create_sites_df(site_list=site_list)
+
+    log.info(f"begin create_sa_pkl for {len(sites)}")
 
     # query NSHM
     hcurves, imtl_list = q_haz.retrieve_hazard_curves(
