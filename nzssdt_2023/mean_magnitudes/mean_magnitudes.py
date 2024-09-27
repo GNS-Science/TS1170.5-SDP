@@ -1,7 +1,9 @@
 import csv
-from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable
+import warnings
+from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable, List
 
 import numpy as np
+import pandas as pd
 from nzshm_common.location.code_location import CodedLocation
 from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store import model, query
@@ -10,6 +12,8 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
 INV_TIME = 1.0
+VS30 = 275
+IMT = "PGA"
 
 
 def lat_lon(id):
@@ -17,9 +21,23 @@ def lat_lon(id):
 
 
 coded_locations_with_id = [
-    CodedLocation(*lat_lon(_id), 0.001) for _id in LOCATION_LISTS["ALL"]["locations"]
+    CodedLocation(*lat_lon(_id), 0.001)
+    for _id in LOCATION_LISTS["ALL"]["locations"]
 ]
 location_codes_with_id = [loc.code for loc in coded_locations_with_id]
+
+def get_loc_id_and_name(location_code):
+
+    if location_code in location_codes_with_id:
+        location_id = LOCATION_LISTS["ALL"]["locations"][
+            location_codes_with_id.index(location_code)
+        ]
+        name = location_by_id(location_id)["name"]
+    else:
+        location_id = location_code
+        name = location_code
+
+    return location_id, name
 
 
 def prob_to_rate(prob: "npt.NDArray") -> "npt.NDArray":
@@ -102,14 +120,8 @@ def get_mean_mags(
     )
     for disagg in disaggs:
         mean_mag = calculate_mean_magnitude(disagg.disaggs, disagg.bins)
-        if disagg.nloc_001 in location_codes_with_id:
-            location_id = LOCATION_LISTS["ALL"]["locations"][
-                location_codes_with_id.index(disagg.nloc_001)
-            ]
-            name = location_by_id(location_id)["name"]
-        else:
-            location_id = disagg.nloc_001
-            name = disagg.nloc_001
+        location_id, name = get_loc_id_and_name(disagg.nloc_001)
+
         d = dict(
             location_id=location_id,
             name=name,
@@ -124,7 +136,97 @@ def get_mean_mags(
         yield d
 
 
-def write_mean_mag_file(hazard_id, locations, vs30s, imts, poes, hazard_agg, filepath):
+def poe_to_rp_rounded(apoe: model.ProbabilityEnum) -> int:
+    """
+    Converts annual probability to a rounded retun period. The return periods are "conventional"
+    return periods used by the hazard and risk community that are roughly equivlent to the
+    (more exact) annual probabilities.
+
+    Args:
+        apoe: annual probability of exceedence
+
+    Returns:
+        the approximate retun period rounded to the nearest "conventional" number.
+    """
+
+    def sig_figs(num, s):
+        d = int(np.ceil(np.log10(num)))
+        p = s - d
+        m = 10**p
+        return np.round(num * m) / m
+
+    rp = -1.0 / np.log(1 - apoe.value)
+    # This is the dumbest thing ever. I should probably just use a lookup table. Not sure there
+    # is an algo that always gives the "conventional" return periods from the apoe.
+    if 470 < rp < 1000:
+        return int(sig_figs(rp, s=1))
+    return int(sig_figs(rp, s=2))
+
+
+def get_mean_mag_df(
+    hazard_id: str,
+    locations: List[CodedLocation],
+    poes: model.ProbabilityEnum,
+    hazard_agg: model.AggregationEnum,
+) -> pd.DataFrame:
+    """
+    Get the mean mantitude table for the requested locations and annual probabilities.
+
+    Args:
+        hazard_id: the toshi-hazard-post ID of the hazard model from which to get disaggregations.
+        locations: the locations at which to calculate mean magnitudes.
+        poes: the annual probabilities of exceedences at which to calculate mean magnitudes.
+        hazard_agg: the hazard aggregate (e.g. mean or a fractile) at which to calculate mean magnitudes.
+
+    Returns:
+        the mean magnitues. The DataFrame index is the location name and the columns are frequencies.
+
+
+    NB: "APoE in the column name is a misnomer as they are approximate return frequencies not probabilities.
+    Magnitudes are rounded to the nearest decimal. The rounding error introduced in the origional workflow
+    (incurred by rounding to the nearest 2 decimal places and then nearest 1) have been reproduced
+    here to ensure output is stable.
+
+    The format of the output DataFrame is:
+
+                    APoE: 1/25 APoE: 1/50 APoE: 1/100 APoE: 1/250 APoE: 1/500 APoE: 1/1000 APoE: 1/2500
+    Kaitaia             5.7        5.8         5.8         5.9         6.0          6.0          6.1
+    Kerikeri            5.7        5.8         5.9         5.9         6.0          6.0          6.1
+    ...                 ...        ...         ...         ...         ...          ...          ...
+    Bluff               6.7        6.8         6.9         7.0         7.0          7.1          7.1
+    Oban                6.7        6.8         6.9         7.0         7.1          7.2          7.3
+    """
+
+    def get_rp_str(rp: int):
+        return f"APoE: 1/{rp}"
+
+    return_periods = [poe_to_rp_rounded(poe) for poe in poes]
+    return_periods = np.sort(return_periods)
+    rp_strs = [get_rp_str(rp) for rp in return_periods]
+    site_names = [
+        get_loc_id_and_name(loc.downsample(0.001).code)[1] for loc in locations
+    ]
+    df = pd.DataFrame(index=site_names, columns=rp_strs)
+    for disagg in get_mean_mags(hazard_id, locations, [VS30], [IMT], poes, hazard_agg):
+        rp = poe_to_rp_rounded(disagg["poe"])
+        rp_str = get_rp_str(rp)
+        site_name = disagg["name"]
+        # df.loc[site_name, rp_str] = np.round(disagg['mag'], 1)
+        df.loc[site_name, rp_str] = np.round(np.round(disagg["mag"], 2), 1)
+        # TODO: because the origional csv file had magnitudes rounded to 2 decimal places we've introduced errors in
+        # the mean mag:
+        # >>> np.round(5.95, 1)
+        # 6.0
+        # >>> np.round(5.948071422587211, 1)
+        # 5.9
+
+    return df
+
+
+def write_mean_mag_csv_file(
+    hazard_id, locations, vs30s, imts, poes, hazard_agg, filepath
+):
+    warnings.warn("Please use get_mean_mag_df instead", DeprecationWarning)
 
     header = [
         "site code",
@@ -166,23 +268,26 @@ if __name__ == "__main__":
     vs30s = [275]
     poes = [
         model.ProbabilityEnum._2_PCT_IN_50YRS,
-        # model.ProbabilityEnum._5_PCT_IN_50YRS,
-        # model.ProbabilityEnum._10_PCT_IN_50YRS,
-        # model.ProbabilityEnum._18_PCT_IN_50YRS,
-        # model.ProbabilityEnum._39_PCT_IN_50YRS,
-        # model.ProbabilityEnum._63_PCT_IN_50YRS,
-        # model.ProbabilityEnum._86_PCT_IN_50YRS,
+        model.ProbabilityEnum._5_PCT_IN_50YRS,
+        model.ProbabilityEnum._10_PCT_IN_50YRS,
+        model.ProbabilityEnum._18_PCT_IN_50YRS,
+        model.ProbabilityEnum._39_PCT_IN_50YRS,
+        model.ProbabilityEnum._63_PCT_IN_50YRS,
+        model.ProbabilityEnum._86_PCT_IN_50YRS,
     ]
     # grid_01 = set([CodedLocation(*pt, 0.001) for pt in load_grid('NZ_0_1_NB_1_1')])
     # locations = list(grid_01)
     locations = [
         CodedLocation(*lat_lon(_id), 0.001)
-        for _id in LOCATION_LISTS["SRWG214"]["locations"][0:10]
+        for _id in LOCATION_LISTS["SRWG214"]["locations"]
     ]
 
     # hazard_agg = model.AggregationEnum._90
     hazard_agg = model.AggregationEnum.MEAN
 
-    write_mean_mag_file(
-        hazard_id, locations, vs30s, imts, poes, hazard_agg, mean_mag_filepath
-    )
+    # write_mean_mag_csv_file(
+    #     hazard_id, locations, vs30s, imts, poes, hazard_agg, mean_mag_filepath
+    # )
+    df = get_mean_mag_df(hazard_id, locations, poes, hazard_agg)
+    # print(df)
+    # df.to_csv('test.csv')
