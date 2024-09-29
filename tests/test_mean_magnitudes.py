@@ -53,7 +53,7 @@ def test_mean_mag_df():
         "APoE: 1/2500",
     ]
     location_ids = [_id for _id in LOCATION_LISTS["SRWG214"]["locations"]][0:nsites]
-    site_list = [location_by_id(_id)["name"] for _id in location_ids ][0:nsites]
+    site_list = [location_by_id(_id)["name"] for _id in location_ids][0:nsites]
     locations = [CodedLocation(*lat_lon(_id), 0.001) for _id in location_ids]
 
     raw_df_filepath = Path(__file__).parent / "fixtures" / "SRWG214_mean_mag.csv"

@@ -21,10 +21,10 @@ def lat_lon(id):
 
 
 coded_locations_with_id = [
-    CodedLocation(*lat_lon(_id), 0.001)
-    for _id in LOCATION_LISTS["ALL"]["locations"]
+    CodedLocation(*lat_lon(_id), 0.001) for _id in LOCATION_LISTS["ALL"]["locations"]
 ]
 location_codes_with_id = [loc.code for loc in coded_locations_with_id]
+
 
 def get_loc_id_and_name(location_code):
 
@@ -200,7 +200,7 @@ def get_mean_mag_df(
     def get_rp_str(rp: int):
         return f"APoE: 1/{rp}"
 
-    return_periods = [poe_to_rp_rounded(poe) for poe in poes]
+    return_periods = np.array([poe_to_rp_rounded(poe) for poe in poes])
     return_periods = np.sort(return_periods)
     rp_strs = [get_rp_str(rp) for rp in return_periods]
     site_names = [
@@ -285,9 +285,5 @@ if __name__ == "__main__":
     # hazard_agg = model.AggregationEnum._90
     hazard_agg = model.AggregationEnum.MEAN
 
-    # write_mean_mag_csv_file(
-    #     hazard_id, locations, vs30s, imts, poes, hazard_agg, mean_mag_filepath
-    # )
     df = get_mean_mag_df(hazard_id, locations, poes, hazard_agg)
-    # print(df)
-    # df.to_csv('test.csv')
+    df.to_csv(mean_mag_filepath)
