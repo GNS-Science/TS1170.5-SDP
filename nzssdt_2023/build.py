@@ -2,7 +2,7 @@ import pathlib
 
 import pandas as pd
 
-from nzssdt_2023 import RESOURCES_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.convert import DistMagTable, SatTable
 from nzssdt_2023.versioning import ConvertedFile, IncludedFile, VersionInfo
 
@@ -16,7 +16,7 @@ def build_version_one(description=None):
 
     # build SAT files
     in_path = pathlib.Path(
-        RESOURCES_FOLDER, "input", "v1", "SaT-variables_v5_corrected-locations.pkl"
+        RESOURCES_FOLDER, "pipeline", "v1", "SaT-variables_v5_corrected-locations.pkl"
     )
     df = pd.read_pickle(in_path)
     sat = SatTable(df)
@@ -56,7 +56,7 @@ def build_version_one(description=None):
     vi.manifest.append(IncludedFile(str(out_path.relative_to(RESOURCES_FOLDER))))
 
     # D&M
-    in_path = pathlib.Path(RESOURCES_FOLDER, "input", "v1", "D_and_M_with_floor.csv")
+    in_path = pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1", "D_and_M_with_floor.csv")
     dandm = DistMagTable(in_path)
 
     out_path = pathlib.Path(RESOURCES_FOLDER, "v1", "d_and_m.json")

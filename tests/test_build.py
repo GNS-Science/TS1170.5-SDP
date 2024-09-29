@@ -3,7 +3,7 @@
 import pathlib
 import shutil
 
-from nzssdt_2023 import RESOURCES_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.build import build_version_one
 
 clone_files = ["major_faults.geojson", "urban_area_polygons.geojson"]
@@ -11,8 +11,8 @@ new_files = ["d_and_m.json", "grid_locations.json", "named_locations.json"]
 
 
 def prepare_temp_inputs(temporary_dir):
-    input_folder = pathlib.Path(RESOURCES_FOLDER, "input", "v1")
-    tmp_folder = pathlib.Path(temporary_dir, "input", "v1")
+    input_folder = pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1")
+    tmp_folder = pathlib.Path(temporary_dir, "pipeline", "v1")
     shutil.copytree(input_folder, tmp_folder)  # Will fail if `foo` exists
 
 

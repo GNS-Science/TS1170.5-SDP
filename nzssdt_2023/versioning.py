@@ -10,7 +10,7 @@ import dacite
 import nzshm_common
 import nzshm_model
 
-from . import RESOURCES_FOLDER
+from .config import RESOURCES_FOLDER
 
 VERSION_LIST_FILENAME = "version_list.json"
 

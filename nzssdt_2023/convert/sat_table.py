@@ -6,7 +6,7 @@ from functools import lru_cache
 
 import pandas as pd
 
-from nzssdt_2023 import RESOURCES_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 
 APoEs = [f"APoE: 1/{rp}" for rp in [25, 100, 250, 500, 1000, 2500]]
 site_class_labels = [
