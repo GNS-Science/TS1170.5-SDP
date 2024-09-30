@@ -1,12 +1,11 @@
 """
-Some developer oriented docs about this module.
+Functions to get hazard data from the NSHM hazard API.
 
-Todo:
-    * change sites to a constant SITES and check whether a local parameter is needed as well as the global
 """
 import datetime
 import datetime as dt
 import logging
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -15,60 +14,30 @@ from nzshm_common.location.code_location import CodedLocation
 from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store.query import get_hazard_curves
 
+if TYPE_CHECKING:
+    import numpy.typing as npt
+    import pandas.typing as pdt
+
 log = logging.getLogger(__name__)
-
-### parameters for NSHM query, as required for the TS Site Demand Parameter tables
-###    note: sites is defined after create_sites_df is defined
-hazard_id = "NSHM_v1.0.4"
-
-agg_list = ["mean", "0.9"]
-vs30_list = [150, 175, 225, 250, 275, 375, 400, 525, 750]
-imt_list = [
-    "PGA",
-    "SA(0.1)",
-    "SA(0.15)",
-    "SA(0.2)",
-    "SA(0.25)",
-    "SA(0.3)",
-    "SA(0.35)",
-    "SA(0.4)",
-    "SA(0.5)",
-    "SA(0.6)",
-    "SA(0.7)",
-    "SA(0.8)",
-    "SA(0.9)",
-    "SA(1.0)",
-    "SA(1.25)",
-    "SA(1.5)",
-    "SA(1.75)",
-    "SA(2.0)",
-    "SA(2.5)",
-    "SA(3.0)",
-    "SA(3.5)",
-    "SA(4.0)",
-    "SA(4.5)",
-    "SA(5.0)",
-    "SA(6.0)",
-    "SA(7.5)",
-    "SA(10.0)",
-]
 
 
 def create_sites_df(
-    named_sites=True,
-    site_list=None,
-    cropped_grid=False,
-    grid_limits=[-np.inf, np.inf, -np.inf, np.inf],
-):
+    named_sites: bool = True,
+    site_list: Optional[List[str]] = None,
+    cropped_grid: bool = False,
+    grid_limits: Tuple[float, float, float, float] = (-np.inf, np.inf, -np.inf, np.inf),
+) -> "pdt.DataFrame":
     """
     creates a pd dataframe of the sites of interest
 
-    :param named_sites:  boolean       True returns SRG sites, False returns lat/lon sites
-    :param site_list:    None or list  specifies a subset of SRG sites
-    :param cropped_grid: boolean       True returns all lat/lon sites, False crops to grid_limits
-    :param grid_limits:  list          [min_lat, max_lat, min_lon, max_lon]
+    Args:
+        named_sites: if True returns SRG sites, False returns lat/lon sites
+        site_list:  specifies a subset of SRG sites
+        cropped_grid:  True returns all lat/lon sites, False crops to grid_limits
+        grid_limits: set outer bound coordinates of the grid [min_lat, max_lat, min_lon, max_lon]
 
-    :return: sites:      pd dataframe  idx: sites, cols: ['latlon', 'lat', 'lon']
+    Returns:
+        a dataframe idx: sites, cols: ['latlon', 'lat', 'lon']
     """
 
     # create a dataframe with named sites
@@ -101,9 +70,9 @@ def create_sites_df(
 
     # create a dataframe with latlon sites
     else:
-        site_list = "NZ_0_1_NB_1_1"
+        site_list_id = "NZ_0_1_NB_1_1"
         resample = 0.1
-        grid = RegionGrid[site_list]
+        grid = RegionGrid[site_list_id]
         grid_locs = grid.load()
 
         # remove empty location
@@ -139,20 +108,25 @@ def create_sites_df(
     return sites
 
 
-sites = pd.concat([create_sites_df(), create_sites_df(named_sites=False)])
-
-
-def retrieve_hazard_curves(sites, vs30_list, imt_list, agg_list, hazard_id):
+def retrieve_hazard_curves(
+    sites: "pdt.DataFrame",
+    vs30_list: List[int],
+    imt_list: List[str],
+    agg_list: List[str],
+    hazard_id: str,
+) -> Tuple["npt.NDArray", List[float]]:
     """
     retrieves the hazard curves for the sites, vs30s, imts, and aggs of interest
 
-    :param sites: pd dataframe  idx: sites, cols: ['latlon', 'lat', 'lon']
-    :param vs30_list: list  vs30s of interest
-    :param imt_list:  list  imts of interest
-    :param agg_list:  list  agg types of interest (e.g., mean or "0.f" where f is a fractile
-    :param hazard_id: string required query the NSHM
+    Args:
+        sites: idx: sites, cols: ['latlon', 'lat', 'lon']
+        vs30_list:  vs30s of interest
+        imt_list:   imts of interest
+        agg_list:   agg types of interest (e.g., mean or "0.f" where f is a fractile
+        hazard_id:  query the NSHM
 
-    :return: np.array   hazard curves indexed by [n_vs30s, n_sites, n_imts, n_imtls, n_aggs]
+    Returns:
+        np.array   hazard curves indexed by [n_vs30s, n_sites, n_imts, n_imtls, n_aggs]
              list   intensities included
     """
 

@@ -1,10 +1,10 @@
 """
-This does everthing in Annes pipeline
+This uses everthing in Annes pipeline
 
 pre-requisities:
  - input_files/CFM_5mmyr/* was supplied by Nick H
  - input_files/polygons_locations.geojson supplied by Nick H
- - these produce: D_Values (`input_data/D_values.json`)
+ - together, these produce: D_Values (`input_data/D_values.json`)
 
  - input_file/mean_magnitudes (3 csv files) are available (input data) (check this matches new CDC package)
 
