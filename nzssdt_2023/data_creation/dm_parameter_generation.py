@@ -11,13 +11,20 @@ from typing import TYPE_CHECKING, List, Tuple
 import numpy as np
 import pandas as pd
 
+from nzshm_common.location import CodedLocation
+from nzshm_common.location.location import LOCATION_LISTS
+from nzshm_common.grids import load_grid
+from toshi_hazard_store.model import ProbabilityEnum, AggregationEnum
+
+
 from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_locations
+from nzssdt_2023.mean_magnitudes import get_mean_mag_df, lat_lon_from_id
 
 if TYPE_CHECKING:
     import geopandas.typing as gpdt
     import pandas.typing as pdt
 
-from nzssdt_2023.config import RESOURCES_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER, DISAGG_HAZARD_ID, LOCATION_LIST, LOCATION_GRID, AKL_LOCATION_ID
 
 
 def calc_distance_to_faults(
@@ -112,39 +119,74 @@ def raw_mag_to_df(raw_df: "pdt.DataFrame", site_list: List[str], APoEs: List[str
 
 
 def extract_m_values(
-    site_list: List[str], APoEs: List[str]
+    site_list: List[str],
+    APoEs: List[str],
+    recalculate: bool=False,
 ) -> Tuple["pdt.DataFrame", "pdt.DataFrame"]:
     """Extracts the magnitudes from the input .csv folder into a manageable dataframe
 
     Args:
         site_list: list of sites of interest
         APoEs    : list of APoEs of interest
+        recalculate: if True, forces recalculation of mean mags, othwise use existing files, if available
 
     Returns:
          M_mean: mean magnitudes for all sites and APoEs
          M_p90 : 90th %ile magnitudes for Auckland and APoEs
+        
+    If the mean mag csv files are available in RESOURCES_FOLDER/pipeline/v1/input_data they will be used unless
+    recalulate is True. If they are not found, they will be calculated by get_mean_mag_df
     """
+
+    srwg_locations = [CodedLocation(*lat_lon_from_id(_id), 0.001) for _id in LOCATION_LISTS[LOCATION_LIST]["locations"]]
+    grid_locations = [CodedLocation(*loc, 0.001) for loc in load_grid(LOCATION_GRID)]
+    akl_locations = [CodedLocation(*lat_lon_from_id(AKL_LOCATION_ID), 0.001)]
+    poes = [
+        ProbabilityEnum._2_PCT_IN_50YRS,
+        ProbabilityEnum._5_PCT_IN_50YRS,
+        ProbabilityEnum._10_PCT_IN_50YRS,
+        ProbabilityEnum._18_PCT_IN_50YRS,
+        ProbabilityEnum._39_PCT_IN_50YRS,
+        ProbabilityEnum._63_PCT_IN_50YRS,
+        ProbabilityEnum._86_PCT_IN_50YRS,
+    ]
 
     folder = Path(RESOURCES_FOLDER, "pipeline/v1/input_data")
     assert os.path.isdir(folder)
 
-    raw_mean_named = pd.read_csv(Path(folder, "SRWG214_mean_mag.csv"))
-    raw_mean_grid = pd.read_csv(Path(folder, "grid_mean_mag.csv"))
-    raw_mean = pd.concat([raw_mean_named, raw_mean_grid])
-    M_mean = raw_mag_to_df(raw_mean, site_list, APoEs)
+    srwg_214_filepath = Path(folder, "SRWG214_mean_mag.csv")
+    grid_filepath = Path(folder, "grid_mean_mag.csv")
+    akl_filepath = Path(folder, "AKL_90pct_mean_mag.csv")
+    if not(srwg_214_filepath.exists() or recalculate):
+        m_mean_named = pd.read_csv(srwg_214_filepath)
+    else:
+        m_mean_named = get_mean_mag_df(DISAGG_HAZARD_ID, srwg_locations, poes, AggregationEnum.MEAN)
+        m_mean_named.to_csv(srwg_214_filepath)
 
-    raw_p90 = pd.read_csv(Path(folder, "AKL_90pct_mean_mag.csv"))
-    M_p90 = raw_mag_to_df(raw_p90, ["Auckland"], APoEs)
+    if not(grid_filepath.exists() or recalculate):
+        m_mean_grid = pd.read_csv(grid_filepath)
+    else:
+        m_mean_grid = get_mean_mag_df(DISAGG_HAZARD_ID, grid_locations, poes, AggregationEnum.MEAN)
+        m_mean_grid.to_csv(grid_filepath)
 
-    return M_mean, M_p90
+    m_mean = pd.concat([m_mean_named, m_mean_grid])
+
+    if not(akl_filepath.exists() or recalculate):
+        m_p90_akl = pd.read_csv(akl_filepath)
+    else:
+        m_p90_akl = get_mean_mag_df(DISAGG_HAZARD_ID, akl_locations, poes, AggregationEnum._90)
+        m_p90_akl.to_csv(akl_filepath)
+
+    return m_mean, m_p90_akl
 
 
-def create_D_and_M_table(site_list: List[str], APoEs: List[str]):
+def create_D_and_M_table(site_list: List[str], APoEs: List[str], recalculate: bool=False):
     """Compiles the D and M parameter tables
 
     Args:
         site_list: list of sites of interest
         APoEs    : list of APoEs of interest
+        recalculate: if True, forces recalculation of mean mags, othwise use existing files, if available
 
     Returns:
         D_and_M: dataframe of the d and m tables
@@ -156,7 +198,7 @@ def create_D_and_M_table(site_list: List[str], APoEs: List[str]):
     D_values = pd.read_json(Path(folder, "D_values.json"))
     D_sites = [site for site in list(D_values.index) if site in site_list]
 
-    M_mean, M_p90 = extract_m_values(site_list, APoEs)
+    M_mean, M_p90 = extract_m_values(site_list, APoEs, recalculate)
 
     D_and_M = pd.DataFrame(index=site_list, columns=["D"] + APoEs)
 

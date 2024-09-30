@@ -16,12 +16,12 @@ VS30 = 275
 IMT = "PGA"
 
 
-def lat_lon(id):
+def lat_lon_from_id(id):
     return (location_by_id(id)["latitude"], location_by_id(id)["longitude"])
 
 
 coded_locations_with_id = [
-    CodedLocation(*lat_lon(_id), 0.001) for _id in LOCATION_LISTS["ALL"]["locations"]
+    CodedLocation(*lat_lon_from_id(_id), 0.001) for _id in LOCATION_LISTS["ALL"]["locations"]
 ]
 location_codes_with_id = [loc.code for loc in coded_locations_with_id]
 
@@ -283,7 +283,7 @@ if __name__ == "__main__":
     # grid_01 = set([CodedLocation(*pt, 0.001) for pt in load_grid('NZ_0_1_NB_1_1')])
     # locations = list(grid_01)
     locations = [
-        CodedLocation(*lat_lon(_id), 0.001)
+        CodedLocation(*lat_lon_from_id(_id), 0.001)
         for _id in LOCATION_LISTS["SRWG214"]["locations"]
     ]
 
