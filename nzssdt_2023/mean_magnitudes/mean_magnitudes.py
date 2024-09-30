@@ -168,6 +168,7 @@ def get_mean_mag_df(
     locations: List[CodedLocation],
     poes: model.ProbabilityEnum,
     hazard_agg: model.AggregationEnum,
+    legacy: bool=True,
 ) -> pd.DataFrame:
     """
     Get the mean mantitude table for the requested locations and annual probabilities.
@@ -177,10 +178,18 @@ def get_mean_mag_df(
         locations: the locations at which to calculate mean magnitudes.
         poes: the annual probabilities of exceedences at which to calculate mean magnitudes.
         hazard_agg: the hazard aggregate (e.g. mean or a fractile) at which to calculate mean magnitudes.
+        legacy: double rounds magnitudes to match origional mean mags from v1 of the workflow.
 
     Returns:
         the mean magnitues. The DataFrame index is the location name and the columns are frequencies.
 
+    The legacy calculation is necessary to match the origional mean magnitude dataframe becuase the orignal
+    csv file had magnitudes rounded to 2 decimal places. When the final ouput is rounded to one decimal
+    place, this results in rounding errors. For example:
+    >>> round(5.948071422587211, 1)
+    5.9
+    >>> round(round(5.948071422587211, 2), 1)
+    6.0
 
     NB: "APoE in the column name is a misnomer as they are approximate return frequencies not probabilities.
     Magnitudes are rounded to the nearest decimal. The rounding error introduced in the origional workflow
@@ -211,14 +220,10 @@ def get_mean_mag_df(
         rp = poe_to_rp_rounded(disagg["poe"])
         rp_str = get_rp_str(rp)
         site_name = disagg["name"]
-        # df.loc[site_name, rp_str] = np.round(disagg['mag'], 1)
-        df.loc[site_name, rp_str] = np.round(np.round(disagg["mag"], 2), 1)
-        # TODO: because the origional csv file had magnitudes rounded to 2 decimal places we've introduced errors in
-        # the mean mag:
-        # >>> np.round(5.95, 1)
-        # 6.0
-        # >>> np.round(5.948071422587211, 1)
-        # 5.9
+        if legacy:
+            df.loc[site_name, rp_str] = np.round(np.round(disagg["mag"], 2), 1)
+        else:
+            df.loc[site_name, rp_str] = np.round(disagg["mag"], 1)
 
     return df
 
