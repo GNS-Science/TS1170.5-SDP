@@ -3,13 +3,12 @@ This module derives the PGA, Sa,s, and Tc parameters from the NSHM hazard curves
 """
 import ast
 import logging
-import os
+import pathlib
 from typing import TYPE_CHECKING, List, NamedTuple, Optional, Tuple
 
 import h5py
 import numpy as np
 import pandas as pd
-import pathlib
 
 from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
@@ -22,7 +21,6 @@ from nzssdt_2023.data_creation.extract_data import (
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
 from nzssdt_2023.data_creation.query_NSHM import agg_list, imt_list, vs30_list
-from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 
 log = logging.getLogger(__name__)
 
@@ -88,7 +86,7 @@ def acc_spectra_to_vel(acc_spectra: "npt.NDArray", imtls: dict) -> "npt.NDArray"
 
 
 def calculate_parameter_arrays(
-    data_file: pathlib.Path,
+    data_file: str | pathlib.Path,
 ) -> Tuple["npt.NDArray", "npt.NDArray", "npt.NDArray", "npt.NDArray"]:
     """Calculate PGA, Sa,s, and Tc values for uniform hazard spectra in hdf5
 
@@ -168,7 +166,9 @@ def create_mean_sa_table(data_file: pathlib.Path) -> "pdt.DataFrame":
     return df
 
 
-def update_lower_bound_sa(mean_df: "pdt.DataFrame", data_file: str) -> "pdt.DataFrame":
+def update_lower_bound_sa(
+    mean_df: "pdt.DataFrame", data_file: str | pathlib.Path
+) -> "pdt.DataFrame":
     """amend the table of mean spectral parameters to include the lower bound hazard
 
     Args:
@@ -399,8 +399,8 @@ def save_table_to_pkl(
 
 
 def create_sa_pkl(
-    hf_name: str,
-    sa_name: str,
+    hf_name: pathlib.Path,
+    sa_name: pathlib.Path,
     hazard_id: Optional[str] = None,
     site_list: Optional[list[str]] = None,
     save_floor_flags: bool = False,

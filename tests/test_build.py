@@ -3,8 +3,8 @@
 import pathlib
 import shutil
 
-from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.build import build_version_one
+from nzssdt_2023.config import RESOURCES_FOLDER
 
 clone_files = ["major_faults.geojson", "urban_area_polygons.geojson"]
 new_files = ["d_and_m.json", "grid_locations.json", "named_locations.json"]

@@ -5,14 +5,19 @@ import pickle as pkl
 
 import numpy as np
 import pandas as pd
+import pathlib
 
 # check the pkl files
+from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 
-filename = "original_files/SaT-variables_v5_corrected-locations.pkl"
+filename = (
+    pathlib.Path(RESOURCES_FOLDER)
+    / "pipeline/v1/SaT-variables_v5_corrected-locations.pkl"
+)
 with open(filename, "rb") as file:
     original_df = pkl.load(file)
 
-filename = "recreated_SaT-variables.pkl"
+filename = pathlib.Path(WORKING_FOLDER) / "recreated_SaT-variables.pkl"
 with open(filename, "rb") as file:
     recreated_df = pkl.load(file)
 
@@ -24,10 +29,10 @@ else:
 
 # check the csv files
 
-filename = "original_files/D_and_M_with_floor.csv"
+filename = pathlib.Path(RESOURCES_FOLDER) / "pipeline/v1/D_and_M_with_floor.csv"
 original_df = pd.read_csv(filename)
 
-filename = "recreated_D-M-tables.csv"
+filename = pathlib.Path(WORKING_FOLDER) / "recreated_D-M-tables.csv"
 recreated_df = pd.read_csv(filename)
 
 if original_df.equals(recreated_df):

@@ -11,15 +11,15 @@ pre-requisities:
 """
 
 import logging
-import pickle as pkl
 import pathlib
+import pickle as pkl
 from typing import Optional
 
 import numpy as np
 
+from nzssdt_2023.config import WORKING_FOLDER
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
-from nzssdt_2023.config import WORKING_FOLDER
 
 # configure logging
 logging.basicConfig(level=logging.INFO)

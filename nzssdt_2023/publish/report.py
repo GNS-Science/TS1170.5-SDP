@@ -241,7 +241,7 @@ def chunks(items, chunk_size):
 
 if __name__ == "__main__":
 
-    OUTPUT_FOLDER = pathlib.Path(RESOURCES_FOLDER.parent, "reports", "v1")
+    OUTPUT_FOLDER = pathlib.Path(RESOURCES_FOLDER).parent / "reports" / "v1"
 
     # TODO shift this into the CLI
     def sat_table():

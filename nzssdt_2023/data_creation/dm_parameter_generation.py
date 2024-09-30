@@ -17,7 +17,8 @@ if TYPE_CHECKING:
     import geopandas.typing as gpdt
     import pandas.typing as pdt
 
-from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
+
 
 def calc_distance_to_faults(
     gdf: "gpdt.DataFrame", faults: "gpdt.DataFrame"
