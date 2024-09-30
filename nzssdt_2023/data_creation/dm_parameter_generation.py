@@ -157,13 +157,14 @@ def extract_m_values(
     srwg_214_filepath = Path(folder, "SRWG214_mean_mag.csv")
     grid_filepath = Path(folder, "grid_mean_mag.csv")
     akl_filepath = Path(folder, "AKL_90pct_mean_mag.csv")
-    if not(srwg_214_filepath.exists() or recalculate):
+
+    if not(not srwg_214_filepath.exists() or recalculate):
         m_mean_named = pd.read_csv(srwg_214_filepath)
     else:
         m_mean_named = get_mean_mag_df(DISAGG_HAZARD_ID, srwg_locations, poes, AggregationEnum.MEAN)
         m_mean_named.to_csv(srwg_214_filepath)
 
-    if not(grid_filepath.exists() or recalculate):
+    if not(not grid_filepath.exists() or recalculate):
         m_mean_grid = pd.read_csv(grid_filepath)
     else:
         m_mean_grid = get_mean_mag_df(DISAGG_HAZARD_ID, grid_locations, poes, AggregationEnum.MEAN)
@@ -171,7 +172,7 @@ def extract_m_values(
 
     m_mean = pd.concat([m_mean_named, m_mean_grid])
 
-    if not(akl_filepath.exists() or recalculate):
+    if not(not akl_filepath.exists() or recalculate):
         m_p90_akl = pd.read_csv(akl_filepath)
     else:
         m_p90_akl = get_mean_mag_df(DISAGG_HAZARD_ID, akl_locations, poes, AggregationEnum._90)
