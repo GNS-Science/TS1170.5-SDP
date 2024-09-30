@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, List, NamedTuple, Optional, Tuple
 import h5py
 import numpy as np
 import pandas as pd
+import pathlib
 
 from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
@@ -21,6 +22,7 @@ from nzssdt_2023.data_creation.extract_data import (
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
 from nzssdt_2023.data_creation.query_NSHM import agg_list, imt_list, vs30_list
+from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +88,7 @@ def acc_spectra_to_vel(acc_spectra: "npt.NDArray", imtls: dict) -> "npt.NDArray"
 
 
 def calculate_parameter_arrays(
-    data_file: str,
+    data_file: pathlib.Path,
 ) -> Tuple["npt.NDArray", "npt.NDArray", "npt.NDArray", "npt.NDArray"]:
     """Calculate PGA, Sa,s, and Tc values for uniform hazard spectra in hdf5
 
@@ -119,7 +121,7 @@ def calculate_parameter_arrays(
     return PGA, Sas, PSV, Tc
 
 
-def create_mean_sa_table(data_file: str) -> "pdt.DataFrame":
+def create_mean_sa_table(data_file: pathlib.Path) -> "pdt.DataFrame":
     """create preliminary table of spectral parameters, considering mean hazard spectra
 
     Args:
@@ -363,7 +365,7 @@ def replace_relevant_locations(
 
 
 def save_table_to_pkl(
-    df: "pdt.DataFrame", sa_name: str, save_floor_flags: bool = False
+    df: "pdt.DataFrame", sa_name: pathlib.Path, save_floor_flags: bool = False
 ):
     """Save the sa parameter table dataframe to a pickle file
 
@@ -377,9 +379,10 @@ def save_table_to_pkl(
     """
     df = df.copy(deep=True)
 
+    # TODO: maybe this should be a separate function?
     if save_floor_flags:
-        filename = sa_name + "_with-floor-flags.pkl"
-        df.to_pickle(filename)
+        floor_filename = str(sa_name).replace(".pkl", "_with-floor-flags.pkl")
+        df.to_pickle(floor_filename)
 
     APoEs = list(df.columns.levels[0])
     sc_labels = list(df.columns.levels[1])
@@ -389,10 +392,10 @@ def save_table_to_pkl(
             for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor"]:
                 df.drop((APoE, sc, parameter), axis=1, inplace=True)
 
-    filename = sa_name + ".pkl"
-    df.to_pickle(filename)
+    # filename = sa_name + ".pkl"
+    df.to_pickle(sa_name)
 
-    print(f"Sa parameter .pkl file(s) saved in \n\t{os.getcwd()}")
+    # print(f"Sa parameter .pkl file(s) saved in \n\t{os.getcwd()}")
 
 
 def create_sa_pkl(
