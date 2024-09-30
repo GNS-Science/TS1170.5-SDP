@@ -1,8 +1,8 @@
-import pathlib
+from pathlib import Path
 
 import pandas as pd
 
-from nzssdt_2023 import RESOURCES_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.convert import DistMagTable, SatTable
 from nzssdt_2023.versioning import ConvertedFile, IncludedFile, VersionInfo
 
@@ -15,14 +15,14 @@ def build_version_one(description=None):
     )
 
     # build SAT files
-    in_path = pathlib.Path(
-        RESOURCES_FOLDER, "input", "v1", "SaT-variables_v5_corrected-locations.pkl"
+    in_path = Path(
+        RESOURCES_FOLDER, "pipeline", "v1", "SaT-variables_v5_corrected-locations.pkl"
     )
     df = pd.read_pickle(in_path)
     sat = SatTable(df)
 
     # SAT named
-    out_path = pathlib.Path(RESOURCES_FOLDER, "v1", "named_locations.json")
+    out_path = Path(RESOURCES_FOLDER, "v1", "named_locations.json")
     sat.named_location_df().to_json(
         out_path,
         index=False,
@@ -39,7 +39,7 @@ def build_version_one(description=None):
     vi.manifest.append(IncludedFile(str(out_path.relative_to(RESOURCES_FOLDER))))
 
     # SAT gridded
-    out_path = pathlib.Path(RESOURCES_FOLDER, "v1", "grid_locations.json")
+    out_path = Path(RESOURCES_FOLDER, "v1", "grid_locations.json")
     sat.grid_location_df().to_json(
         out_path,
         index=False,
@@ -56,10 +56,10 @@ def build_version_one(description=None):
     vi.manifest.append(IncludedFile(str(out_path.relative_to(RESOURCES_FOLDER))))
 
     # D&M
-    in_path = pathlib.Path(RESOURCES_FOLDER, "input", "v1", "D_and_M_with_floor.csv")
+    in_path = Path(RESOURCES_FOLDER, "pipeline", "v1", "D_and_M_with_floor.csv")
     dandm = DistMagTable(in_path)
 
-    out_path = pathlib.Path(RESOURCES_FOLDER, "v1", "d_and_m.json")
+    out_path = Path(RESOURCES_FOLDER, "v1", "d_and_m.json")
     dandm.flatten().to_json(
         out_path,
         index=True,
@@ -79,7 +79,7 @@ def build_version_one(description=None):
         "major_faults.geojson",
         "urban_area_polygons.geojson",
     ]:
-        in_path = pathlib.Path(RESOURCES_FOLDER, "v1", infile)
+        in_path = Path(RESOURCES_FOLDER, "v1", infile)
         vi.manifest.append(IncludedFile(str(in_path.relative_to(RESOURCES_FOLDER))))
 
     return vi

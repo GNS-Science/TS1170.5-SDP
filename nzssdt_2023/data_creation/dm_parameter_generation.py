@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     import geopandas.typing as gpdt
     import pandas.typing as pdt
 
-MODULE_FOLDER = Path(os.path.realpath(__file__)).parent
+from nzssdt_2023.config import RESOURCES_FOLDER
 
 
 def calc_distance_to_faults(
@@ -125,7 +125,7 @@ def extract_m_values(
          M_p90 : 90th %ile magnitudes for Auckland and APoEs
     """
 
-    folder = Path(MODULE_FOLDER, "input_data")
+    folder = Path(RESOURCES_FOLDER, "pipeline/v1/input_data")
     assert os.path.isdir(folder)
 
     raw_mean_named = pd.read_csv(Path(folder, "SRWG214_mean_mag.csv"))
@@ -139,7 +139,7 @@ def extract_m_values(
     return M_mean, M_p90
 
 
-def compile_D_and_M_values(site_list: List[str], APoEs: List[str]) -> "pdt.DataFrame":
+def create_D_and_M_table(site_list: List[str], APoEs: List[str]):
     """Compiles the D and M parameter tables
 
     Args:
@@ -150,7 +150,7 @@ def compile_D_and_M_values(site_list: List[str], APoEs: List[str]) -> "pdt.DataF
         D_and_M: dataframe of the d and m tables
     """
 
-    folder = Path(MODULE_FOLDER, "input_data")
+    folder = Path(RESOURCES_FOLDER, "pipeline", "v1", "input_data")
     assert os.path.isdir(folder)
 
     D_values = pd.read_json(Path(folder, "D_values.json"))
@@ -170,24 +170,5 @@ def compile_D_and_M_values(site_list: List[str], APoEs: List[str]) -> "pdt.DataF
             M_mean.loc[site_list, APoE], M_p90.loc["Auckland", APoE]
         )
 
-    return D_and_M
-
-
-def create_D_and_M_table(site_list: List[str], APoEs: List[str], filename: str):
-    """Create and save the D and M parameter table
-
-    Args:
-        site_list:
-        APoEs:
-        filename:
-
-    """
-
-    D_and_M = compile_D_and_M_values(site_list, APoEs)
-
     D_and_M = replace_relevant_locations(D_and_M)
-
-    filename = filename + ".csv"
-    D_and_M.to_csv(filename)
-
-    print(f"{filename} saved to \n\t{os.getcwd()}")
+    return D_and_M

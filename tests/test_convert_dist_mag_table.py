@@ -2,14 +2,14 @@ import pathlib
 
 import pytest
 
-from nzssdt_2023 import RESOURCES_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.convert import DistMagTable
 
 
 @pytest.fixture(scope="module")
 def dm_table():
     filename = "D_and_M_with_floor.csv"
-    csv_path = pathlib.Path(RESOURCES_FOLDER, "input", "v1", filename)
+    csv_path = pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1", filename)
     return DistMagTable(csv_path)
 
 

@@ -7,9 +7,9 @@ TODO:
 """
 
 import csv
-import pathlib
 from decimal import Decimal
 from itertools import islice
+from pathlib import Path
 from typing import Iterator, List, Tuple, Union
 
 import pandas as pd
@@ -28,7 +28,7 @@ from borb.pdf import (
 )
 from borb.pdf.page.page_size import PageSize
 
-from nzssdt_2023 import RESOURCES_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.convert import DistMagTable, SatTable
 
 MAX_PAGE_ROWS = 30
@@ -241,17 +241,17 @@ def chunks(items, chunk_size):
 
 if __name__ == "__main__":
 
-    OUTPUT_FOLDER = pathlib.Path(RESOURCES_FOLDER.parent, "reports", "v1")
+    OUTPUT_FOLDER = Path(RESOURCES_FOLDER).parent / "reports" / "v1"
 
     # TODO shift this into the CLI
     def sat_table():
         filename = "SaT-variables_v5_corrected-locations.pkl"
-        df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, "input", "v1", filename))
+        df = pd.read_pickle(Path(RESOURCES_FOLDER, "input", "v1", filename))
         return SatTable(df)
 
     def dm_table():
         filename = "D_and_M_with_floor.csv"
-        csv_path = pathlib.Path(RESOURCES_FOLDER, "input", "v1", filename)
+        csv_path = Path(RESOURCES_FOLDER, "input", "v1", filename)
         return DistMagTable(csv_path)
 
     sat = sat_table()
@@ -275,7 +275,7 @@ if __name__ == "__main__":
             table_rows = list(generate_table_rows(location_df, d_and_m_df, apoe[1]))
 
             ### CSV
-            with open(pathlib.Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
+            with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
                 writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
                 header = ["location", "M", "D"]
                 for sss in SOIL_CLASSES:
@@ -296,7 +296,5 @@ if __name__ == "__main__":
                     )
                 )
 
-            with open(
-                pathlib.Path(OUTPUT_FOLDER, filename + ".pdf"), "wb"
-            ) as out_file_handle:
+            with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
                 PDF.dumps(out_file_handle, report)

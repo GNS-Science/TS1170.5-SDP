@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from borb.pdf import Document
 
-from nzssdt_2023 import RESOURCES_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.convert import DistMagTable, SatTable
 from nzssdt_2023.publish.report import build_report_page, generate_table_rows
 
@@ -12,14 +12,14 @@ from nzssdt_2023.publish.report import build_report_page, generate_table_rows
 @pytest.fixture(scope="module")
 def sat_table():
     filename = "SaT-variables_v5_corrected-locations.pkl"
-    df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, "input", "v1", filename))
+    df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1", filename))
     return SatTable(df)
 
 
 @pytest.fixture(scope="module")
 def dm_table():
     filename = "D_and_M_with_floor.csv"
-    csv_path = pathlib.Path(RESOURCES_FOLDER, "input", "v1", filename)
+    csv_path = pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1", filename)
     return DistMagTable(csv_path)
 
 
