@@ -139,40 +139,6 @@ def extract_m_values(
     return M_mean, M_p90
 
 
-# def compile_D_and_M_values(site_list: List[str], APoEs: List[str]) -> "pdt.DataFrame":
-#     """Compiles the D and M parameter tables
-
-#     Args:
-#         site_list: list of sites of interest
-#         APoEs    : list of APoEs of interest
-
-#     Returns:
-#         D_and_M: dataframe of the d and m tables
-#     """
-
-#     folder = Path(RESOURCES_FOLDER, "pipeline", "v1", "input_data")
-#     assert os.path.isdir(folder)
-
-#     D_values = pd.read_json(Path(folder, "D_values.json"))
-#     D_sites = [site for site in list(D_values.index) if site in site_list]
-
-#     M_mean, M_p90 = extract_m_values(site_list, APoEs)
-
-#     D_and_M = pd.DataFrame(index=site_list, columns=["D"] + APoEs)
-
-#     # include D values
-#     D_and_M.loc[D_sites, "D"] = D_values.loc[D_sites, "D"]
-
-#     # include M values
-#     for APoE in APoEs:
-#         # M value is >= the 90th %ile values for Auckland
-#         D_and_M.loc[site_list, APoE] = np.maximum(
-#             M_mean.loc[site_list, APoE], M_p90.loc["Auckland", APoE]
-#         )
-
-#     return D_and_M
-
-
 def create_D_and_M_table(site_list: List[str], APoEs: List[str]):
     """Compiles the D and M parameter tables
 
@@ -205,5 +171,4 @@ def create_D_and_M_table(site_list: List[str], APoEs: List[str]):
         )
 
     D_and_M = replace_relevant_locations(D_and_M)
-
     return D_and_M
