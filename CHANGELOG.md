@@ -6,11 +6,16 @@
  - new `nzssdt_2023.data_creation` package for Annes process steps
  - new `nzssdt_2023.scripts` package for cli scripts
  - mkdocs with some intitial structure and standard NSHM doc pages.
+ - new `nzssdt_2023.config` module with ENV option for WORKING_FOLDER, used for intermediate file storage
+ - more use of logging
 
 ### Changed
  - migrated report.py into new `publish` package
  - minor typing improvents
  - renamed `nzssdt_2023\cli.py` -> `nzssdt_2023\scripts\publish_cli.py`
+ - refactor `resources\input` to `resources\pipeline`
+ - migrated various datafiles from into resources or /WORKING_FOLDER
+ - more use of pathlib
 
 ## [0.4.0] 2024-09-11
 
