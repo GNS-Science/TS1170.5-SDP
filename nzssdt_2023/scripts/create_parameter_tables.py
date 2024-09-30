@@ -11,8 +11,8 @@ pre-requisities:
 """
 
 import logging
-import pathlib
 import pickle as pkl
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -27,7 +27,7 @@ logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
 mini = True
 
-output_folder = pathlib.Path(WORKING_FOLDER)
+output_folder = Path(WORKING_FOLDER)
 
 site_list: Optional[list[str]] = None
 

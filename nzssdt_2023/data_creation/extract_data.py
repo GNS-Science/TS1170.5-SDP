@@ -2,7 +2,7 @@
 This module extracts the data and metadata in the hdf5 containing the NSHM data.
 """
 import ast
-import pathlib
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Tuple
 
 import h5py
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     import pandas.typing as pdt
 
 
-def extract_spectra(data_file: str | pathlib.Path) -> Tuple["npt.NDArray", dict]:
+def extract_spectra(data_file: str | Path) -> Tuple["npt.NDArray", dict]:
     """Extract the uniform hazard spectra from the hdf5
 
     Args:
@@ -31,7 +31,7 @@ def extract_spectra(data_file: str | pathlib.Path) -> Tuple["npt.NDArray", dict]
     return acc_spectra, imtls
 
 
-def extract_vs30s(data_file: str | pathlib.Path) -> List[int]:
+def extract_vs30s(data_file: str | Path) -> List[int]:
     """Extract the vs30 values from the hdf5
 
     Args:
@@ -47,7 +47,7 @@ def extract_vs30s(data_file: str | pathlib.Path) -> List[int]:
     return vs30_list
 
 
-def extract_quantiles(data_file: str | pathlib.Path) -> List[float]:
+def extract_quantiles(data_file: str | Path) -> List[float]:
     """Extract hazard quantiles from the hdf5
 
     Args:
@@ -63,7 +63,7 @@ def extract_quantiles(data_file: str | pathlib.Path) -> List[float]:
     return quantiles
 
 
-def extract_sites(data_file: str | pathlib.Path) -> "pdt.DataFrame":
+def extract_sites(data_file: str | Path) -> "pdt.DataFrame":
     """Extract sites from the hdf5
 
     Args:
@@ -79,7 +79,7 @@ def extract_sites(data_file: str | pathlib.Path) -> "pdt.DataFrame":
     return sites
 
 
-def extract_APoEs(data_file: str | pathlib.Path) -> Tuple[List[str], List[int]]:
+def extract_APoEs(data_file: str | Path) -> Tuple[List[str], List[int]]:
     """Extract uniform hazard spectra annual probabilities of exceedance from the hdf5
 
     Args:

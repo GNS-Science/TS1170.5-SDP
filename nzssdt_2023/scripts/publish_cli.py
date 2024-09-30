@@ -1,7 +1,7 @@
 """A simple Command Line Interface to manage the resources files."""
 
 import os
-import pathlib
+from pathlib import Path
 
 import click
 
@@ -19,7 +19,7 @@ def cli():
 @click.option(
     "--resources_path",
     "-R",
-    default=lambda: pathlib.Path(pathlib.Path(os.getcwd()).parent, "resources"),
+    default=lambda: Path(Path(os.getcwd()).parent, "resources"),
 )
 def list_versions(resources_path, verbose):
     """List the available versions of NZSSDT 2023"""

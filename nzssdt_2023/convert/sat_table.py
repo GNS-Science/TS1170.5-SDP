@@ -1,8 +1,8 @@
 #!python main.py
 """Copied from Anne Hulsey's example"""
 
-import pathlib
 from functools import lru_cache
+from pathlib import Path
 
 import pandas as pd
 
@@ -65,13 +65,13 @@ class SatTable:
 
 if __name__ == "__main__":
     filename = "SaT-variables_v5_corrected-locations.pkl"
-    df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, filename))
+    df = pd.read_pickle(Path(RESOURCES_FOLDER, filename))
 
     sat_table = SatTable(df)
     flat = sat_table.flatten()
 
     flat.to_json(
-        pathlib.Path(RESOURCES_FOLDER, "flat_table_v5.json.zip"),
+        Path(RESOURCES_FOLDER, "flat_table_v5.json.zip"),
         index=False,
         orient="table",
         indent=2,

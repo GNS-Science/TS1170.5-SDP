@@ -3,7 +3,7 @@ This module derives the PGA, Sa,s, and Tc parameters from the NSHM hazard curves
 """
 import ast
 import logging
-import pathlib
+from pathlib import Path
 from typing import TYPE_CHECKING, List, NamedTuple, Optional, Tuple
 
 import h5py
@@ -86,7 +86,7 @@ def acc_spectra_to_vel(acc_spectra: "npt.NDArray", imtls: dict) -> "npt.NDArray"
 
 
 def calculate_parameter_arrays(
-    data_file: str | pathlib.Path,
+    data_file: str | Path,
 ) -> Tuple["npt.NDArray", "npt.NDArray", "npt.NDArray", "npt.NDArray"]:
     """Calculate PGA, Sa,s, and Tc values for uniform hazard spectra in hdf5
 
@@ -119,7 +119,7 @@ def calculate_parameter_arrays(
     return PGA, Sas, PSV, Tc
 
 
-def create_mean_sa_table(data_file: pathlib.Path) -> "pdt.DataFrame":
+def create_mean_sa_table(data_file: Path) -> "pdt.DataFrame":
     """create preliminary table of spectral parameters, considering mean hazard spectra
 
     Args:
@@ -167,7 +167,7 @@ def create_mean_sa_table(data_file: pathlib.Path) -> "pdt.DataFrame":
 
 
 def update_lower_bound_sa(
-    mean_df: "pdt.DataFrame", data_file: str | pathlib.Path
+    mean_df: "pdt.DataFrame", data_file: str | Path
 ) -> "pdt.DataFrame":
     """amend the table of mean spectral parameters to include the lower bound hazard
 
@@ -365,7 +365,7 @@ def replace_relevant_locations(
 
 
 def save_table_to_pkl(
-    df: "pdt.DataFrame", sa_name: pathlib.Path, save_floor_flags: bool = False
+    df: "pdt.DataFrame", sa_name: Path, save_floor_flags: bool = False
 ):
     """Save the sa parameter table dataframe to a pickle file
 
@@ -399,8 +399,8 @@ def save_table_to_pkl(
 
 
 def create_sa_pkl(
-    hf_name: pathlib.Path,
-    sa_name: pathlib.Path,
+    hf_name: Path,
+    sa_name: Path,
     hazard_id: Optional[str] = None,
     site_list: Optional[list[str]] = None,
     save_floor_flags: bool = False,

@@ -2,8 +2,8 @@
 """Define data structure and input output utilities for the resource versions."""
 import dataclasses
 import json
-import pathlib
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Iterable, List, Optional, Union
 
 import dacite
@@ -46,7 +46,7 @@ class VersionInfo:
 
 def read_version_list():
     """returns the current version list."""
-    vl = pathlib.Path(RESOURCES_FOLDER, VERSION_LIST_FILENAME)
+    vl = Path(RESOURCES_FOLDER, VERSION_LIST_FILENAME)
     if not vl.exists():
         return []
     version_list = json.load(open(vl))
@@ -55,6 +55,6 @@ def read_version_list():
 
 def write_version_list(new_list: Iterable[VersionInfo]):
     """creates/updates the version list."""
-    vl = pathlib.Path(RESOURCES_FOLDER, VERSION_LIST_FILENAME)
+    vl = Path(RESOURCES_FOLDER, VERSION_LIST_FILENAME)
     with open(vl, "w") as fout:
         json.dump([dataclasses.asdict(vi) for vi in new_list], fout, indent=2)

@@ -1,14 +1,14 @@
-import pathlib
 from functools import lru_cache
+from pathlib import Path
 from typing import Union
 
 import pandas as pd
 
 
 class DistMagTable:
-    def __init__(self, csv_path: Union[str, pathlib.Path]):
+    def __init__(self, csv_path: Union[str, Path]):
         self.csv_path = csv_path
-        if not pathlib.Path(csv_path).exists():
+        if not Path(csv_path).exists():
             raise ValueError(f"Invalid csv path: {csv_path}")
         self.raw_table = pd.read_csv(self.csv_path)
 

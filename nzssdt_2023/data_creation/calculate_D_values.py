@@ -8,7 +8,7 @@ Data files are now found in the `{RESOURCES}/pipeline/v1/input_data` folder.
 """
 
 
-import pathlib
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import geopandas as gpd
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 def build_d_value_dataframe() -> "pdt.DataFrame":
-    in_path = pathlib.Path(RESOURCES_FOLDER) / "pipeline/v1/input_data"
+    in_path = Path(RESOURCES_FOLDER) / "pipeline/v1/input_data"
 
     filename = in_path / "CFM_5mmyr" / "NZ_CFM_v1_0_SR_Pref_5mmyr+.shp"
     faults = gpd.read_file(filename)
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     d_values_df = build_d_value_dataframe()
     print(d_values_df)
-    out_path = pathlib.Path(WORKING_FOLDER)
+    out_path = Path(WORKING_FOLDER)
     assert (
         out_path.exists() and out_path.is_dir()
     ), f"Path {out_path} was not found or is not a folder."
