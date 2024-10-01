@@ -2,7 +2,10 @@
 This module compiles the magnitude and distances values for the parameter table.
 
 TODO:
- - optimise data structure to improve on mean-mag csv files
+    - `extract_m_values` uses/builds entire mean mag tables independent of what locations and PoEs
+        are reqeusted in function args
+    - could we consolodate the mean mag csv files into one cache? Any locations/poes not availalbe can be looked
+        up and added to the cache
 """
 import os
 from pathlib import Path
@@ -15,7 +18,7 @@ from toshi_hazard_store.model import AggregationEnum
 from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_locations
 from nzssdt_2023.mean_magnitudes import get_mean_mag_df
 
-from .constants import AKL_LOCATIONS, GRID_LOCATIONS, POES, SRWG_LOCATIONS
+from .constants import AKL_LOCATIONS, GRID_LOCATIONS, POES, SRWG_LOCATIONS, SRWG_214_MEAN_MAG_FILEPATH, AKL_MEAN_MAG_P90_FILEPATH, GRID_MEAN_MAG_FILEPATH
 
 if TYPE_CHECKING:
     import geopandas.typing as gpdt
@@ -134,45 +137,33 @@ def extract_m_values(
     If the mean mag csv files are available in RESOURCES_FOLDER/pipeline/v1/input_data they will be used unless
     recalulate is True. If they are not found, they will be calculated by get_mean_mag_df
 
-    TODO:
-        - site_list and APoEs are not used, instead those parameters are hard-coded for the queiry and only
-        used to filter the resulting DataFrames.
-        - could we consolodate the df csv files into one cache? Any locations/poes not availalbe can be looked
-        up and added to the cache
     """
 
-    folder = Path(RESOURCES_FOLDER, "pipeline/v1/input_data")
-    assert os.path.isdir(folder)
-
-    srwg_214_filepath = Path(folder, "SRWG214_mean_mag.csv")
-    grid_filepath = Path(folder, "grid_mean_mag.csv")
-    akl_filepath = Path(folder, "AKL_90pct_mean_mag.csv")
-
-    if not srwg_214_filepath.exists() or recalculate:
+    if not SRWG_214_MEAN_MAG_FILEPATH.exists() or recalculate:
         m_mean_named = get_mean_mag_df(
             DISAGG_HAZARD_ID, SRWG_LOCATIONS, POES, AggregationEnum.MEAN
         )
-        m_mean_named.to_csv(srwg_214_filepath)
+        m_mean_named.to_csv(SRWG_214_MEAN_MAG_FILEPATH)
     else:
-        m_mean_named = pd.read_csv(srwg_214_filepath, index_col=["site_name"])
+        m_mean_named = pd.read_csv(SRWG_214_MEAN_MAG_FILEPATH, index_col=["site_name"])
 
-    if not grid_filepath.exists() or recalculate:
+    if not GRID_MEAN_MAG_FILEPATH.exists() or recalculate:
         m_mean_grid = get_mean_mag_df(
             DISAGG_HAZARD_ID, GRID_LOCATIONS, POES, AggregationEnum.MEAN
         )
-        m_mean_grid.to_csv(grid_filepath)
+        m_mean_grid.to_csv(GRID_MEAN_MAG_FILEPATH)
     else:
-        m_mean_grid = pd.read_csv(grid_filepath, index_col=["site_name"])
+        m_mean_grid = pd.read_csv(GRID_MEAN_MAG_FILEPATH, index_col=["site_name"])
 
     m_mean = pd.concat([m_mean_named, m_mean_grid])
 
-    if not akl_filepath.exists() or recalculate:
+    if not AKL_MEAN_MAG_P90_FILEPATH.exists() or recalculate:
         m_p90_akl = get_mean_mag_df(
             DISAGG_HAZARD_ID, AKL_LOCATIONS, POES, AggregationEnum._90
         )
-        m_p90_akl.to_csv(akl_filepath)
+        m_p90_akl.to_csv(AKL_MEAN_MAG_P90_FILEPATH)
     else:
-        m_p90_akl = pd.read_csv(akl_filepath, index_col=["site_name"])
+        m_p90_akl = pd.read_csv(AKL_MEAN_MAG_P90_FILEPATH, index_col=["site_name"])
 
     m_mean = m_mean.loc[site_list, APoEs]
     m_p90_akl = m_p90_akl.loc[["Auckland"], APoEs]

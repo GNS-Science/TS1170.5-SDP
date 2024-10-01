@@ -3,13 +3,14 @@ This module contains constants used for mean mag table generation. The intermeed
 and probabilies, regardless of what is requested by the call to extract_m_values.
 """
 
-
+from pathlib import Path
 from nzshm_common.grids import load_grid
 from nzshm_common.location import CodedLocation
 from nzshm_common.location.location import LOCATION_LISTS
 from toshi_hazard_store.model import ProbabilityEnum
 
 from nzssdt_2023.mean_magnitudes import lat_lon_from_id
+from nzssdt_2023.config import WORKING_FOLDER
 
 location_list = "SRWG214"
 location_grid = "NZ_0_1_NB_1_1"
@@ -30,3 +31,8 @@ POES = [
     ProbabilityEnum._63_PCT_IN_50YRS,
     ProbabilityEnum._86_PCT_IN_50YRS,
 ]
+
+
+SRWG_214_MEAN_MAG_FILEPATH = Path(WORKING_FOLDER, "SRWG214_mean_mag.csv")
+GRID_MEAN_MAG_FILEPATH = Path(WORKING_FOLDER, "grid_mean_mag.csv")
+AKL_MEAN_MAG_P90_FILEPATH = Path(WORKING_FOLDER, "AKL_90pct_mean_mag.csv")
