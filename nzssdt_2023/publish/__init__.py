@@ -1,3 +1,3 @@
 """
-Package for the final publication phase for a new version.
+Package for the final PDF publication phase for a new version.
 """

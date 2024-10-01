@@ -21,8 +21,12 @@ nav:
     - Testing: testing.md
     - API:
       - nzssdt: api/index.md
+      - nzssdt.build: api/build.md
+      - nzssdt.config: api/config.md
+      - nzssdt.versioning: api/versioning.md
       - nzssdt.data_creation: api/data_creation.md
       - nzssdt.mean_magnitudes: api/mean_magnitudes.md
+      - nzssdt.convert: api/convert.md
       - nzssdt.publish: api/publish.md
   - Changelog: changelog.md
 theme:

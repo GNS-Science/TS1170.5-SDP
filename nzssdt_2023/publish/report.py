@@ -1,8 +1,16 @@
 """
+Build PDF and equivalent CSV table structures for a version.
+
+This module uses the `borb` library to produce the PDF document.
+
 TODO:
  - extra column Td to each soil/site class
  - table reorg. Instead of table per APOE, now we want rows per APOE per Auckland
    (see example, but don't include units!)
+ - Versioning & manifest data structures needs further work once the main characteristics of V2 are defined.
+
+methods:
+ build_report_page
 
 """
 
