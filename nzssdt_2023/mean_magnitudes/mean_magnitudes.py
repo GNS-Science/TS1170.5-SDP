@@ -21,7 +21,8 @@ def lat_lon_from_id(id):
 
 
 coded_locations_with_id = [
-    CodedLocation(*lat_lon_from_id(_id), 0.001) for _id in LOCATION_LISTS["ALL"]["locations"]
+    CodedLocation(*lat_lon_from_id(_id), 0.001)
+    for _id in LOCATION_LISTS["ALL"]["locations"]
 ]
 location_codes_with_id = [loc.code for loc in coded_locations_with_id]
 
@@ -168,7 +169,7 @@ def get_mean_mag_df(
     locations: List[CodedLocation],
     poes: model.ProbabilityEnum,
     hazard_agg: model.AggregationEnum,
-    legacy: bool=True,
+    legacy: bool = True,
 ) -> pd.DataFrame:
     """
     Get the mean mantitude table for the requested locations and annual probabilities.
@@ -225,7 +226,7 @@ def get_mean_mag_df(
         else:
             df.loc[site_name, rp_str] = np.round(disagg["mag"], 1)
 
-    df.index.name = 'site_name'
+    df.index.name = "site_name"
     return df
 
 

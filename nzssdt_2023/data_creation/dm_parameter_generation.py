@@ -10,20 +10,18 @@ from typing import TYPE_CHECKING, List, Tuple
 
 import numpy as np
 import pandas as pd
-
 from toshi_hazard_store.model import AggregationEnum
-
-from .constants import SRWG_LOCATIONS, GRID_LOCATIONS, AKL_LOCATIONS, POES
-
 
 from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_locations
 from nzssdt_2023.mean_magnitudes import get_mean_mag_df
+
+from .constants import AKL_LOCATIONS, GRID_LOCATIONS, POES, SRWG_LOCATIONS
 
 if TYPE_CHECKING:
     import geopandas.typing as gpdt
     import pandas.typing as pdt
 
-from nzssdt_2023.config import RESOURCES_FOLDER, DISAGG_HAZARD_ID
+from nzssdt_2023.config import DISAGG_HAZARD_ID, RESOURCES_FOLDER
 
 
 def calc_distance_to_faults(
@@ -120,7 +118,7 @@ def raw_mag_to_df(raw_df: "pdt.DataFrame", site_list: List[str], APoEs: List[str
 def extract_m_values(
     site_list: List[str],
     APoEs: List[str],
-    recalculate: bool=False,
+    recalculate: bool = False,
 ) -> Tuple["pdt.DataFrame", "pdt.DataFrame"]:
     """Extracts the magnitudes from the input .csv folder into a manageable dataframe
 
@@ -132,13 +130,13 @@ def extract_m_values(
     Returns:
          M_mean: mean magnitudes for all sites and APoEs
          M_p90 : 90th %ile magnitudes for Auckland and APoEs
-        
+
     If the mean mag csv files are available in RESOURCES_FOLDER/pipeline/v1/input_data they will be used unless
     recalulate is True. If they are not found, they will be calculated by get_mean_mag_df
 
     TODO:
         - site_list and APoEs are not used, instead those parameters are hard-coded for the queiry and only
-        used to filter the resulting DataFrames. 
+        used to filter the resulting DataFrames.
         - could we consolodate the df csv files into one cache? Any locations/poes not availalbe can be looked
         up and added to the cache
     """
@@ -150,24 +148,30 @@ def extract_m_values(
     grid_filepath = Path(folder, "grid_mean_mag.csv")
     akl_filepath = Path(folder, "AKL_90pct_mean_mag.csv")
 
-    if not(not srwg_214_filepath.exists() or recalculate):
-        m_mean_named = pd.read_csv(srwg_214_filepath, index_col=['site_name'])
+    if not (not srwg_214_filepath.exists() or recalculate):
+        m_mean_named = pd.read_csv(srwg_214_filepath, index_col=["site_name"])
     else:
-        m_mean_named = get_mean_mag_df(DISAGG_HAZARD_ID, SRWG_LOCATIONS, POES, AggregationEnum.MEAN)
+        m_mean_named = get_mean_mag_df(
+            DISAGG_HAZARD_ID, SRWG_LOCATIONS, POES, AggregationEnum.MEAN
+        )
         m_mean_named.to_csv(srwg_214_filepath)
 
-    if not(not grid_filepath.exists() or recalculate):
-        m_mean_grid = pd.read_csv(grid_filepath, index_col=['site_name'])
+    if not (not grid_filepath.exists() or recalculate):
+        m_mean_grid = pd.read_csv(grid_filepath, index_col=["site_name"])
     else:
-        m_mean_grid = get_mean_mag_df(DISAGG_HAZARD_ID, GRID_LOCATIONS, POES, AggregationEnum.MEAN)
+        m_mean_grid = get_mean_mag_df(
+            DISAGG_HAZARD_ID, GRID_LOCATIONS, POES, AggregationEnum.MEAN
+        )
         m_mean_grid.to_csv(grid_filepath)
 
     m_mean = pd.concat([m_mean_named, m_mean_grid])
 
-    if not(not akl_filepath.exists() or recalculate):
-        m_p90_akl = pd.read_csv(akl_filepath, index_col=['site_name'])
+    if not (not akl_filepath.exists() or recalculate):
+        m_p90_akl = pd.read_csv(akl_filepath, index_col=["site_name"])
     else:
-        m_p90_akl = get_mean_mag_df(DISAGG_HAZARD_ID, AKL_LOCATIONS, POES, AggregationEnum._90)
+        m_p90_akl = get_mean_mag_df(
+            DISAGG_HAZARD_ID, AKL_LOCATIONS, POES, AggregationEnum._90
+        )
         m_p90_akl.to_csv(akl_filepath)
 
     m_mean = m_mean.loc[site_list, APoEs]
@@ -176,7 +180,9 @@ def extract_m_values(
     return m_mean, m_p90_akl
 
 
-def create_D_and_M_table(site_list: List[str], APoEs: List[str], recalculate: bool=False):
+def create_D_and_M_table(
+    site_list: List[str], APoEs: List[str], recalculate: bool = False
+):
     """Compiles the D and M parameter tables
 
     Args:
