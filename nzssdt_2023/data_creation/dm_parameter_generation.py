@@ -148,31 +148,31 @@ def extract_m_values(
     grid_filepath = Path(folder, "grid_mean_mag.csv")
     akl_filepath = Path(folder, "AKL_90pct_mean_mag.csv")
 
-    if not (not srwg_214_filepath.exists() or recalculate):
-        m_mean_named = pd.read_csv(srwg_214_filepath, index_col=["site_name"])
-    else:
+    if not srwg_214_filepath.exists() or recalculate:
         m_mean_named = get_mean_mag_df(
             DISAGG_HAZARD_ID, SRWG_LOCATIONS, POES, AggregationEnum.MEAN
         )
         m_mean_named.to_csv(srwg_214_filepath)
-
-    if not (not grid_filepath.exists() or recalculate):
-        m_mean_grid = pd.read_csv(grid_filepath, index_col=["site_name"])
     else:
+        m_mean_named = pd.read_csv(srwg_214_filepath, index_col=["site_name"])
+
+    if not grid_filepath.exists() or recalculate:
         m_mean_grid = get_mean_mag_df(
             DISAGG_HAZARD_ID, GRID_LOCATIONS, POES, AggregationEnum.MEAN
         )
         m_mean_grid.to_csv(grid_filepath)
+    else:
+        m_mean_grid = pd.read_csv(grid_filepath, index_col=["site_name"])
 
     m_mean = pd.concat([m_mean_named, m_mean_grid])
 
-    if not (not akl_filepath.exists() or recalculate):
-        m_p90_akl = pd.read_csv(akl_filepath, index_col=["site_name"])
-    else:
+    if not akl_filepath.exists() or recalculate:
         m_p90_akl = get_mean_mag_df(
             DISAGG_HAZARD_ID, AKL_LOCATIONS, POES, AggregationEnum._90
         )
         m_p90_akl.to_csv(akl_filepath)
+    else:
+        m_p90_akl = pd.read_csv(akl_filepath, index_col=["site_name"])
 
     m_mean = m_mean.loc[site_list, APoEs]
     m_p90_akl = m_p90_akl.loc[["Auckland"], APoEs]
