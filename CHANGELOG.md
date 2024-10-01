@@ -7,7 +7,6 @@
  - new `nzssdt_2023.scripts` package for cli scripts
  - mkdocs with some intitial structure and standard NSHM doc pages.
  - new `nzssdt_2023.config` module with ENV option for WORKING_FOLDER, used for intermediate file storage
- - more use of logging
 
 ### Changed
  - migrated report.py into new `publish` package
@@ -16,6 +15,8 @@
  - refactor `resources\input` to `resources\pipeline`
  - migrated various datafiles from into resources or /WORKING_FOLDER
  - more use of pathlib
+ - more use of logging
+ - better docstrings for `convert`, `publish`, `build` & `versioning`
 
 ## [0.4.0] 2024-09-11
 

@@ -1,4 +1,15 @@
+"""
+The build module builds a final version.
+
+TODO:
+ - when `convert` and `versioning` packages are refactored, make this build more than just one version.
+
+
+Methods:
+    build_version_one: write out the outputs and record everything in new VersionInfo
+"""
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 
@@ -7,8 +18,12 @@ from nzssdt_2023.convert import DistMagTable, SatTable
 from nzssdt_2023.versioning import ConvertedFile, IncludedFile, VersionInfo
 
 
-def build_version_one(description=None):
-    # Write out the outputs and record everything in new VersionInfo
+def build_version_one(description: Optional[str] = None) -> VersionInfo:
+    """Write out the outputs and record everything in new VersionInfo
+
+    Args:
+        description: the description of the version.
+    """
 
     vi = VersionInfo(
         version_number=1, nzshm_model_version="NSHM_v1.0.4", description=description

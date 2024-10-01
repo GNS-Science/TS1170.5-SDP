@@ -20,13 +20,46 @@ from nzssdt_2023.data_creation.extract_data import (
     extract_vs30s,
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
-from nzssdt_2023.data_creation.query_NSHM import agg_list, imt_list, vs30_list
+
+# from nzssdt_2023.data_creation.query_NSHM import agg_list, imt_list, vs30_list
 
 log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import numpy.typing as npt
     import pandas.typing as pdt
+
+agg_list = ["mean", "0.9"]
+vs30_list = [150, 175, 225, 250, 275, 375, 400, 525, 750]
+imt_list = [
+    "PGA",
+    "SA(0.1)",
+    "SA(0.15)",
+    "SA(0.2)",
+    "SA(0.25)",
+    "SA(0.3)",
+    "SA(0.35)",
+    "SA(0.4)",
+    "SA(0.5)",
+    "SA(0.6)",
+    "SA(0.7)",
+    "SA(0.8)",
+    "SA(0.9)",
+    "SA(1.0)",
+    "SA(1.25)",
+    "SA(1.5)",
+    "SA(1.75)",
+    "SA(2.0)",
+    "SA(2.5)",
+    "SA(3.0)",
+    "SA(3.5)",
+    "SA(4.0)",
+    "SA(4.5)",
+    "SA(5.0)",
+    "SA(6.0)",
+    "SA(7.5)",
+    "SA(10.0)",
+]
 
 
 class SiteClass(NamedTuple):
@@ -401,7 +434,7 @@ def save_table_to_pkl(
 def create_sa_pkl(
     hf_name: Path,
     sa_name: Path,
-    hazard_id: Optional[str] = None,
+    hazard_id: str = "NSHM_v1.0.4",
     site_list: Optional[list[str]] = None,
     save_floor_flags: bool = False,
 ):
@@ -418,7 +451,6 @@ def create_sa_pkl(
         * add option to pass alternate return periods to to_hdf5.add_uniform_hazard_spectra
 
     """
-    hazard_id = hazard_id or q_haz.hazard_id
 
     if site_list is None:
         sites = pd.concat(

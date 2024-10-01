@@ -1,5 +1,5 @@
 """
-Some developer oriented docs about this module.
+helper functions for producing an HDF5 file for the NZSSDT tables
 """
 import os
 import re

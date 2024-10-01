@@ -1,10 +1,12 @@
 """
-This module calcluates d (distances) values fomr polygons to fauls using faults defined in a CFM shapefile
+This module calculates D (distance) values between polygons and faults
 
+Required data:
+ - faults defined in a CFM shapefile.
+ - polygons defined in geojson fle
 
-NB this was originally in input_data folder alongside the data files.
-
-Data files are now found in the `{RESOURCES}/pipeline/v1/input_data` folder.
+NB these was originally in input_data folder alongside the data files and are now
+found in the `{RESOURCES}/pipeline/v1/input_data` folder.
 """
 
 
