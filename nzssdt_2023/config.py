@@ -13,6 +13,3 @@ WORKING_FOLDER = os.getenv("WORKING_FOLDER", "/tmp")
 """A standardised directory path for disposable working files."""
 
 DISAGG_HAZARD_ID = "NSHM_v1.0.4_mag"
-LOCATION_LIST = "SRWG214"
-LOCATION_GRID = "NZ_0_1_NB_1_1"
-AKL_LOCATION_ID = "srg_29"

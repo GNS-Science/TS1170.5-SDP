@@ -11,20 +11,19 @@ from typing import TYPE_CHECKING, List, Tuple
 import numpy as np
 import pandas as pd
 
-from nzshm_common.location import CodedLocation
-from nzshm_common.location.location import LOCATION_LISTS
-from nzshm_common.grids import load_grid
-from toshi_hazard_store.model import ProbabilityEnum, AggregationEnum
+from toshi_hazard_store.model import AggregationEnum
+
+from .constants import SRWG_LOCATIONS, GRID_LOCATIONS, AKL_LOCATIONS, POES
 
 
 from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_locations
-from nzssdt_2023.mean_magnitudes import get_mean_mag_df, lat_lon_from_id
+from nzssdt_2023.mean_magnitudes import get_mean_mag_df
 
 if TYPE_CHECKING:
     import geopandas.typing as gpdt
     import pandas.typing as pdt
 
-from nzssdt_2023.config import RESOURCES_FOLDER, DISAGG_HAZARD_ID, LOCATION_LIST, LOCATION_GRID, AKL_LOCATION_ID
+from nzssdt_2023.config import RESOURCES_FOLDER, DISAGG_HAZARD_ID
 
 
 def calc_distance_to_faults(
@@ -136,20 +135,13 @@ def extract_m_values(
         
     If the mean mag csv files are available in RESOURCES_FOLDER/pipeline/v1/input_data they will be used unless
     recalulate is True. If they are not found, they will be calculated by get_mean_mag_df
-    """
 
-    srwg_locations = [CodedLocation(*lat_lon_from_id(_id), 0.001) for _id in LOCATION_LISTS[LOCATION_LIST]["locations"]]
-    grid_locations = [CodedLocation(*loc, 0.001) for loc in load_grid(LOCATION_GRID)]
-    akl_locations = [CodedLocation(*lat_lon_from_id(AKL_LOCATION_ID), 0.001)]
-    poes = [
-        ProbabilityEnum._2_PCT_IN_50YRS,
-        ProbabilityEnum._5_PCT_IN_50YRS,
-        ProbabilityEnum._10_PCT_IN_50YRS,
-        ProbabilityEnum._18_PCT_IN_50YRS,
-        ProbabilityEnum._39_PCT_IN_50YRS,
-        ProbabilityEnum._63_PCT_IN_50YRS,
-        ProbabilityEnum._86_PCT_IN_50YRS,
-    ]
+    TODO:
+        - site_list and APoEs are not used, instead those parameters are hard-coded for the queiry and only
+        used to filter the resulting DataFrames. 
+        - could we consolodate the df csv files into one cache? Any locations/poes not availalbe can be looked
+        up and added to the cache
+    """
 
     folder = Path(RESOURCES_FOLDER, "pipeline/v1/input_data")
     assert os.path.isdir(folder)
@@ -159,24 +151,27 @@ def extract_m_values(
     akl_filepath = Path(folder, "AKL_90pct_mean_mag.csv")
 
     if not(not srwg_214_filepath.exists() or recalculate):
-        m_mean_named = pd.read_csv(srwg_214_filepath)
+        m_mean_named = pd.read_csv(srwg_214_filepath, index_col=['site_name'])
     else:
-        m_mean_named = get_mean_mag_df(DISAGG_HAZARD_ID, srwg_locations, poes, AggregationEnum.MEAN)
+        m_mean_named = get_mean_mag_df(DISAGG_HAZARD_ID, SRWG_LOCATIONS, POES, AggregationEnum.MEAN)
         m_mean_named.to_csv(srwg_214_filepath)
 
     if not(not grid_filepath.exists() or recalculate):
-        m_mean_grid = pd.read_csv(grid_filepath)
+        m_mean_grid = pd.read_csv(grid_filepath, index_col=['site_name'])
     else:
-        m_mean_grid = get_mean_mag_df(DISAGG_HAZARD_ID, grid_locations, poes, AggregationEnum.MEAN)
+        m_mean_grid = get_mean_mag_df(DISAGG_HAZARD_ID, GRID_LOCATIONS, POES, AggregationEnum.MEAN)
         m_mean_grid.to_csv(grid_filepath)
 
     m_mean = pd.concat([m_mean_named, m_mean_grid])
 
     if not(not akl_filepath.exists() or recalculate):
-        m_p90_akl = pd.read_csv(akl_filepath)
+        m_p90_akl = pd.read_csv(akl_filepath, index_col=['site_name'])
     else:
-        m_p90_akl = get_mean_mag_df(DISAGG_HAZARD_ID, akl_locations, poes, AggregationEnum._90)
+        m_p90_akl = get_mean_mag_df(DISAGG_HAZARD_ID, AKL_LOCATIONS, POES, AggregationEnum._90)
         m_p90_akl.to_csv(akl_filepath)
+
+    m_mean = m_mean.loc[site_list, APoEs]
+    m_p90_akl = m_p90_akl.loc[["Auckland"], APoEs]
 
     return m_mean, m_p90_akl
 

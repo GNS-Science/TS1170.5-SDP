@@ -225,6 +225,7 @@ def get_mean_mag_df(
         else:
             df.loc[site_name, rp_str] = np.round(disagg["mag"], 1)
 
+    df.index.name = 'site_name'
     return df
 
 
