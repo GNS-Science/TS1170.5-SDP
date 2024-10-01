@@ -4,13 +4,14 @@ and probabilies, regardless of what is requested by the call to extract_m_values
 """
 
 from pathlib import Path
+
 from nzshm_common.grids import load_grid
 from nzshm_common.location import CodedLocation
 from nzshm_common.location.location import LOCATION_LISTS
 from toshi_hazard_store.model import ProbabilityEnum
 
-from nzssdt_2023.mean_magnitudes import lat_lon_from_id
 from nzssdt_2023.config import WORKING_FOLDER
+from nzssdt_2023.data_creation.mean_magnitudes import lat_lon_from_id
 
 location_list = "SRWG214"
 location_grid = "NZ_0_1_NB_1_1"

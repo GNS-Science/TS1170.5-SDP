@@ -1,5 +1,7 @@
-import csv
-import warnings
+"""
+This module contains functions for extracting mean magnitudes from disaggregations and packaging into DataFrame objects.
+"""
+
 from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable, List
 
 import numpy as np
@@ -187,10 +189,12 @@ def get_mean_mag_df(
     The legacy calculation is necessary to match the origional mean magnitude dataframe becuase the orignal
     csv file had magnitudes rounded to 2 decimal places. When the final ouput is rounded to one decimal
     place, this results in rounding errors. For example:
+    ```python
     >>> round(5.948071422587211, 1)
     5.9
     >>> round(round(5.948071422587211, 2), 1)
     6.0
+    ```
 
     NB: "APoE in the column name is a misnomer as they are approximate return frequencies not probabilities.
     Magnitudes are rounded to the nearest decimal. The rounding error introduced in the origional workflow
@@ -199,12 +203,14 @@ def get_mean_mag_df(
 
     The format of the output DataFrame is:
 
+    ```
                     APoE: 1/25 APoE: 1/50 APoE: 1/100 APoE: 1/250 APoE: 1/500 APoE: 1/1000 APoE: 1/2500
     Kaitaia             5.7        5.8         5.8         5.9         6.0          6.0          6.1
     Kerikeri            5.7        5.8         5.9         5.9         6.0          6.0          6.1
     ...                 ...        ...         ...         ...         ...          ...          ...
     Bluff               6.7        6.8         6.9         7.0         7.0          7.1          7.1
     Oban                6.7        6.8         6.9         7.0         7.1          7.2          7.3
+    ```
     """
 
     def get_rp_str(rp: int):
@@ -228,43 +234,6 @@ def get_mean_mag_df(
 
     df.index.name = "site_name"
     return df
-
-
-def write_mean_mag_csv_file(
-    hazard_id, locations, vs30s, imts, poes, hazard_agg, filepath
-):
-    warnings.warn("Please use get_mean_mag_df instead", DeprecationWarning)
-
-    header = [
-        "site code",
-        "site name",
-        "latitude",
-        "longitude",
-        "vs30",
-        "poe (% in 50 years)",
-        "imt",
-        "imtl (g)",
-        "mean magnitude",
-    ]
-    with open(filepath, "w") as meanmag_file:
-        writer = csv.writer(meanmag_file)
-        writer.writerow(header)
-        for disagg in get_mean_mags(
-            hazard_id, locations, vs30s, imts, poes, hazard_agg
-        ):
-            writer.writerow(
-                [
-                    disagg["location_id"],
-                    disagg["name"],
-                    disagg["lat"],
-                    disagg["lon"],
-                    disagg["vs30"],
-                    disagg["poe"],
-                    disagg["imt"],
-                    disagg["imtl"],
-                    disagg["mag"],
-                ]
-            )
 
 
 if __name__ == "__main__":

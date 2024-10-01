@@ -25,7 +25,7 @@ from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
-mini = False
+mini = True
 
 output_folder = Path(WORKING_FOLDER)
 
@@ -43,7 +43,7 @@ else:
     dm_path = output_folder / "recreated_D-M-tables.csv"
 
 # generate Sa Parameter Tables (writes pkl and hdf5 files)
-# sa_gen.create_sa_pkl(hf_path, sa_path, site_list=site_list)
+sa_gen.create_sa_pkl(hf_path, sa_path, site_list=site_list)
 
 # extract metadata from Sa Parameter Tables
 with open(sa_path, "rb") as file:

@@ -8,10 +8,7 @@ from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store.model import AggregationEnum, ProbabilityEnum
 
 from nzssdt_2023.data_creation.dm_parameter_generation import raw_mag_to_df
-from nzssdt_2023.mean_magnitudes.mean_magnitudes import (
-    get_mean_mag_df,
-    poe_to_rp_rounded,
-)
+from nzssdt_2023.data_creation.mean_magnitudes import get_mean_mag_df, poe_to_rp_rounded
 
 
 def lat_lon(id):

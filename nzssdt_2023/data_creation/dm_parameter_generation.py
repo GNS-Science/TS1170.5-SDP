@@ -3,9 +3,9 @@ This module compiles the magnitude and distances values for the parameter table.
 
 TODO:
     - `extract_m_values` uses/builds entire mean mag tables independent of what locations and PoEs
-        are reqeusted in function args
-    - could we consolodate the mean mag csv files into one cache? Any locations/poes not availalbe can be looked
-        up and added to the cache
+        are requested in function args.
+    - Consolodate the mean mag csv files into one cache rather than 3 seperate files. Any locations/poes
+        not available can be looked up and added to the cache.
 """
 import os
 from pathlib import Path
@@ -15,10 +15,18 @@ import numpy as np
 import pandas as pd
 from toshi_hazard_store.model import AggregationEnum
 
+from nzssdt_2023.data_creation.mean_magnitudes import get_mean_mag_df
 from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_locations
-from nzssdt_2023.mean_magnitudes import get_mean_mag_df
 
-from .constants import AKL_LOCATIONS, GRID_LOCATIONS, POES, SRWG_LOCATIONS, SRWG_214_MEAN_MAG_FILEPATH, AKL_MEAN_MAG_P90_FILEPATH, GRID_MEAN_MAG_FILEPATH
+from .constants import (
+    AKL_LOCATIONS,
+    AKL_MEAN_MAG_P90_FILEPATH,
+    GRID_LOCATIONS,
+    GRID_MEAN_MAG_FILEPATH,
+    POES,
+    SRWG_214_MEAN_MAG_FILEPATH,
+    SRWG_LOCATIONS,
+)
 
 if TYPE_CHECKING:
     import geopandas.typing as gpdt
