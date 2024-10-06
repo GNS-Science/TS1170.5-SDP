@@ -4,7 +4,7 @@ This module compiles the magnitude and distances values for the parameter table.
 TODO:
     - `extract_m_values` uses/builds entire mean mag tables independent of what locations and PoEs
         are requested in function args.
-    - Consolodate the mean mag csv files into one cache rather than 3 seperate files. Any locations/poes
+    - Consolidate the mean mag csv files into one cache rather than 3 separate files. Any locations/poes
         not available can be looked up and added to the cache.
 """
 import os

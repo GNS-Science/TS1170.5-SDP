@@ -1,6 +1,6 @@
 """
-This module contains constants used for mean mag table generation. The intermeediate tables are generated for all sites
-and probabilies, regardless of what is requested by the call to extract_m_values.
+This module contains constants used for mean mag table generation. The intermediate tables are generated for all sites
+and probabilities, regardless of what is requested by the call to extract_m_values.
 """
 
 from pathlib import Path
