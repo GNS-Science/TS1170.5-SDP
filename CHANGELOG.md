@@ -1,13 +1,5 @@
 # Changelog
 
-## [0.6.0] TBD
-
-### Changed
- - moved `mean_magnitudes` module to `data_creation` package
- - `mean_magnitudes` functions create DataFrame objects in form expected by functions in `dm_parameter_generation`
- - mean magnitude csv files moved from RESOURES_FOLDER to WORKING_FOLDER and removed from repo
- - `extract_m_values` function will generate mean magnitude csv files if needed or requested
-
 ## [0.5.0] TBD
 
 ### Added
@@ -25,6 +17,10 @@
  - more use of pathlib
  - more use of logging
  - better docstrings for `convert`, `publish`, `build` & `versioning`
+ - moved `mean_magnitudes` module to `data_creation` package
+ - `mean_magnitudes` functions create DataFrame objects in form expected by functions in `dm_parameter_generation`
+ - mean magnitude csv files moved from RESOURCES_FOLDER to WORKING_FOLDER and removed from repo
+ - `extract_m_values` function will generate mean magnitude csv files if needed or requested
 
 ## [0.4.0] 2024-09-11
 
