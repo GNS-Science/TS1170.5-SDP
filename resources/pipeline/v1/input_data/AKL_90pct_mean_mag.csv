@@ -1,8 +1,0 @@
-site code,site name,latitude,longitude,vs30,poe (% in 50 years),imt,imtl (g),mean magnitude
-srg_29,Auckland,-36.852,174.763,275,10,PGA,1.90e-01,6.26
-srg_29,Auckland,-36.852,174.763,275,18,PGA,1.33e-01,6.23
-srg_29,Auckland,-36.852,174.763,275,2,PGA,3.90e-01,6.38
-srg_29,Auckland,-36.852,174.763,275,39,PGA,7.62e-02,6.22
-srg_29,Auckland,-36.852,174.763,275,5,PGA,2.66e-01,6.30
-srg_29,Auckland,-36.852,174.763,275,63,PGA,4.59e-02,6.22
-srg_29,Auckland,-36.852,174.763,275,86,PGA,2.61e-02,6.21
