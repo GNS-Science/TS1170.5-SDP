@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from toshi_hazard_store.model import AggregationEnum
 
-from nzssdt_2023.data_creation.mean_magnitudes import get_mean_mag_df
+from nzssdt_2023.data_creation.mean_magnitudes import get_mean_mag_df, read_mean_mag_df
 from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_locations
 
 from .constants import (
@@ -107,7 +107,7 @@ def raw_mag_to_df(raw_df: "pdt.DataFrame", site_list: List[str], APoEs: List[str
 
     rps = [int(APoE.split("/")[1]) for APoE in APoEs]
 
-    df = pd.DataFrame(index=site_list, columns=APoEs)
+    df = pd.DataFrame(index=site_list, columns=APoEs, dtype=float)
 
     for site in site_list:
         for rp in rps:
@@ -153,7 +153,7 @@ def extract_m_values(
         )
         m_mean_named.to_csv(SRWG_214_MEAN_MAG_FILEPATH)
     else:
-        m_mean_named = pd.read_csv(SRWG_214_MEAN_MAG_FILEPATH, index_col=["site_name"])
+        m_mean_named = read_mean_mag_df(SRWG_214_MEAN_MAG_FILEPATH)
 
     if not GRID_MEAN_MAG_FILEPATH.exists() or recalculate:
         m_mean_grid = get_mean_mag_df(
@@ -161,7 +161,7 @@ def extract_m_values(
         )
         m_mean_grid.to_csv(GRID_MEAN_MAG_FILEPATH)
     else:
-        m_mean_grid = pd.read_csv(GRID_MEAN_MAG_FILEPATH, index_col=["site_name"])
+        m_mean_grid = read_mean_mag_df(GRID_MEAN_MAG_FILEPATH)
 
     m_mean = pd.concat([m_mean_named, m_mean_grid])
 
@@ -171,7 +171,7 @@ def extract_m_values(
         )
         m_p90_akl.to_csv(AKL_MEAN_MAG_P90_FILEPATH)
     else:
-        m_p90_akl = pd.read_csv(AKL_MEAN_MAG_P90_FILEPATH, index_col=["site_name"])
+        m_p90_akl = read_mean_mag_df(AKL_MEAN_MAG_P90_FILEPATH)
 
     m_mean = m_mean.loc[site_list, APoEs]
     m_p90_akl = m_p90_akl.loc[["Auckland"], APoEs]

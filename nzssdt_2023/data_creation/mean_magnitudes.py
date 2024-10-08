@@ -2,8 +2,9 @@
 This module contains functions for extracting mean magnitudes from disaggregations and packaging into DataFrame objects.
 """
 
-from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable, List
+from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable, List, Union
 
+from pathlib import Path
 import numpy as np
 import pandas as pd
 from nzshm_common.location.code_location import CodedLocation
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 INV_TIME = 1.0
 VS30 = 275
 IMT = "PGA"
+DTYPE = float
 
 
 def lat_lon_from_id(id):
@@ -166,6 +168,10 @@ def poe_to_rp_rounded(apoe: model.ProbabilityEnum) -> int:
     return int(sig_figs(rp, s=2))
 
 
+def read_mean_mag_df(filepath: Union[Path, str]) -> pd.DataFrame:
+    df = pd.read_csv(Path(filepath), index_col=["site_name"])
+    return df.astype(DTYPE)
+
 def get_mean_mag_df(
     hazard_id: str,
     locations: List[CodedLocation],
@@ -222,7 +228,7 @@ def get_mean_mag_df(
     site_names = [
         get_loc_id_and_name(loc.downsample(0.001).code)[1] for loc in locations
     ]
-    df = pd.DataFrame(index=site_names, columns=rp_strs)
+    df = pd.DataFrame(index=site_names, columns=rp_strs, dtype=DTYPE)
     for disagg in get_mean_mags(hazard_id, locations, [VS30], [IMT], poes, hazard_agg):
         rp = poe_to_rp_rounded(disagg["poe"])
         rp_str = get_rp_str(rp)
