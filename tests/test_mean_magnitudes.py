@@ -20,6 +20,39 @@ def lat_lon(id):
     return (location_by_id(id)["latitude"], location_by_id(id)["longitude"])
 
 
+NSITES = 10
+HAZARD_AGG = AggregationEnum.MEAN
+HAZARD_ID = "NSHM_v1.0.4_mag"
+POES = [
+    ProbabilityEnum._2_PCT_IN_50YRS,
+    ProbabilityEnum._5_PCT_IN_50YRS,
+    ProbabilityEnum._10_PCT_IN_50YRS,
+    ProbabilityEnum._18_PCT_IN_50YRS,
+    ProbabilityEnum._39_PCT_IN_50YRS,
+    ProbabilityEnum._63_PCT_IN_50YRS,
+    ProbabilityEnum._86_PCT_IN_50YRS,
+]
+APOES = [
+    "APoE: 1/25",
+    "APoE: 1/50",
+    "APoE: 1/100",
+    "APoE: 1/250",
+    "APoE: 1/500",
+    "APoE: 1/1000",
+    "APoE: 1/2500",
+]
+LOCATION_IDS = [_id for _id in LOCATION_LISTS["SRWG214"]["locations"]]
+LOCATIONS = [CodedLocation(*lat_lon(_id), 0.001) for _id in LOCATION_IDS][0:NSITES]
+
+
+def get_df_expected(raw_df_filepath):
+    site_list = [location_by_id(_id)["name"] for _id in LOCATION_IDS][0:NSITES]
+    raw_df = pd.read_csv(raw_df_filepath)
+    df_expected = raw_mag_to_df(raw_df, site_list, APOES)
+    df_expected.index.name = "site_name"
+    return df_expected
+
+
 poe_data = [
     (ProbabilityEnum._05_PCT_IN_50YRS, 10000),
     (ProbabilityEnum._1_PCT_IN_50YRS, 5000),
@@ -42,39 +75,27 @@ def test_poe_to_freq(apoe, expected):
     os.getenv("NZSHM22_HAZARD_STORE_STAGE") != "PROD",
     reason="requires access to toshi hazard store",
 )
+def test_mean_mag_df_legacy():
+
+    raw_df_filepath_leg = (
+        Path(__file__).parent / "fixtures" / "SRWG214_mean_mag_legacy.csv"
+    )
+    df_expected_leg = get_df_expected(raw_df_filepath_leg)
+    df_leg = get_mean_mag_df(HAZARD_ID, LOCATIONS, POES, HAZARD_AGG, legacy=True)
+
+    pandas.testing.assert_frame_equal(df_leg, df_expected_leg)
+
+
+@pytest.mark.skipif(
+    os.getenv("NZSHM22_HAZARD_STORE_STAGE") != "PROD",
+    reason="requires access to toshi hazard store",
+)
 def test_mean_mag_df(tmp_path):
 
-    nsites = 10
-    apoes = [
-        "APoE: 1/25",
-        "APoE: 1/50",
-        "APoE: 1/100",
-        "APoE: 1/250",
-        "APoE: 1/500",
-        "APoE: 1/1000",
-        "APoE: 1/2500",
-    ]
-    location_ids = [_id for _id in LOCATION_LISTS["SRWG214"]["locations"]][0:nsites]
-    site_list = [location_by_id(_id)["name"] for _id in location_ids][0:nsites]
-    locations = [CodedLocation(*lat_lon(_id), 0.001) for _id in location_ids]
-
     raw_df_filepath = Path(__file__).parent / "fixtures" / "SRWG214_mean_mag.csv"
-    raw_df = pd.read_csv(raw_df_filepath)
-    df_expected = raw_mag_to_df(raw_df, site_list, apoes)
-    df_expected.index.name = "site_name"
+    df_expected = get_df_expected(raw_df_filepath)
 
-    poes = [
-        ProbabilityEnum._2_PCT_IN_50YRS,
-        ProbabilityEnum._5_PCT_IN_50YRS,
-        ProbabilityEnum._10_PCT_IN_50YRS,
-        ProbabilityEnum._18_PCT_IN_50YRS,
-        ProbabilityEnum._39_PCT_IN_50YRS,
-        ProbabilityEnum._63_PCT_IN_50YRS,
-        ProbabilityEnum._86_PCT_IN_50YRS,
-    ]
-    hazard_id = "NSHM_v1.0.4_mag"
-    hazard_agg = AggregationEnum.MEAN
-    df = get_mean_mag_df(hazard_id, locations, poes, hazard_agg)
+    df = get_mean_mag_df(HAZARD_ID, LOCATIONS, POES, HAZARD_AGG, legacy=False)
 
     pandas.testing.assert_frame_equal(df, df_expected)
 
