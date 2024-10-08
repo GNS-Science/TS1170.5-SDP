@@ -2,9 +2,9 @@
 This module contains functions for extracting mean magnitudes from disaggregations and packaging into DataFrame objects.
 """
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable, List, Union
 
-from pathlib import Path
 import numpy as np
 import pandas as pd
 from nzshm_common.location.code_location import CodedLocation
@@ -171,6 +171,7 @@ def poe_to_rp_rounded(apoe: model.ProbabilityEnum) -> int:
 def read_mean_mag_df(filepath: Union[Path, str]) -> pd.DataFrame:
     df = pd.read_csv(Path(filepath), index_col=["site_name"])
     return df.astype(DTYPE)
+
 
 def get_mean_mag_df(
     hazard_id: str,

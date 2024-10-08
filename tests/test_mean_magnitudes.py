@@ -9,7 +9,11 @@ from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store.model import AggregationEnum, ProbabilityEnum
 
 from nzssdt_2023.data_creation.dm_parameter_generation import raw_mag_to_df
-from nzssdt_2023.data_creation.mean_magnitudes import get_mean_mag_df, poe_to_rp_rounded, read_mean_mag_df
+from nzssdt_2023.data_creation.mean_magnitudes import (
+    get_mean_mag_df,
+    poe_to_rp_rounded,
+    read_mean_mag_df,
+)
 
 
 def lat_lon(id):
@@ -57,7 +61,7 @@ def test_mean_mag_df(tmp_path):
     raw_df_filepath = Path(__file__).parent / "fixtures" / "SRWG214_mean_mag.csv"
     raw_df = pd.read_csv(raw_df_filepath)
     df_expected = raw_mag_to_df(raw_df, site_list, apoes)
-    df_expected.index.name = 'site_name'
+    df_expected.index.name = "site_name"
 
     poes = [
         ProbabilityEnum._2_PCT_IN_50YRS,
@@ -75,7 +79,7 @@ def test_mean_mag_df(tmp_path):
     pandas.testing.assert_frame_equal(df, df_expected)
 
     # test that the df written to csv and read back is identical
-    csv_filepath = tmp_path / 'df.csv'
+    csv_filepath = tmp_path / "df.csv"
     df.to_csv(csv_filepath)
     df_from_csv = read_mean_mag_df(csv_filepath)
     pandas.testing.assert_frame_equal(df, df_from_csv)
