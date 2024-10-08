@@ -178,7 +178,7 @@ def get_mean_mag_df(
     locations: List[CodedLocation],
     poes: model.ProbabilityEnum,
     hazard_agg: model.AggregationEnum,
-    legacy: bool = True,
+    legacy: bool = False,
 ) -> pd.DataFrame:
     """
     Get the mean mantitude table for the requested locations and annual probabilities.
