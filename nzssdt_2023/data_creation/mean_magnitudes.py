@@ -141,15 +141,15 @@ def get_mean_mags(
 
 def poe_to_rp_rounded(apoe: model.ProbabilityEnum) -> int:
     """
-    Converts annual probability to a rounded retun period. The return periods are "conventional"
-    return periods used by the hazard and risk community that are roughly equivlent to the
+    Converts annual probability to a rounded return period. The return periods are "conventional"
+    return periods used by the hazard and risk community that are roughly equivalent to the
     (more exact) annual probabilities.
 
     Args:
-        apoe: annual probability of exceedence
+        apoe: annual probability of exceedance
 
     Returns:
-        the approximate retun period rounded to the nearest "conventional" number.
+        the approximate return period rounded to the nearest "conventional" number.
     """
 
     def sig_figs(num, s):
@@ -174,20 +174,20 @@ def get_mean_mag_df(
     legacy: bool = True,
 ) -> pd.DataFrame:
     """
-    Get the mean mantitude table for the requested locations and annual probabilities.
+    Get the mean magnitude table for the requested locations and annual probabilities.
 
     Args:
         hazard_id: the toshi-hazard-post ID of the hazard model from which to get disaggregations.
         locations: the locations at which to calculate mean magnitudes.
         poes: the annual probabilities of exceedences at which to calculate mean magnitudes.
         hazard_agg: the hazard aggregate (e.g. mean or a fractile) at which to calculate mean magnitudes.
-        legacy: double rounds magnitudes to match origional mean mags from v1 of the workflow.
+        legacy: double rounds magnitudes to match original mean mags from v1 of the workflow.
 
     Returns:
-        the mean magnitues. The DataFrame index is the location name and the columns are frequencies.
+        the mean magnitudes. The DataFrame index is the location name and the columns are frequencies.
 
-    The legacy calculation is necessary to match the origional mean magnitude dataframe becuase the orignal
-    csv file had magnitudes rounded to 2 decimal places. When the final ouput is rounded to one decimal
+    The legacy calculation is necessary to match the original mean magnitude dataframe because the original
+    csv file had magnitudes rounded to 2 decimal places. When the final output is rounded to one decimal
     place, this results in rounding errors. For example:
     ```python
     >>> round(5.948071422587211, 1)
@@ -197,7 +197,7 @@ def get_mean_mag_df(
     ```
 
     NB: "APoE in the column name is a misnomer as they are approximate return frequencies not probabilities.
-    Magnitudes are rounded to the nearest decimal. The rounding error introduced in the origional workflow
+    Magnitudes are rounded to the nearest decimal. The rounding error introduced in the original workflow
     (incurred by rounding to the nearest 2 decimal places and then nearest 1) have been reproduced
     here to ensure output is stable.
 
