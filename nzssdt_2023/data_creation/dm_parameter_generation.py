@@ -142,9 +142,8 @@ def extract_m_values(
          M_mean: mean magnitudes for all sites and APoEs
          M_p90 : 90th %ile magnitudes for Auckland and APoEs
 
-    If the mean mag csv files are available in RESOURCES_FOLDER/pipeline/v1/input_data they will be used unless
-    recalulate is True. If they are not found, they will be calculated by get_mean_mag_df
-
+    If the mean mag csv files are available in the WORKING_FOLDER they will be used unless recalulate is True.
+    If they are not found, they will be calculated by get_mean_mag_df.
     """
 
     if not SRWG_214_MEAN_MAG_FILEPATH.exists() or recalculate:
