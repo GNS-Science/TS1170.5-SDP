@@ -163,4 +163,5 @@ cython_debug/
 .vscode
 resources/*.pdf
 anne_hidden/
+tmp/
 *.hdf5
