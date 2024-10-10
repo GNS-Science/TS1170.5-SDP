@@ -56,4 +56,3 @@ with open(sa_path, "rb") as file:
 # generate D and M Tables
 dm_df = dm_gen.create_D_and_M_table(site_list, APoEs)
 dm_df.to_csv(dm_path)
-

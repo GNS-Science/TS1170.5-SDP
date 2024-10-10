@@ -21,7 +21,6 @@ from nzssdt_2023.data_creation.extract_data import (
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
 
-
 log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
