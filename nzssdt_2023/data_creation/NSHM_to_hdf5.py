@@ -3,6 +3,12 @@ helper functions for producing an HDF5 file for the NZSSDT tables
 """
 import os
 import re
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
+from .constants import DEFAULT_RPS
+
+if TYPE_CHECKING:
+    import numpy.typing as npt
 
 import h5py
 import numpy as np
@@ -72,16 +78,21 @@ def convert_imtls_to_disp(acc_imtls):
     return disp_imtls
 
 
-def calculate_hazard_design_intensities(data, hazard_rps, intensity_type="acc"):
+def calculate_hazard_design_intensities(
+    data: Dict[str, Any],
+    hazard_rps: Union[List[int], "npt.NDArray"],
+    intensity_type="acc",
+):
     """
     calculate design intensities based on an annual probability of exceedance (APoE)
 
     :param data: dictionary containing hazard curves and metadata for vs30, sites, intensity measures
-    :param hazard_rps: np array containing the desired return periods (1 / APoE)
+    :param hazard_rps: list containing the desired return periods (1 / APoE)
 
     :return: np arrays for all intensities from the hazard curve realizations and stats (mean and quantiles)
     """
 
+    hazard_rps = np.array(hazard_rps)
     # vs30s = data['metadata']['vs30s']
     imtls = data["metadata"][f"{intensity_type}_imtls"]
     hcurves_stats = np.array(data["hcurves"]["hcurves_stats"])
@@ -113,16 +124,23 @@ def calculate_hazard_design_intensities(data, hazard_rps, intensity_type="acc"):
 
 
 def add_uniform_hazard_spectra(
-    data, hazard_rps=np.array([25, 50, 100, 250, 500, 1000, 2500])
-):
+    data: Dict[str, Any],
+    hazard_rps: Optional[List[int]] = None,
+) -> Dict[str, Any]:
     """
     Adds uniform hazard spectra to the data dictionary, based on the input hazard_rps
 
-    :param data: dictionary containing hazard curves and metadata for vs30, sites, intensity measures
-    :param hazard_rps: np.array  list of return periods of interest (inverse of annual probability of exceedance, apoe)
+    Args:
+        data: dictionary containing hazard curves and metadata for vs30, sites, intensity measures
+        hazard_rps: list of return periods of interest (inverse of annual probability of exceedance, apoe)
 
-    :return: updated dictionary includes design intensities
+    Returns:
+        updated dictionary includes design intensities
+
+    If hazard_rps is None (default) or empty, the default return periods, `constants.DEFAULT_RPS`, will be used.
     """
+
+    hazard_rps = hazard_rps or DEFAULT_RPS
 
     imtls = data["metadata"]["acc_imtls"]
     data["metadata"]["disp_imtls"] = convert_imtls_to_disp(imtls)
@@ -130,7 +148,7 @@ def add_uniform_hazard_spectra(
     # get poe values
     print("Calculating APoE intensities.")
     data["hazard_design"] = {}
-    data["hazard_design"]["hazard_rps"] = hazard_rps.tolist()
+    data["hazard_design"]["hazard_rps"] = hazard_rps
 
     for intensity_type in ["acc", "disp"]:
         data["hazard_design"][intensity_type] = {}

@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pandas.testing
 import pytest
@@ -8,12 +9,47 @@ from nzshm_common.location import CodedLocation
 from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store.model import AggregationEnum, ProbabilityEnum
 
-from nzssdt_2023.data_creation.dm_parameter_generation import raw_mag_to_df
 from nzssdt_2023.data_creation.mean_magnitudes import (
+    frequency_to_poe,
     get_mean_mag_df,
-    poe_to_rp_rounded,
+    poe_to_rp,
     read_mean_mag_df,
+    site_name_to_coded_location,
 )
+
+
+def raw_mag_to_df(raw_df, site_list, APoEs):
+    """compile magnitudes dataframe into a more manageable dataframe
+
+    Args:
+        raw_df: dataframe from the initial NSHM query of magnitudes
+        site_list: list of sites included in the sa tables
+        APoEs    : list of APoEs included in the sa tables
+
+    Returns:
+        df: dataframe with rows: sites and columns: APoEs
+    """
+    poe_duration = 50
+
+    rps = [int(APoE.split("/")[1]) for APoE in APoEs]
+
+    df = pd.DataFrame(index=site_list, columns=APoEs, dtype=float)
+
+    for site in site_list:
+        for rp in rps:
+            apoe = 1 / rp
+            poe_50 = np.round((100 * (1 - np.exp(-apoe * poe_duration))), 0).astype(
+                "int"
+            )
+
+            APoE = f"APoE: 1/{rp}"
+            site_idx = raw_df["site name"] == site
+            poe_idx = raw_df["poe (% in 50 years)"] == poe_50
+            df.loc[site, APoE] = (
+                raw_df[site_idx & poe_idx]["mean magnitude"].values[0].round(1)
+            )
+
+    return df
 
 
 def lat_lon(id):
@@ -66,9 +102,26 @@ poe_data = [
 ]
 
 
-@pytest.mark.parametrize("apoe,expected", poe_data)
-def test_poe_to_freq(apoe, expected):
-    assert poe_to_rp_rounded(apoe) == expected
+name_location = [
+    ("Kerikeri", CodedLocation(-35.229696132, 173.958389289, 0.001)),
+    ("-46.200~166.600", CodedLocation(-46.200, 166.600, 0.001)),
+]
+
+
+@pytest.mark.parametrize("name,location", name_location)
+def test_name_to_location(name, location):
+    assert site_name_to_coded_location(name) == location
+
+
+@pytest.mark.parametrize("apoe,rp", poe_data)
+def test_frequency_to_poe(apoe, rp):
+    frequency = f"APoE: 1/{rp}"
+    assert frequency_to_poe(frequency) == apoe
+
+
+@pytest.mark.parametrize("apoe,rp", poe_data)
+def test_poe_to_freq(apoe, rp):
+    assert poe_to_rp(apoe) == rp
 
 
 @pytest.mark.skipif(
