@@ -20,6 +20,7 @@
  - moved `mean_magnitudes` module to `data_creation` package
  - `mean_magnitudes` functions create DataFrame objects in form expected by functions in `dm_parameter_generation`
  - mean magnitude csv files moved from RESOURCES_FOLDER to WORKING_FOLDER and removed from repo
+ - mean magnitude csv files are on demand cache
  - `extract_m_values` function will generate mean magnitude csv files if needed or requested
 
 ## [0.4.0] 2024-09-11

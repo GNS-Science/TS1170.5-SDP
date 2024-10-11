@@ -1,10 +1,12 @@
-import os
+import json
+from collections import namedtuple
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pandas.testing
 import pytest
+import toshi_hazard_store.query as query
 from nzshm_common.location import CodedLocation
 from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store.model import AggregationEnum, ProbabilityEnum
@@ -15,6 +17,50 @@ from nzssdt_2023.data_creation.mean_magnitudes import (
     poe_to_rp,
     read_mean_mag_df,
     site_name_to_coded_location,
+)
+
+
+def lat_lon(id):
+    return (location_by_id(id)["latitude"], location_by_id(id)["longitude"])
+
+
+NSITES = 10
+HAZARD_AGG = AggregationEnum.MEAN
+HAZARD_ID = "NSHM_v1.0.4_mag"
+POES = [
+    ProbabilityEnum._2_PCT_IN_50YRS,
+    ProbabilityEnum._5_PCT_IN_50YRS,
+    ProbabilityEnum._10_PCT_IN_50YRS,
+    ProbabilityEnum._18_PCT_IN_50YRS,
+    ProbabilityEnum._39_PCT_IN_50YRS,
+    ProbabilityEnum._63_PCT_IN_50YRS,
+    ProbabilityEnum._86_PCT_IN_50YRS,
+]
+APOES = [
+    "APoE: 1/25",
+    "APoE: 1/50",
+    "APoE: 1/100",
+    "APoE: 1/250",
+    "APoE: 1/500",
+    "APoE: 1/1000",
+    "APoE: 1/2500",
+]
+LOCATION_IDS = [_id for _id in LOCATION_LISTS["SRWG214"]["locations"]]
+LOCATIONS = [CodedLocation(*lat_lon(_id), 0.001) for _id in LOCATION_IDS][0:NSITES]
+
+Disagg = namedtuple(
+    "Disagg",
+    [
+        "disaggs",
+        "bins",
+        "nloc_001",
+        "lat",
+        "lon",
+        "vs30",
+        "probability",
+        "imt",
+        "shaking_level",
+    ],
 )
 
 
@@ -52,33 +98,23 @@ def raw_mag_to_df(raw_df, site_list, APoEs):
     return df
 
 
-def lat_lon(id):
-    return (location_by_id(id)["latitude"], location_by_id(id)["longitude"])
-
-
-NSITES = 10
-HAZARD_AGG = AggregationEnum.MEAN
-HAZARD_ID = "NSHM_v1.0.4_mag"
-POES = [
-    ProbabilityEnum._2_PCT_IN_50YRS,
-    ProbabilityEnum._5_PCT_IN_50YRS,
-    ProbabilityEnum._10_PCT_IN_50YRS,
-    ProbabilityEnum._18_PCT_IN_50YRS,
-    ProbabilityEnum._39_PCT_IN_50YRS,
-    ProbabilityEnum._63_PCT_IN_50YRS,
-    ProbabilityEnum._86_PCT_IN_50YRS,
-]
-APOES = [
-    "APoE: 1/25",
-    "APoE: 1/50",
-    "APoE: 1/100",
-    "APoE: 1/250",
-    "APoE: 1/500",
-    "APoE: 1/1000",
-    "APoE: 1/2500",
-]
-LOCATION_IDS = [_id for _id in LOCATION_LISTS["SRWG214"]["locations"]]
-LOCATIONS = [CodedLocation(*lat_lon(_id), 0.001) for _id in LOCATION_IDS][0:NSITES]
+def mock_get_disagg(
+    hazard_model_ids,
+    disagg_aggs,
+    hazard_aggs,
+    locs,
+    vs30s,
+    imts,
+    probabilities,
+):
+    dissag_filepth = Path(__file__).parent / "fixtures" / "disagg_fixture_all.json"
+    with dissag_filepth.open() as disagg_file:
+        disaggs = json.load(disagg_file)
+    for disagg in disaggs:
+        disagg["disaggs"] = np.array(disagg["disaggs"])
+        disagg["bins"] = np.array(disagg["bins"])
+        disagg["probability"] = ProbabilityEnum[disagg["probability"]]
+        yield Disagg(**disagg)
 
 
 def get_df_expected(raw_df_filepath):
@@ -124,11 +160,12 @@ def test_poe_to_freq(apoe, rp):
     assert poe_to_rp(apoe) == rp
 
 
-@pytest.mark.skipif(
-    os.getenv("NZSHM22_HAZARD_STORE_STAGE") != "PROD",
-    reason="requires access to toshi hazard store",
-)
-def test_mean_mag_df_legacy():
+@pytest.fixture
+def get_disagg_fixture(monkeypatch):
+    monkeypatch.setattr(query, "get_disagg_aggregates", mock_get_disagg)
+
+
+def test_mean_mag_df_legacy(get_disagg_fixture):
 
     raw_df_filepath_leg = (
         Path(__file__).parent / "fixtures" / "SRWG214_mean_mag_legacy.csv"
@@ -139,11 +176,7 @@ def test_mean_mag_df_legacy():
     pandas.testing.assert_frame_equal(df_leg, df_expected_leg)
 
 
-@pytest.mark.skipif(
-    os.getenv("NZSHM22_HAZARD_STORE_STAGE") != "PROD",
-    reason="requires access to toshi hazard store",
-)
-def test_mean_mag_df(tmp_path):
+def test_mean_mag_df(get_disagg_fixture, tmp_path):
 
     raw_df_filepath = Path(__file__).parent / "fixtures" / "SRWG214_mean_mag.csv"
     df_expected = get_df_expected(raw_df_filepath)
