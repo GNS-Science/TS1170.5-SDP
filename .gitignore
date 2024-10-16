@@ -164,3 +164,4 @@ cython_debug/
 resources/*.pdf
 anne_hidden/
 *.hdf5
+tmp/
