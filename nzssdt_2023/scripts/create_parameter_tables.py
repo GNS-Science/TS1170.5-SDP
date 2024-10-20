@@ -25,7 +25,8 @@ from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
-mini = True
+mini = False
+legacy = True
 
 output_folder = Path(WORKING_FOLDER)
 
@@ -54,5 +55,5 @@ with open(sa_path, "rb") as file:
     APoEs = [f"APoE: 1/{rp}" for rp in rps]
 
 # generate D and M Tables
-dm_df = dm_gen.create_D_and_M_table(site_list, APoEs)
+dm_df = dm_gen.create_D_and_M_table(site_list, APoEs, legacy=legacy)
 dm_df.to_csv(dm_path)

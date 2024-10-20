@@ -7,6 +7,7 @@ TODO:
     - Consolidate the mean mag csv files into one cache rather than 3 separate files. Any locations/poes
         not available can be looked up and added to the cache.
 """
+import itertools
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Tuple
@@ -15,24 +16,24 @@ import numpy as np
 import pandas as pd
 from toshi_hazard_store.model import AggregationEnum
 
-from nzssdt_2023.data_creation.mean_magnitudes import get_mean_mag_df
-from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_locations
-
-from .constants import (
-    AKL_LOCATIONS,
-    AKL_MEAN_MAG_P90_FILEPATH,
-    GRID_LOCATIONS,
-    GRID_MEAN_MAG_FILEPATH,
-    POES,
-    SRWG_214_MEAN_MAG_FILEPATH,
-    SRWG_LOCATIONS,
+from nzssdt_2023.data_creation.mean_magnitudes import (
+    empty_mean_mag_df,
+    frequency_to_poe,
+    get_mean_mag,
+    get_mean_mag_df,
+    read_mean_mag_df,
+    site_name_to_coded_location,
 )
+from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_locations
 
 if TYPE_CHECKING:
     import geopandas.typing as gpdt
     import pandas.typing as pdt
 
-from nzssdt_2023.config import DISAGG_HAZARD_ID, RESOURCES_FOLDER
+from nzssdt_2023.config import DISAGG_HAZARD_ID, RESOURCES_FOLDER, WORKING_FOLDER
+
+# prevent SettingWithCopyWarning
+pd.options.mode.copy_on_write = True
 
 
 def calc_distance_to_faults(
@@ -87,107 +88,79 @@ def return_table_indices(df: "pdt.DataFrame") -> Tuple[List[str], List[str], Lis
     return site_list, APoEs, site_class_list
 
 
-def raw_mag_to_df(raw_df: "pdt.DataFrame", site_list: List[str], APoEs: List[str]):
-    """compile magnitudes dataframe into a more manageable dataframe
-
-    Args:
-        raw_df: dataframe from the initial NSHM query of magnitudes
-        site_list: list of sites included in the sa tables
-        APoEs    : list of APoEs included in the sa tables
-
-    Returns:
-        df: dataframe with rows: sites and columns: APoEs
-
-
-    TODO:
-     - reorg CDC mean_mag to get this final df shape.
-
-    """
-    poe_duration = 50
-
-    rps = [int(APoE.split("/")[1]) for APoE in APoEs]
-
-    df = pd.DataFrame(index=site_list, columns=APoEs)
-
-    for site in site_list:
-        for rp in rps:
-            apoe = 1 / rp
-            poe_50 = np.round((100 * (1 - np.exp(-apoe * poe_duration))), 0).astype(
-                "int"
-            )
-
-            APoE = f"APoE: 1/{rp}"
-            site_idx = raw_df["site name"] == site
-            poe_idx = raw_df["poe (% in 50 years)"] == poe_50
-            df.loc[site, APoE] = (
-                raw_df[site_idx & poe_idx]["mean magnitude"].values[0].round(1)
-            )
-
-    return df
-
-
 def extract_m_values(
-    site_list: List[str],
-    APoEs: List[str],
-    recalculate: bool = False,
-) -> Tuple["pdt.DataFrame", "pdt.DataFrame"]:
+    site_names: List[str],
+    freqs: List[str],
+    agg: AggregationEnum,
+    no_cache: bool = False,
+    legacy: bool = False,
+) -> "pdt.DataFrame":
     """Extracts the magnitudes from the input .csv folder into a manageable dataframe
 
     Args:
-        site_list: list of sites of interest
-        APoEs    : list of APoEs of interest
-        recalculate: if True, forces recalculation of mean mags, othwise use existing files, if available
+        site_names: names of sites of interest
+        frequencies: list of the frequencys (1/return period) of interest
+        agg: the aggregate hazard curve at which to calculate mean magnitude (e.g., "mean", "0.9", ...)
+        no_cache: if True, ignore the cache file
+        legacy: if True double rounds magnitudes to match origional mean mags from v1 of the workflow.
 
     Returns:
-         M_mean: mean magnitudes for all sites and APoEs
-         M_p90 : 90th %ile magnitudes for Auckland and APoEs
+        mags: mean magnitudes
 
-    If the mean mag csv files are available in RESOURCES_FOLDER/pipeline/v1/input_data they will be used unless
-    recalulate is True. If they are not found, they will be calculated by get_mean_mag_df
+    The format of the frequencies entries is e.g. "APoE: 1/25"
 
+    If no_chache is False then the mean magnitudes will be looked up in a cache file. If not found
+    there, they will be calculated and added to the cache. The cache file is in the WORKING_FOLDER
+    named mags_{agg}.csv where {agg} is the hazard curve aggregate.
+
+    site names are location names or lat~lon coeds e.g. "Pukekohe" or "-45.500~166.600"
     """
 
-    if not SRWG_214_MEAN_MAG_FILEPATH.exists() or recalculate:
-        m_mean_named = get_mean_mag_df(
-            DISAGG_HAZARD_ID, SRWG_LOCATIONS, POES, AggregationEnum.MEAN
-        )
-        m_mean_named.to_csv(SRWG_214_MEAN_MAG_FILEPATH)
+    locations = [site_name_to_coded_location(name) for name in site_names]
+    poes = [frequency_to_poe(freq) for freq in freqs]
+
+    if no_cache:
+        return get_mean_mag_df(DISAGG_HAZARD_ID, locations, poes, agg, legacy)
+
+    cache_filepath = Path(WORKING_FOLDER) / f"mag_agg-{agg.name}.csv"
+    if cache_filepath.exists():
+        mags = read_mean_mag_df(cache_filepath)
     else:
-        m_mean_named = pd.read_csv(SRWG_214_MEAN_MAG_FILEPATH, index_col=["site_name"])
+        poes = [frequency_to_poe(freq) for freq in freqs]
+        mags = empty_mean_mag_df(poes)
+        mags = get_mean_mag_df(DISAGG_HAZARD_ID, locations, poes, agg, legacy)
+        mags.to_csv(cache_filepath)
+        return mags.loc[site_names, freqs]
 
-    if not GRID_MEAN_MAG_FILEPATH.exists() or recalculate:
-        m_mean_grid = get_mean_mag_df(
-            DISAGG_HAZARD_ID, GRID_LOCATIONS, POES, AggregationEnum.MEAN
-        )
-        m_mean_grid.to_csv(GRID_MEAN_MAG_FILEPATH)
-    else:
-        m_mean_grid = pd.read_csv(GRID_MEAN_MAG_FILEPATH, index_col=["site_name"])
+    # fill in the missing values one at a time
+    for site, freq in itertools.product(site_names, freqs):
+        if (
+            (site not in mags.index)
+            or (freq not in mags.columns)
+            or (pd.isnull(mags.loc[site, freq]))
+        ):
+            location = site_name_to_coded_location(site)
+            poe = frequency_to_poe(freq)
+            mag = get_mean_mag(DISAGG_HAZARD_ID, location, poe, agg, legacy)
+            mags.loc[site, freq] = mag
 
-    m_mean = pd.concat([m_mean_named, m_mean_grid])
-
-    if not AKL_MEAN_MAG_P90_FILEPATH.exists() or recalculate:
-        m_p90_akl = get_mean_mag_df(
-            DISAGG_HAZARD_ID, AKL_LOCATIONS, POES, AggregationEnum._90
-        )
-        m_p90_akl.to_csv(AKL_MEAN_MAG_P90_FILEPATH)
-    else:
-        m_p90_akl = pd.read_csv(AKL_MEAN_MAG_P90_FILEPATH, index_col=["site_name"])
-
-    m_mean = m_mean.loc[site_list, APoEs]
-    m_p90_akl = m_p90_akl.loc[["Auckland"], APoEs]
-
-    return m_mean, m_p90_akl
+    mags.to_csv(cache_filepath)
+    return mags.loc[site_names, freqs]
 
 
 def create_D_and_M_table(
-    site_list: List[str], APoEs: List[str], recalculate: bool = False
-):
+    site_list: List[str],
+    APoEs: List[str],
+    no_cache: bool = False,
+    legacy: bool = False,
+) -> "pdt.DataFrame":
     """Compiles the D and M parameter tables
 
     Args:
         site_list: list of sites of interest
         APoEs    : list of APoEs of interest
-        recalculate: if True, forces recalculation of mean mags, othwise use existing files, if available
+        no_cache: if True, ignore the cache file
+        legacy: if True double rounds magnitudes to match origional mean mags from v1 of the workflow.
 
     Returns:
         D_and_M: dataframe of the d and m tables
@@ -199,7 +172,8 @@ def create_D_and_M_table(
     D_values = pd.read_json(Path(folder, "D_values.json"))
     D_sites = [site for site in list(D_values.index) if site in site_list]
 
-    M_mean, M_p90 = extract_m_values(site_list, APoEs, recalculate)
+    M_mean = extract_m_values(site_list, APoEs, AggregationEnum.MEAN, no_cache, legacy)
+    M_p90 = extract_m_values(["Auckland"], APoEs, AggregationEnum._90, no_cache, legacy)
 
     D_and_M = pd.DataFrame(index=site_list, columns=["D"] + APoEs)
 
