@@ -12,9 +12,7 @@ RESOURCES_FOLDER = str(PurePath(os.path.realpath(__file__)).parent.parent / "res
 
 WORKING_FOLDER = os.getenv("WORKING_FOLDER", tempfile.gettempdir())
 """A standardised directory path for disposable working files."""
-# I had to change the above from /tmp to tmp and create a folder in scripts named tmp to get it to work.
-# Need an automated, disposable solution that also works on Windows.
-# https://stackoverflow.com/questions/15111103/tmp-folder-in-windows-like-tmp-in-linux
+
 
 
 DISAGG_HAZARD_ID = "NSHM_v1.0.4_mag"
