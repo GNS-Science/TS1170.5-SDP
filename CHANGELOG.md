@@ -22,6 +22,7 @@
  - mean magnitude csv files moved from RESOURCES_FOLDER to WORKING_FOLDER and removed from repo
  - mean magnitude csv files are on demand cache
  - `extract_m_values` function will generate mean magnitude csv files if needed or requested
+ - default `config.WORKING_FOLDER` uses platform independent tmp folder
 
 ## [0.4.0] 2024-09-11
 
