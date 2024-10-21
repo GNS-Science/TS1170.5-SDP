@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     import pandas.typing as pdt
 
 agg_list = ["mean", "0.9"]
-vs30_list = [150, 175, 225, 250, 275, 375, 400, 525, 750]
 imt_list = [
     "PGA",
     "SA(0.1)",
@@ -74,6 +73,10 @@ SITE_CLASSES: dict[str, SiteClass] = {
     "V": SiteClass("V", 225, "Site Soil Class V", 200, 250),
     "VI": SiteClass("VI", 175, "Site Soil Class VI", 150, 200),
 }
+
+
+vs30_list = [SITE_CLASSES[sc].representative_vs30 for sc in SITE_CLASSES.keys()]
+
 
 lower_bound_parameters: dict[str, str | float] = {
     "controlling_site": "Auckland",
