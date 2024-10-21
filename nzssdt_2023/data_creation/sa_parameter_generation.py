@@ -96,6 +96,20 @@ LOCATION_REPLACEMENTS: dict[str, LocationReplacement] = {
 }
 
 
+class PGA_reductions(NamedTuple):
+    site_class: str
+    A0: float
+    A1: float
+    PGA_threshold: float
+
+
+PGA_REDUCTIONS: dict[str, PGA_reductions] = {
+    "IV": PGA_reductions("IV", 0.076, 0.123, 0.198),
+    "V": PGA_reductions("V", 0.114, 0.227, 0.137),
+    "VI": PGA_reductions("VI", 0.085, 0.171, 0.133),
+}
+
+
 def acc_spectra_to_vel(acc_spectra: "npt.NDArray", imtls: dict) -> "npt.NDArray":
     """Convert uniform hazard spectra from acceleration to velocity
 
@@ -116,6 +130,72 @@ def acc_spectra_to_vel(acc_spectra: "npt.NDArray", imtls: dict) -> "npt.NDArray"
     return vel_spectra
 
 
+def calc_R_PGA(pga: float, site_class: str):
+    """Calculate the reduction factor for the peak ground acceleration (Eq. C3.15)
+
+    Args:
+        pga: peak ground acceleration [g]
+        site_class: roman numeral
+
+    Return:
+        r_pga: reduction factor for peak ground acceleration
+
+    """
+    r_pga = 0
+
+    if site_class in PGA_REDUCTIONS.keys():
+        A0 = PGA_REDUCTIONS[site_class].A0
+        A1 = PGA_REDUCTIONS[site_class].A1
+        PGA_threshold = PGA_REDUCTIONS[site_class].PGA_threshold
+
+        if pga >= PGA_threshold:
+            r_pga = A0 * np.log(pga) + A1
+
+    return r_pga
+
+
+def calc_reduced_PGA(pga: float, site_class: str):
+    """Calculate the adjusted peak ground acceleration (Eq. C3.14)
+
+    Args:
+        pga: peak ground acceleration [g]
+        site_class: roman numeral
+
+    Return:
+        reduced_pga: adjusted peak ground acceleration
+    """
+    r_pga = calc_R_PGA(pga, site_class)
+    reduced_pga = pga * (1 - r_pga)
+
+    return reduced_pga
+
+
+def reduce_PGAs(PGA: "npt.NDArray", vs30_list: List[int]) -> "npt.NDArray":
+    """Apply peak ground acceleration adjustments to all PGA values (Eq. C3.14)
+
+    Args:
+        PGA: peak ground acceleration
+        vs30_list: vs30 values associated with PGA's vs30 index
+
+    Return:
+        new_PGA: adjusted peak ground acceleration
+    """
+    n_vs30s, n_sites, n_rps, n_stats = PGA.shape
+    reduced_PGA = PGA.copy()
+
+    for sc in PGA_REDUCTIONS.keys():
+        vs30 = int(SITE_CLASSES[sc].representative_vs30)
+        i_vs30 = vs30_list.index(vs30)
+
+        for i_site in range(n_sites):
+            for i_rp in range(n_rps):
+                for i_stat in range(n_stats):
+                    pga = PGA[i_vs30, i_site, i_rp, i_stat]
+                    reduced_PGA[i_vs30, i_site, i_rp, i_stat] = calc_reduced_PGA(pga, sc)
+
+    return reduced_PGA
+
+
 def calculate_parameter_arrays(
     data_file: str | Path,
 ) -> Tuple["npt.NDArray", "npt.NDArray", "npt.NDArray", "npt.NDArray"]:
@@ -125,7 +205,7 @@ def calculate_parameter_arrays(
         data_file: name of hazard hdf5 file
 
     Returns:
-        PGA: peak ground acceleration
+        PGA: adjusted peak ground acceleration (Eqn C3.14)
         Sas: short-period spectral acceleration (90% of maximum spectral acceleration)
         PSV: 95% of maximum spectral velocity
         Tc : spectral-acceleration-plateau corner period
@@ -134,9 +214,6 @@ def calculate_parameter_arrays(
         * add Td calculation (needs equation, how to do lower-bound adjustment)
 
     """
-    with h5py.File(data_file, "r") as hf:
-        imtls = ast.literal_eval(hf["metadata"].attrs["acc_imtls"])
-        imt_list = list(imtls.keys())
 
     acc_spectra, imtls = extract_spectra(data_file)
     vel_spectra = acc_spectra_to_vel(acc_spectra, imtls)
@@ -145,7 +222,11 @@ def calculate_parameter_arrays(
     PSV = 0.95 * np.max(vel_spectra, axis=2)
 
     Tc = 2 * np.pi * PSV / (Sas * g)
+
+    imt_list = list(imtls.keys())
+    vs30_list = extract_vs30s(data_file)
     PGA = acc_spectra[:, :, imt_list.index("PGA"), :, :]
+    PGA = reduce_PGAs(PGA, vs30_list)
 
     return PGA, Sas, PSV, Tc
 
