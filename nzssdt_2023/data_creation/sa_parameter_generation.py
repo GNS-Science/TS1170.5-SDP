@@ -131,14 +131,14 @@ def acc_spectra_to_vel(acc_spectra: "npt.NDArray", imtls: dict) -> "npt.NDArray"
     return vel_spectra
 
 
-def calc_R_PGA(pga: float, site_class: str):
+def calc_R_PGA(pga: float, site_class: str) -> float:
     """Calculate the reduction factor for the peak ground acceleration (Eq. C3.15)
 
     Args:
         pga: peak ground acceleration [g]
         site_class: roman numeral
 
-    Return:
+    Returns:
         r_pga: reduction factor for peak ground acceleration
 
     """
@@ -155,14 +155,14 @@ def calc_R_PGA(pga: float, site_class: str):
     return r_pga
 
 
-def calc_reduced_PGA(pga: float, site_class: str):
+def calc_reduced_PGA(pga: float, site_class: str) -> float:
     """Calculate the adjusted peak ground acceleration (Eq. C3.14)
 
     Args:
         pga: peak ground acceleration [g]
         site_class: roman numeral
 
-    Return:
+    Returns:
         reduced_pga: adjusted peak ground acceleration
     """
     r_pga = calc_R_PGA(pga, site_class)
@@ -178,8 +178,8 @@ def reduce_PGAs(PGA: "npt.NDArray", vs30_list: List[int]) -> "npt.NDArray":
         PGA: peak ground acceleration
         vs30_list: vs30 values associated with PGA's vs30 index
 
-    Return:
-        new_PGA: adjusted peak ground acceleration
+    Returns:
+        reduced_PGA: adjusted peak ground acceleration
     """
     n_vs30s, n_sites, n_rps, n_stats = PGA.shape
     reduced_PGA = PGA.copy()
