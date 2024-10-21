@@ -1,12 +1,10 @@
 """
 This module derives the PGA, Sa,s, and Tc parameters from the NSHM hazard curves.
 """
-import ast
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, List, NamedTuple, Optional, Tuple
 
-import h5py
 import numpy as np
 import pandas as pd
 
@@ -191,7 +189,9 @@ def reduce_PGAs(PGA: "npt.NDArray", vs30_list: List[int]) -> "npt.NDArray":
             for i_rp in range(n_rps):
                 for i_stat in range(n_stats):
                     pga = PGA[i_vs30, i_site, i_rp, i_stat]
-                    reduced_PGA[i_vs30, i_site, i_rp, i_stat] = calc_reduced_PGA(pga, sc)
+                    reduced_PGA[i_vs30, i_site, i_rp, i_stat] = calc_reduced_PGA(
+                        pga, sc
+                    )
 
     return reduced_PGA
 
