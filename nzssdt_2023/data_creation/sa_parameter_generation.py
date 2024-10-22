@@ -21,8 +21,6 @@ from nzssdt_2023.data_creation.extract_data import (
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
 
-# from nzssdt_2023.data_creation.query_NSHM import agg_list, imt_list, vs30_list
-
 log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -425,10 +423,7 @@ def save_table_to_pkl(
             for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor"]:
                 df.drop((APoE, sc, parameter), axis=1, inplace=True)
 
-    # filename = sa_name + ".pkl"
     df.to_pickle(sa_name)
-
-    # print(f"Sa parameter .pkl file(s) saved in \n\t{os.getcwd()}")
 
 
 def create_sa_pkl(
