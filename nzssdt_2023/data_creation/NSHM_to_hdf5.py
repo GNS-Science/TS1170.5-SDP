@@ -93,11 +93,10 @@ def calculate_hazard_design_intensities(
     """
 
     hazard_rps = np.array(hazard_rps)
-    # vs30s = data['metadata']['vs30s']
     imtls = data["metadata"][f"{intensity_type}_imtls"]
     hcurves_stats = np.array(data["hcurves"]["hcurves_stats"])
 
-    [n_vs30, n_sites, n_imts, n_imtls, n_stats] = hcurves_stats.shape
+    [n_vs30, n_sites, n_imts, _, n_stats] = hcurves_stats.shape
 
     n_rps = len(hazard_rps)
 
