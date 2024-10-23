@@ -3,19 +3,29 @@ This module derives the PGA, Sa,s, and Tc parameters from the NSHM hazard curves
 """
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, List, NamedTuple, Optional, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
 from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
+from nzssdt_2023.data_creation.constants import (
+    AGG_LIST,
+    IMT_LIST,
+    IMTL_LIST,
+    LOCATION_REPLACEMENTS,
+    LOWER_BOUND_PARAMETERS,
+    PGA_REDUCTIONS,
+    SITE_CLASSES,
+    VS30_LIST,
+    LocationReplacement,
+)
 from nzssdt_2023.data_creation.extract_data import (
     extract_APoEs,
     extract_quantiles,
     extract_sites,
     extract_spectra,
-    extract_vs30s,
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
 
@@ -24,91 +34,6 @@ log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     import numpy.typing as npt
     import pandas.typing as pdt
-
-agg_list = ["mean", "0.9"]
-imt_list = [
-    "PGA",
-    "SA(0.1)",
-    "SA(0.15)",
-    "SA(0.2)",
-    "SA(0.25)",
-    "SA(0.3)",
-    "SA(0.35)",
-    "SA(0.4)",
-    "SA(0.5)",
-    "SA(0.6)",
-    "SA(0.7)",
-    "SA(0.8)",
-    "SA(0.9)",
-    "SA(1.0)",
-    "SA(1.25)",
-    "SA(1.5)",
-    "SA(1.75)",
-    "SA(2.0)",
-    "SA(2.5)",
-    "SA(3.0)",
-    "SA(3.5)",
-    "SA(4.0)",
-    "SA(4.5)",
-    "SA(5.0)",
-    "SA(6.0)",
-    "SA(7.5)",
-    "SA(10.0)",
-]
-
-
-class SiteClass(NamedTuple):
-    site_class: str
-    representative_vs30: int
-    label: str
-    lower_bound: float
-    upper_bound: float
-
-
-SITE_CLASSES: dict[str, SiteClass] = {
-    "I": SiteClass("I", 750, "Site Soil Class I", 750, np.nan),
-    "II": SiteClass("II", 525, "Site Soil Class II", 450, 750),
-    "III": SiteClass("III", 375, "Site Soil Class III", 300, 450),
-    "IV": SiteClass("IV", 275, "Site Soil Class IV", 250, 300),
-    "V": SiteClass("V", 225, "Site Soil Class V", 200, 250),
-    "VI": SiteClass("VI", 175, "Site Soil Class VI", 150, 200),
-}
-
-
-vs30_list = [SITE_CLASSES[sc].representative_vs30 for sc in SITE_CLASSES.keys()]
-
-
-lower_bound_parameters: dict[str, str | float] = {
-    "controlling_site": "Auckland",
-    "controlling_percentile": 0.9,
-}
-
-
-class LocationReplacement(NamedTuple):
-    preferred_location: str
-    replaced_locations: list[str]
-
-
-LOCATION_REPLACEMENTS: dict[str, LocationReplacement] = {
-    "Auckland": LocationReplacement("Auckland", ["Manukau City"]),
-    "Tauranga": LocationReplacement("Tauranga", ["Mount Maunganui"]),
-    "Wellington": LocationReplacement("Wellington", ["Wellington CBD"]),
-    "Lower Hutt": LocationReplacement("Lower Hutt", ["Wainuiomata", "Eastbourne"]),
-}
-
-
-class PGA_reductions(NamedTuple):
-    site_class: str
-    A0: float
-    A1: float
-    PGA_threshold: float
-
-
-PGA_REDUCTIONS: dict[str, PGA_reductions] = {
-    "IV": PGA_reductions("IV", 0.076, 0.123, 0.198),
-    "V": PGA_reductions("V", 0.114, 0.227, 0.137),
-    "VI": PGA_reductions("VI", 0.085, 0.171, 0.133),
-}
 
 
 def acc_spectra_to_vel(acc_spectra: "npt.NDArray", imtls: dict) -> "npt.NDArray":
@@ -171,12 +96,11 @@ def calc_reduced_PGA(pga: float, site_class: str) -> float:
     return reduced_pga
 
 
-def reduce_PGAs(PGA: "npt.NDArray", vs30_list: List[int]) -> "npt.NDArray":
+def reduce_PGAs(PGA: "npt.NDArray") -> "npt.NDArray":
     """Apply peak ground acceleration adjustments to all PGA values (Eq. C3.14)
 
     Args:
         PGA: peak ground acceleration
-        vs30_list: vs30 values associated with PGA's vs30 index
 
     Returns:
         reduced_PGA: adjusted peak ground acceleration
@@ -186,7 +110,7 @@ def reduce_PGAs(PGA: "npt.NDArray", vs30_list: List[int]) -> "npt.NDArray":
 
     for sc in PGA_REDUCTIONS.keys():
         vs30 = int(SITE_CLASSES[sc].representative_vs30)
-        i_vs30 = vs30_list.index(vs30)
+        i_vs30 = VS30_LIST.index(vs30)
 
         for i_site in range(n_sites):
             for i_rp in range(n_rps):
@@ -226,10 +150,8 @@ def calculate_parameter_arrays(
 
     Tc = 2 * np.pi * PSV / (Sas * g)
 
-    imt_list = list(imtls.keys())
-    vs30_list = extract_vs30s(data_file)
-    PGA = acc_spectra[:, :, imt_list.index("PGA"), :, :]
-    PGA = reduce_PGAs(PGA, vs30_list)
+    PGA = acc_spectra[:, :, IMT_LIST.index("PGA"), :, :]
+    PGA = reduce_PGAs(PGA)
 
     return PGA, Sas, PSV, Tc
 
@@ -248,7 +170,6 @@ def create_mean_sa_table(data_file: Path) -> "pdt.DataFrame":
 
     """
     PGA, Sas, PSV, Tc = calculate_parameter_arrays(data_file)
-    vs30_list = extract_vs30s(data_file)
     i_stat = 0  # hcurves index for stats in ['mean'] + quantiles
 
     site_list = list(extract_sites(data_file).index)
@@ -268,7 +189,7 @@ def create_mean_sa_table(data_file: Path) -> "pdt.DataFrame":
 
         log.info(f"site class {sc} label: {sc_label} vs30: {vs30}")
 
-        i_vs30 = vs30_list.index(vs30)
+        i_vs30 = VS30_LIST.index(vs30)
 
         for APoE in APoEs:
             i_rp = hazard_rp_list.index(int(APoE.split("/")[1]))
@@ -296,7 +217,6 @@ def update_lower_bound_sa(
     """
     PGA, Sas, PSV, Tc = calculate_parameter_arrays(data_file)
     site_list = list(extract_sites(data_file).index)
-    vs30_list = extract_vs30s(data_file)
     quantiles = extract_quantiles(data_file)
 
     APoEs, hazard_rp_list = extract_APoEs(data_file)
@@ -306,16 +226,16 @@ def update_lower_bound_sa(
     index = site_list
     df = pd.concat([mean_df, pd.DataFrame(index=index, columns=columns)], axis=1)
 
-    controlling_site = lower_bound_parameters["controlling_site"]
+    controlling_site = LOWER_BOUND_PARAMETERS["controlling_site"]
     i_site = site_list.index(controlling_site)
     i_stat = 1 + quantiles.index(
-        float(lower_bound_parameters["controlling_percentile"])
+        float(LOWER_BOUND_PARAMETERS["controlling_percentile"])
     )
 
     for sc in SITE_CLASSES.keys():
         sc_label = SITE_CLASSES[sc].label
         vs30 = SITE_CLASSES[sc].representative_vs30
-        i_vs30 = vs30_list.index(int(vs30))
+        i_vs30 = VS30_LIST.index(int(vs30))
 
         for APoE in APoEs:
             i_rp = hazard_rp_list.index(int(APoE.split("/")[1]))
@@ -541,13 +461,13 @@ def create_sa_pkl(
     log.info(f"begin create_sa_pkl for {len(sites)}")
 
     # query NSHM
-    hcurves, imtl_list = q_haz.retrieve_hazard_curves(
-        sites, vs30_list, imt_list, agg_list, hazard_id
+    hcurves, _ = q_haz.retrieve_hazard_curves(
+        sites, VS30_LIST, IMT_LIST, AGG_LIST, hazard_id
     )
 
     # prep and save hcurves to hdf5
     data = to_hdf5.create_hcurve_dictionary(
-        sites, vs30_list, imt_list, imtl_list, agg_list, hcurves
+        sites, VS30_LIST, IMT_LIST, IMTL_LIST, AGG_LIST, hcurves
     )
 
     data = to_hdf5.add_uniform_hazard_spectra(data)
