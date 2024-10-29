@@ -137,12 +137,12 @@ IMTL_LIST = [
 ]
 
 SITE_CLASSES: dict[str, SiteClass] = {
-    "I": SiteClass("I", 750, "Site Soil Class I", 750, np.nan),
-    "II": SiteClass("II", 525, "Site Soil Class II", 450, 750),
-    "III": SiteClass("III", 375, "Site Soil Class III", 300, 450),
-    "IV": SiteClass("IV", 275, "Site Soil Class IV", 250, 300),
-    "V": SiteClass("V", 225, "Site Soil Class V", 200, 250),
-    "VI": SiteClass("VI", 175, "Site Soil Class VI", 150, 200),
+    "I": SiteClass("I", 750, "Site Class I", 750, np.nan),
+    "II": SiteClass("II", 525, "Site Class II", 450, 750),
+    "III": SiteClass("III", 375, "Site Class III", 300, 450),
+    "IV": SiteClass("IV", 275, "Site Class IV", 250, 300),
+    "V": SiteClass("V", 225, "Site Class V", 200, 250),
+    "VI": SiteClass("VI", 175, "Site Class VI", 150, 200),
 }
 
 
@@ -166,3 +166,9 @@ PGA_REDUCTIONS: dict[str, PGA_reductions] = {
     "V": PGA_reductions("V", 0.114, 0.227, 0.137),
     "VI": PGA_reductions("VI", 0.085, 0.171, 0.133),
 }
+
+# specify number of decimal places or significant figures to round to
+PGA_N_DP = 2
+SAS_N_DP = 2
+TC_N_SF = 2
+TD_N_SF = 2
