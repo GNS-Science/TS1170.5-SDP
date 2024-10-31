@@ -383,7 +383,16 @@ def fit_Td_array(
     n_sites = len(sites_of_interest)
     Td = np.zeros([n_vs30s, n_sites, n_apoes])
 
-    for site in sites_of_interest:
+    # cycle through all hazard parameters
+    count = 0
+    expected_count = n_sites
+    for i_site_int,site in enumerate(sites_of_interest):
+        count += 1
+        log.info(
+            f"fit_Td_array progress: Site #{count} of {expected_count}. "
+            f"Approx {(count / expected_count) * 100:.1f} % progress. "
+        )
+
         for vs30 in vs30_list:
             for rp in hazard_rp_list:
                 i_site = site_list.index(site)
@@ -396,7 +405,7 @@ def fit_Td_array(
                 sas = Sas[i_vs30, i_site, i_rp, i_stat]
                 tc = Tc[i_vs30, i_site, i_rp, i_stat]
 
-                Td[i_vs30, i_site, i_rp] = fit_Td(spectrum, periods, pga, sas, tc)
+                Td[i_vs30, i_site_int, i_rp] = fit_Td(spectrum, periods, pga, sas, tc)
 
     Td = sig_figs(Td, TD_N_SF)
 
@@ -468,7 +477,7 @@ def create_mean_sa_table(
 
 
 def update_lower_bound_sa(
-    mean_df, PGA, Sas, PSV, Tc, lower_bound_Td, vs30_list, hazard_rp_list, i_stat
+    mean_df, PGA, Sas, Tc, PSV, acc_spectra, imtls, vs30_list, hazard_rp_list, quantile_list
 ):
     site_list = list(mean_df.index)
     index = site_list
@@ -481,6 +490,21 @@ def update_lower_bound_sa(
 
     controlling_site = LOWER_BOUND_PARAMETERS["controlling_site"]
     i_site = site_list.index(controlling_site)
+    i_stat = 1 + quantile_list.index(
+        float(LOWER_BOUND_PARAMETERS["controlling_percentile"])
+    )
+    lower_bound_Td = fit_Td_array(
+        PGA,
+        Sas,
+        Tc,
+        acc_spectra,
+        imtls,
+        site_list,
+        vs30_list,
+        hazard_rp_list,
+        i_stat,
+        [controlling_site],
+    )
 
     log.info("update_lower_bound_sa() processesing site classes")
     for sc in SITE_CLASSES.keys():
@@ -507,7 +531,7 @@ def update_lower_bound_sa(
                 i_vs30, i_site, i_rp, i_stat
             ]
             df.loc[controlling_site, (APoE, sc_label, "Td")] = lower_bound_Td[
-                i_vs30, i_site, i_rp
+                i_vs30, 0, i_rp
             ]
 
             # apply lower bound to all sites for PGA, Sas, and PSV
@@ -629,38 +653,26 @@ def replace_relevant_locations(
 def create_sa_table(data_file: Path) -> "pdt.DataFrame":
     site_list = list(extract_sites(data_file).index)
     APoEs, hazard_rp_list = extract_APoEs(data_file)
-    quantiles = extract_quantiles(data_file)
+    quantile_list = extract_quantiles(data_file)
     vs30_list = VS30_LIST
 
+    log.info(f"begin calculate_parameter_arrays")
     PGA, Sas, PSV, Tc = calculate_parameter_arrays(data_file)
 
     acc_spectra, imtls = extract_spectra(data_file)
+
+    log.info(f"begin fit_Td_array for mean Tds")
     mean_Td = fit_Td_array(
         PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list
     )
 
-    sites_of_interest = [LOWER_BOUND_PARAMETERS["controlling_site"]]
-    i_stat = 1 + quantiles.index(
-        float(LOWER_BOUND_PARAMETERS["controlling_percentile"])
-    )
-    lower_bound_Td = fit_Td_array(
-        PGA,
-        Sas,
-        Tc,
-        acc_spectra,
-        imtls,
-        site_list,
-        vs30_list,
-        hazard_rp_list,
-        i_stat,
-        sites_of_interest,
-    )
-
+    log.info(f"begin create_mean_sa_table")
     mean_df = create_mean_sa_table(
         PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list
     )
+    log.info(f"begin update_lower_bound_sa")
     df = update_lower_bound_sa(
-        mean_df, PGA, Sas, PSV, Tc, lower_bound_Td, vs30_list, hazard_rp_list, i_stat
+        mean_df, PGA, Sas, Tc, PSV, acc_spectra, imtls, vs30_list, hazard_rp_list, quantile_list
     )
     df = replace_relevant_locations(df)
 
@@ -692,7 +704,7 @@ def save_table_to_pkl(
 
     for APoE in APoEs:
         for sc in sc_labels:
-            for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor"]:
+            for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor", "Td Floor"]:
                 df.drop((APoE, sc, parameter), axis=1, inplace=True)
 
     df.to_pickle(sa_name)
