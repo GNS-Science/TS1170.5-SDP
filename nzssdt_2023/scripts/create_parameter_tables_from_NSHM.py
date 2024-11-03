@@ -25,7 +25,7 @@ from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
-mini = True
+mini = False
 legacy = False
 
 output_folder = Path(WORKING_FOLDER)
@@ -39,9 +39,9 @@ if mini:
 
     site_list = ["Auckland", "Christchurch", "Dunedin", "Wellington"]
 else:
-    hf_path = output_folder / "recreated_hcurves.hdf5"
-    sa_path = output_folder / "recreated_SaT-variables.pkl"
-    dm_path = output_folder / "recreated_D-M-tables.csv"
+    hf_path = output_folder / "all_hcurves.hdf5"
+    sa_path = output_folder / "all_SaT-variables.pkl"
+    dm_path = output_folder / "all_D-M-tables.csv"
 
 # generate Sa Parameter Tables (writes pkl and hdf5 files)
 sa_gen.create_sa_pkl(hf_path, sa_path, site_list=site_list)
