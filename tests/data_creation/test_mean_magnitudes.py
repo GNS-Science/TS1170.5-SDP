@@ -107,7 +107,9 @@ def mock_get_disagg(
     imts,
     probabilities,
 ):
-    dissag_filepth = Path(__file__).parent.parent / "fixtures" / "disagg_fixture_all.json"
+    dissag_filepth = (
+        Path(__file__).parent.parent / "fixtures" / "disagg_fixture_all.json"
+    )
     with dissag_filepth.open() as disagg_file:
         disaggs = json.load(disagg_file)
     for disagg in disaggs:

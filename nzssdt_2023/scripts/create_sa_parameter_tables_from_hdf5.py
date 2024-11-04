@@ -34,11 +34,15 @@ if mini:
     hf_path = output_folder / "mini_hcurves.hdf5"
     sa_path = output_folder / "mini_SaT-variables.pkl"
 
-    site_list = ["Auckland", "Christchurch", "Dunedin", "Wellington", ]
+    site_list = [
+        "Auckland",
+        "Christchurch",
+        "Dunedin",
+        "Wellington",
+    ]
 else:
     hf_path = output_folder / "all_hcurves.hdf5"
     sa_path = output_folder / "all_SaT-variables.pkl"
 
 df = sa_gen.create_sa_table(hf_path)
 sa_gen.save_table_to_pkl(df, sa_path)
-

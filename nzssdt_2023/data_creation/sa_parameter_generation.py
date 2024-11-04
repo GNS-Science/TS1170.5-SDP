@@ -185,7 +185,7 @@ def reduce_PGAs(PGA: "npt.NDArray") -> "npt.NDArray":
     return reduced_PGA
 
 
-def uhs_value(period: float, PGA: float, Sas: float, Tc: float, Td: float) -> float:
+def uhs_value(period: Union[float, "npt.NDArray"], PGA: float, Sas: float, Tc: float, Td: float) -> float:
     """Derive the spectral acceleration Sa(T) at a given period (T), based on the seismic demand parameters.
     Sa(T) equations come from TS Eq. 3.2-3.5
 
@@ -199,6 +199,13 @@ def uhs_value(period: float, PGA: float, Sas: float, Tc: float, Td: float) -> fl
     Returns:
         SaT: spectral acceleration [g]
     """
+
+    # Anne below feels like a bodge not a hack
+    # which defeats the purpose, see
+    # becuase you want to use the fn on an ndarray, but you have unpack the array
+    if isinstance(period, np.ndarray):
+        period = float(period[0])
+
     if period == 0:
         SaT = PGA
     elif period < 0.1:
@@ -210,11 +217,16 @@ def uhs_value(period: float, PGA: float, Sas: float, Tc: float, Td: float) -> fl
     else:
         # TODO: CBC or CDC, any thoughts on how to fix this?
         # When using this function in a scipy optimization (and only then), it returns an array of length 1
-        try:
-            assert len(Sas * Tc / period * (Td / period) ** 0.5) == 1
-            SaT = float((Sas * Tc / period * (Td / period) ** 0.5)[0])
-        except TypeError:
-            SaT = Sas * Tc / period * (Td / period) ** 0.5
+        # try:
+        #     assert len(Sas * Tc / period * (Td / period) ** 0.5) == 1
+        #     SaT = float((Sas * Tc / period * (Td / period) ** 0.5)[0])
+        #     ## Here we can see that type(period) is `ndarray` not float
+        #     # print (type(period), period)
+        #     # assert 0
+        #     # why isn't mypy showing this up ?? (update: actually it WAS showing this problem)
+        # except TypeError:
+
+        SaT = Sas * Tc / period * (Td / period) ** 0.5
 
     return SaT
 
@@ -386,7 +398,7 @@ def fit_Td_array(
     # cycle through all hazard parameters
     count = 0
     expected_count = n_sites
-    for i_site_int,site in enumerate(sites_of_interest):
+    for i_site_int, site in enumerate(sites_of_interest):
         count += 1
         log.info(
             f"fit_Td_array progress: Site #{count} of {expected_count}. "
@@ -477,7 +489,16 @@ def create_mean_sa_table(
 
 
 def update_lower_bound_sa(
-    mean_df, PGA, Sas, Tc, PSV, acc_spectra, imtls, vs30_list, hazard_rp_list, quantile_list
+    mean_df,
+    PGA,
+    Sas,
+    Tc,
+    PSV,
+    acc_spectra,
+    imtls,
+    vs30_list,
+    hazard_rp_list,
+    quantile_list,
 ):
     site_list = list(mean_df.index)
     index = site_list
@@ -672,7 +693,16 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
     )
     log.info(f"begin update_lower_bound_sa")
     df = update_lower_bound_sa(
-        mean_df, PGA, Sas, Tc, PSV, acc_spectra, imtls, vs30_list, hazard_rp_list, quantile_list
+        mean_df,
+        PGA,
+        Sas,
+        Tc,
+        PSV,
+        acc_spectra,
+        imtls,
+        vs30_list,
+        hazard_rp_list,
+        quantile_list,
     )
     df = replace_relevant_locations(df)
 
