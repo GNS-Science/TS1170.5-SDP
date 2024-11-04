@@ -185,7 +185,9 @@ def reduce_PGAs(PGA: "npt.NDArray") -> "npt.NDArray":
     return reduced_PGA
 
 
-def uhs_value(period: Union[float, "npt.NDArray"], PGA: float, Sas: float, Tc: float, Td: float) -> float:
+def uhs_value(
+    period: Union[float, "npt.NDArray"], PGA: float, Sas: float, Tc: float, Td: float
+) -> float:
     """Derive the spectral acceleration Sa(T) at a given period (T), based on the seismic demand parameters.
     Sa(T) equations come from TS Eq. 3.2-3.5
 
@@ -200,9 +202,12 @@ def uhs_value(period: Union[float, "npt.NDArray"], PGA: float, Sas: float, Tc: f
         SaT: spectral acceleration [g]
     """
 
-    # Anne below feels like a bodge not a hack
-    # which defeats the purpose, see
-    # becuase you want to use the fn on an ndarray, but you have unpack the array
+    # TODO: this works (i.e. it handles the code as it's called now) -  but
+    # I think there's a better way to do this sort of thing whe your data is in numpy arrays
+    #
+    # see https://stackoverflow.com/questions/42594695/
+    # how-to-apply-a-function-map-values-of-each-element-in-a-2d-numpy-array-matrix
+
     if isinstance(period, np.ndarray):
         period = float(period[0])
 
@@ -225,9 +230,7 @@ def uhs_value(period: Union[float, "npt.NDArray"], PGA: float, Sas: float, Tc: f
         #     # assert 0
         #     # why isn't mypy showing this up ?? (update: actually it WAS showing this problem)
         # except TypeError:
-
         SaT = Sas * Tc / period * (Td / period) ** 0.5
-
     return SaT
 
 
@@ -677,21 +680,21 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
     quantile_list = extract_quantiles(data_file)
     vs30_list = VS30_LIST
 
-    log.info(f"begin calculate_parameter_arrays")
+    log.info("begin calculate_parameter_arrays")
     PGA, Sas, PSV, Tc = calculate_parameter_arrays(data_file)
 
     acc_spectra, imtls = extract_spectra(data_file)
 
-    log.info(f"begin fit_Td_array for mean Tds")
+    log.info("begin fit_Td_array for mean Tds")
     mean_Td = fit_Td_array(
         PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list
     )
 
-    log.info(f"begin create_mean_sa_table")
+    log.info("begin create_mean_sa_table")
     mean_df = create_mean_sa_table(
         PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list
     )
-    log.info(f"begin update_lower_bound_sa")
+    log.info("begin update_lower_bound_sa")
     df = update_lower_bound_sa(
         mean_df,
         PGA,
