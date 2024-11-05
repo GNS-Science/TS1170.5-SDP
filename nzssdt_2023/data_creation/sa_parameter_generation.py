@@ -42,6 +42,7 @@ if TYPE_CHECKING:
 
 TEST_NO_PGA_REDUCTION = False  # for testing only, skips `reduce_PGAs()` function call.
 
+
 def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str:
     """Returns the site class for the selected vs30 value
     Site class definitions can be found in TS Table 3.1
@@ -443,7 +444,9 @@ def calculate_parameter_arrays(
         log.debug(f"PGA array {PGA}")
         PGA = reduce_PGAs(PGA)
     else:
-        log.warning(f"PGA reduction skipped because `TEST_NO_PGA_REDUCTION` == {TEST_NO_PGA_REDUCTION}")
+        log.warning(
+            f"PGA reduction skipped because `TEST_NO_PGA_REDUCTION` == {TEST_NO_PGA_REDUCTION}"
+        )
 
     PGA = np.round(PGA, PGA_N_DP)
 

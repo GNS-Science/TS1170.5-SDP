@@ -12,22 +12,24 @@ TODO:
  This would be much cleaner if the `sa_gen.create_sa_table` function could do this instead.
 """
 
-import numpy as np
 import pytest
+from pytest_lazy_fixtures import lf
 
 import nzssdt_2023.data_creation.constants as constants
 import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
+
 
 # @pytest.mark.skip('WIP')
 @pytest.mark.parametrize(
     "site_class", ["Site Class VI", "Site Class V", "Site Class IV"]
 )
 @pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
-def test_original_PGAs(site_class, city, mini_hcurves_hdf5_path, pga_original_rp_2500, monkeypatch):
-    """OG PGA are calcluated in extract_spectra
-    """
+def test_original_PGAs(
+    site_class, city, mini_hcurves_hdf5_path, pga_original_rp_2500, monkeypatch
+):
+    """OG PGA are calcluated in extract_spectra"""
 
-    monkeypatch.setattr(sa_gen, 'TEST_NO_PGA_REDUCTION', True)
+    monkeypatch.setattr(sa_gen, "TEST_NO_PGA_REDUCTION", True)
 
     site_list = list(sa_gen.extract_sites(mini_hcurves_hdf5_path).index)
     APoEs, hazard_rp_list = sa_gen.extract_APoEs(mini_hcurves_hdf5_path)
@@ -208,54 +210,31 @@ def test_reduce_PGAs_main_cities_SIMPLE_SLOW(
         df0[("APoE: 1/2500", "Site Class IV", "PGA")]["Auckland"]
     )
 
-# @pytest.mark.skip("WIP demo stage only")
-def test_create_sa_table_reduced_pga(mini_hcurves_hdf5_path, pga_reduced_rp_2500):
 
-    df0 = sa_gen.create_sa_table(mini_hcurves_hdf5_path)
+@pytest.mark.parametrize(
+    "site_class", [f"Site Class {sc}" for sc in "IV,V,VI".split(",")]
+)
+@pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
+@pytest.mark.parametrize(
+    "return_period, pga_table",
+    [
+        (2500, lf("pga_reduced_rp_2500")),
+        (500, lf("pga_reduced_rp_500")),
+    ],
+)
+def test_create_sa_table_reduced_pga(
+    sa_table_reduced, city, site_class, return_period, pga_table
+):
 
+    df0 = sa_table_reduced
     print(df0)
     print()
     print(df0.columns)
 
-    print(df0[("APoE: 1/2500", "Site Class IV", "PGA")])
-    print(df0[("APoE: 1/2500", "Site Class IV", "PGA")]["Auckland"])
+    print(df0[(f"APoE: 1/{return_period}", site_class, "PGA")])
+    print(df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city])
 
-    df1 = pga_reduced_rp_2500
-    print(df1)
-    akl = df1[df1["City"] == "Auckland"]
-
-    assert pytest.approx(round(float(akl["SiteClass_IV"]), 2)) == float(
-        df0[("APoE: 1/2500", "Site Class IV", "PGA")]["Auckland"]
-    )
-
-
-@pytest.fixture(scope='module')
-def monkeymodule():
-    """
-    allow monkeypatch module see https://stackoverflow.com/q/73385558
-    """
-    from _pytest.monkeypatch import MonkeyPatch
-    mpatch = MonkeyPatch()
-    yield mpatch
-    mpatch.undo()
-
-@pytest.fixture(scope='module')
-def sa_table_original(monkeymodule, mini_hcurves_hdf5_path):
-    monkeymodule.setattr(sa_gen, 'TEST_NO_PGA_REDUCTION', True)
-    yield sa_gen.create_sa_table(mini_hcurves_hdf5_path)
-
-@pytest.mark.parametrize(
-    "site_class", ["Site Class VI", "Site Class V", "Site Class IV"]
-)
-@pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
-def test_create_sa_table_original_pga(sa_table_original, pga_original_rp_2500, city, site_class):
-
-    df0 = sa_table_original
-
-    print(df0[("APoE: 1/2500", site_class, "PGA")])
-    print(df0[("APoE: 1/2500", site_class, "PGA")][city])
-
-    df1 = pga_original_rp_2500
+    df1 = pga_table
     print(df1)
     expected_df = df1[df1["City"] == city]
 
@@ -268,5 +247,42 @@ def test_create_sa_table_original_pga(sa_table_original, pga_original_rp_2500, c
     )
 
     assert pytest.approx(round(float(expected_df[site_class]), 2)) == float(
-        df0[("APoE: 1/2500", site_class, "PGA")][city]
+        df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city]
+    )
+
+
+@pytest.mark.parametrize(
+    "site_class", [f"Site Class {sc}" for sc in "IV,V,VI".split(",")]
+)
+@pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
+@pytest.mark.parametrize(
+    "return_period, pga_table",
+    [
+        (2500, lf("pga_original_rp_2500")),
+        (500, lf("pga_original_rp_500")),
+    ],
+)
+def test_create_sa_table_original_pga(
+    sa_table_original, city, site_class, return_period, pga_table
+):
+
+    df0 = sa_table_original
+
+    print(df0[(f"APoE: 1/{return_period}", site_class, "PGA")])
+    print(df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city])
+
+    df1 = pga_table
+    print(df1)
+    expected_df = df1[df1["City"] == city]
+
+    expected_df = expected_df.rename(
+        columns={
+            "SiteClass_IV": "Site Class IV",
+            "SiteClass_V": "Site Class V",
+            "SiteClass_VI": "Site Class VI",
+        }
+    )
+
+    assert pytest.approx(round(float(expected_df[site_class]), 2)) == float(
+        df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city]
     )

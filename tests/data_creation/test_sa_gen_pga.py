@@ -76,4 +76,3 @@ def test_reduce_PGAs(mini_hcurves_hdf5_path):
 
 #     print(acc_spectra)
 #     assert 0
-
