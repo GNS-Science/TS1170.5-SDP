@@ -11,20 +11,17 @@ pre-requisities:
 """
 
 import logging
-import pickle as pkl
 from pathlib import Path
 from typing import Optional
-
-import numpy as np
 
 from nzssdt_2023.config import WORKING_FOLDER
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
 # configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
-mini = False
+mini = True
 
 output_folder = Path(WORKING_FOLDER)
 

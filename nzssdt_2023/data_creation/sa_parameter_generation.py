@@ -198,17 +198,17 @@ def uhs_value(
         Tc: spectral-acceleration-plateau corner period [seconds]
         Td: spectral-velocity-plateau corner period [seconds]
 
+    Todo:
+        this works (i.e. it handles the code as it's called now) -  but
+        I think there's a better way to do this sort of thing whe your data is in numpy arrays
+        see: https://stackoverflow.com/questions/42594695/
+        how-to-apply-a-function-map-values-of-each-element-in-a-2d-numpy-array-matrix
+
     Returns:
         SaT: spectral acceleration [g]
     """
-
-    # TODO: this works (i.e. it handles the code as it's called now) -  but
-    # I think there's a better way to do this sort of thing whe your data is in numpy arrays
-    #
-    # see https://stackoverflow.com/questions/42594695/
-    # how-to-apply-a-function-map-values-of-each-element-in-a-2d-numpy-array-matrix
-
     if isinstance(period, np.ndarray):
+        assert len(period) == 1
         period = float(period[0])
 
     if period == 0:
@@ -220,18 +220,9 @@ def uhs_value(
     elif period < Td:
         SaT = Sas * Tc / period
     else:
-        # TODO: CBC or CDC, any thoughts on how to fix this?
-        # When using this function in a scipy optimization (and only then), it returns an array of length 1
-        # try:
-        #     assert len(Sas * Tc / period * (Td / period) ** 0.5) == 1
-        #     SaT = float((Sas * Tc / period * (Td / period) ** 0.5)[0])
-        #     ## Here we can see that type(period) is `ndarray` not float
-        #     # print (type(period), period)
-        #     # assert 0
-        #     # why isn't mypy showing this up ?? (update: actually it WAS showing this problem)
-        # except TypeError:
         SaT = Sas * Tc / period * (Td / period) ** 0.5
-    return SaT
+    # return SaT
+    return float(SaT)
 
 
 def interpolate_spectra(
@@ -446,6 +437,8 @@ def calculate_parameter_arrays(
     vel_spectra = acc_spectra_to_vel(acc_spectra, imtls)
 
     PGA = acc_spectra[:, :, IMT_LIST.index("PGA"), :, :]
+
+    log.debug(f"PGA array {PGA}")
     PGA = reduce_PGAs(PGA)
     PGA = np.round(PGA, PGA_N_DP)
 

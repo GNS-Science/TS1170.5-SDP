@@ -1,14 +1,17 @@
-import pytest
 from pathlib import Path
-import pandas as pd
 
-import nzssdt_2023.data_creation.constants as constants
+import pandas as pd
+import pytest
+
+# import nzssdt_2023.data_creation.constants as constants
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
+
 
 @pytest.fixture(scope="module")
 def mini_hcurves_hdf5_path():
     yield FIXTURES / "mini_hcurves.hdf5"
+
 
 @pytest.fixture(scope="module")
 def pga_adjusted_rp_2500():

@@ -23,12 +23,14 @@ def test_uhs_value_python_exploratory():
     assert (
         sa_gen.uhs_value(period=0.5, PGA=2.0, Sas=1.5, Tc=2.0, Td=2.0) == 1.5
     ), "period < Tc"
-    assert sa_gen.uhs_value(period=0.5, PGA=2.0, Sas=1.5, Tc=0.45, Td=2.0) ==\
-        1.5 * 0.45 / 0.5,\
-        "period < Td:"
-    assert sa_gen.uhs_value(period=5.0, PGA=2.0, Sas=1.5, Tc=0.45, Td=2.0) == \
-        1.5 * (0.45 / 5.0) * (2.0 / 5.0) ** 0.5,\
-        "everything else"
+    assert (
+        sa_gen.uhs_value(period=0.5, PGA=2.0, Sas=1.5, Tc=0.45, Td=2.0)
+        == 1.5 * 0.45 / 0.5
+    ), "period < Td:"
+    assert (
+        sa_gen.uhs_value(period=5.0, PGA=2.0, Sas=1.5, Tc=0.45, Td=2.0)
+        == 1.5 * (0.45 / 5.0) * (2.0 / 5.0) ** 0.5
+    ), "everything else"
 
 
 UhsArgs = namedtuple("UhsArgs", "period, PGA, Sas, Tc, Td")
@@ -68,12 +70,13 @@ def test_uhs_value_python_parameterized(args, expected):
 def test_uhs_value_numpy(args, expected):
 
     # This test reproduces what's done in sa_gen module when calling ush_value
-    # But can't we write this so the array is passed in  rather than unpacking...
-    # with `for period in periods`?
+    # But could we0 write this so the array is passed in  rather than unpacking
+    # with ... `for period in periods`?
     # See TODO notes in function body
 
     periods = np.ndarray([1, 1])
     periods.fill(args.period)
+
     res = [
         sa_gen.uhs_value(period, args.PGA, args.Sas, args.Tc, args.Td)
         for period in periods
