@@ -27,7 +27,7 @@ import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
 def test_original_PGAs(
     site_class, city, mini_hcurves_hdf5_path, pga_original_rp_2500, monkeypatch
 ):
-    """OG PGA are calcluated in extract_spectra"""
+    """Original PGA are calculated in extract_spectra() function"""
 
     monkeypatch.setattr(sa_gen, "TEST_NO_PGA_REDUCTION", True)
 
@@ -115,23 +115,9 @@ def test_PGA_reduction(
     df_original = pga_original_table.set_index('City')
     df_reduced  = pga_reduced_table.set_index('City')
 
-    df_original = df_original.rename(
-        columns={
-            "SiteClass_IV": "Site Class IV",
-            "SiteClass_V": "Site Class V",
-            "SiteClass_VI": "Site Class VI",
-        }
-    )
-    df_reduced = df_reduced.rename(
-        columns={
-            "SiteClass_IV": "Site Class IV",
-            "SiteClass_V": "Site Class V",
-            "SiteClass_VI": "Site Class VI",
-        }
-    )
-
     pga_original = df_original.loc[city,site_class]
     pga_reduced = sa_gen.calc_reduced_PGA(pga_original, sc)
+
     assert pytest.approx(df_reduced.loc[city,site_class]) == pga_reduced
 
 
@@ -192,14 +178,6 @@ def test_reduce_PGAs_main_cities_FAST(
     df1 = pga_reduced_rp_2500
     expected_df = df1[df1["City"] == city]
 
-    expected_df = expected_df.rename(
-        columns={
-            "SiteClass_IV": "Site Class IV",
-            "SiteClass_V": "Site Class V",
-            "SiteClass_VI": "Site Class VI",
-        }
-    )
-    # print("Christchurch,0.5782371974177063,0.576551165606152,0.6741478781297515")
     print(expected_df)
 
     assert pytest.approx(round(float(expected_df[site_class]), 2)) == float(
@@ -268,9 +246,10 @@ def test_create_sa_table_reduced_pga(
 ):
 
     df0 = sa_table_reduced
-    print(df0)
-    print()
-    print(df0.columns)
+
+    # print(df0)
+    # print()
+    # print(df0.columns)
 
     print(df0[(f"APoE: 1/{return_period}", site_class, "PGA")])
     print(df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city])
@@ -278,29 +257,6 @@ def test_create_sa_table_reduced_pga(
     df1 = pga_table
     print(df1)
     expected_df = df1[df1["City"] == city]
-
-    expected_df = expected_df.rename(
-        columns={
-            "SiteClass_IV": "Site Class IV",
-            "SiteClass_V": "Site Class V",
-            "SiteClass_VI": "Site Class VI",
-        }
-    )
-
-    # df_anne = df1.set_index('City')
-    #
-    # df_anne = df_anne.rename(
-    #     columns={
-    #         "SiteClass_IV": "Site Class IV",
-    #         "SiteClass_V": "Site Class V",
-    #         "SiteClass_VI": "Site Class VI",
-    #     }
-    # )
-    #
-    # print(expected_df)
-    # print(df_anne.loc[city,:])
-    #
-    # assert 0
 
     assert pytest.approx(round(float(expected_df[site_class]), 2)) == float(
         df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city]
@@ -330,14 +286,6 @@ def test_create_sa_table_original_pga(
     df1 = pga_table
     print(df1)
     expected_df = df1[df1["City"] == city]
-
-    expected_df = expected_df.rename(
-        columns={
-            "SiteClass_IV": "Site Class IV",
-            "SiteClass_V": "Site Class V",
-            "SiteClass_VI": "Site Class VI",
-        }
-    )
 
     assert pytest.approx(round(float(expected_df[site_class]), 2)) == float(
         df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city]

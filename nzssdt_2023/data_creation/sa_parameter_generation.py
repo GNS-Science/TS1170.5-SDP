@@ -13,6 +13,7 @@ from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
 from nzssdt_2023.data_creation.constants import (
     AGG_LIST,
+    DEFAULT_RPS, # FOR TESTING
     IMT_LIST,
     IMTL_LIST,
     LOCATION_REPLACEMENTS,
@@ -518,6 +519,8 @@ def update_lower_bound_sa(
     i_stat = 1 + quantile_list.index(
         float(LOWER_BOUND_PARAMETERS["controlling_percentile"])
     )
+    log.debug(f'update_lower_bound_sa() controlling_site: {controlling_site};'
+        f' controlling_percentile {LOWER_BOUND_PARAMETERS["controlling_percentile"]}')
     lower_bound_Td = fit_Td_array(
         PGA,
         Sas,
@@ -684,17 +687,55 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
     log.info("begin calculate_parameter_arrays")
     PGA, Sas, PSV, Tc = calculate_parameter_arrays(data_file)
 
+
     acc_spectra, imtls = extract_spectra(data_file)
+
+    # DIAGNOSTICS
+    # why is PGA off by ~0.01 for some permutations??
+    # PGA (dimensions: vs30, site, return period, statistic)
+    np.set_printoptions(precision=8)
+    pd.set_option('display.precision', 8)
+
+    print('DIAG #1')
+    print('=' * 40)
+    SITE_IDX = 0  # Auckland
+    RP_IDX = DEFAULT_RPS.index(2500)
+    STAT_IDX = 0  # mean
+    PGA1 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
+    print(PGA1)
+    print('=' * 40)
+    print()
+    assert PGA1.shape == (6, )
 
     log.info("begin fit_Td_array for mean Tds")
     mean_Td = fit_Td_array(
         PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list
     )
 
+    print('DIAG #2')
+    print('=' * 40)
+    PGA2 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
+    print(PGA2)
+    print('=' * 40)
+    print()
+    assert PGA2.shape == (6, )
+
+    assert (PGA1 == PGA2).all()
+
     log.info("begin create_mean_sa_table")
     mean_df = create_mean_sa_table(
         PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list
     )
+
+    COLUMNS = [('APoE: 1/2500', f'Site Class {sc}', 'PGA') for sc in 'VI,V,IV'.split(',')]
+
+    print('DIAG #3 post create_mean_sa_table')
+    #print('        mean_df AKL APoE:', ' 1/2500', 'Site Class V', 'PGA')
+    print('=' * 40)
+    print(mean_df[COLUMNS]) # [mean_df.index=="Auckland"])
+    print('=' * 40)
+    print()
+
     log.info("begin update_lower_bound_sa")
     df = update_lower_bound_sa(
         mean_df,
@@ -708,6 +749,13 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
         hazard_rp_list,
         quantile_list,
     )
+
+    print('DIAG #4 post update_lower_bound_sa')
+    print('=' * 40)
+    print(df[COLUMNS])
+    print('=' * 40)
+    print()
+
     df = replace_relevant_locations(df)
 
     return df
