@@ -98,6 +98,49 @@ def test_original_PGAs(
     "site_class", ["Site Class VI", "Site Class V", "Site Class IV"]
 )
 @pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
+@pytest.mark.parametrize(
+    "return_period, pga_original_table, pga_reduced_table",
+    [
+        (2500, lf("pga_original_rp_2500"), lf("pga_reduced_rp_2500")),
+        (500, lf("pga_original_rp_500"), lf("pga_reduced_rp_500")),
+    ],
+)
+def test_PGA_reduction(
+    site_class, city, return_period, pga_original_table, pga_reduced_table
+):
+    """PGA reduction on CdlT's original PGAs"""
+
+    sc = site_class.split(' ')[-1]
+    # print(sc)
+    # assert 0
+
+    df_original = pga_original_table.set_index('City')
+    df_reduced  = pga_reduced_table.set_index('City')
+
+    df_original = df_original.rename(
+        columns={
+            "SiteClass_IV": "Site Class IV",
+            "SiteClass_V": "Site Class V",
+            "SiteClass_VI": "Site Class VI",
+        }
+    )
+    df_reduced = df_reduced.rename(
+        columns={
+            "SiteClass_IV": "Site Class IV",
+            "SiteClass_V": "Site Class V",
+            "SiteClass_VI": "Site Class VI",
+        }
+    )
+
+    pga_original = df_original.loc[city,site_class]
+    pga_reduced = sa_gen.calc_reduced_PGA(pga_original, sc)
+    assert pytest.approx(df_reduced.loc[city,site_class]) == pga_reduced
+
+
+@pytest.mark.parametrize(
+    "site_class", ["Site Class VI", "Site Class V", "Site Class IV"]
+)
+@pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
 def test_reduce_PGAs_main_cities_FAST(
     site_class, city, mini_hcurves_hdf5_path, pga_reduced_rp_2500
 ):
@@ -245,6 +288,21 @@ def test_create_sa_table_reduced_pga(
             "SiteClass_VI": "Site Class VI",
         }
     )
+
+    # df_anne = df1.set_index('City')
+    #
+    # df_anne = df_anne.rename(
+    #     columns={
+    #         "SiteClass_IV": "Site Class IV",
+    #         "SiteClass_V": "Site Class V",
+    #         "SiteClass_VI": "Site Class VI",
+    #     }
+    # )
+    #
+    # print(expected_df)
+    # print(df_anne.loc[city,:])
+    #
+    # assert 0
 
     assert pytest.approx(round(float(expected_df[site_class]), 2)) == float(
         df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city]
