@@ -111,8 +111,6 @@ def test_PGA_reduction(
     """PGA reduction on CdlT's original PGAs"""
 
     sc = site_class.split(' ')[-1]
-    # print(sc)
-    # assert 0
 
     df_original = pga_original_table.set_index('City')
     df_reduced  = pga_reduced_table.set_index('City')
