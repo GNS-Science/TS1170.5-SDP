@@ -172,4 +172,3 @@ PGA_REDUCTIONS: dict[str, PGA_reductions] = {
 PGA_N_DP = 2
 SAS_N_DP = 2
 TC_N_SF = 2
-TD_N_SF = 2

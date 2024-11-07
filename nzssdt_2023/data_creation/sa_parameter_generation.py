@@ -23,7 +23,6 @@ from nzssdt_2023.data_creation.constants import (
     SAS_N_DP,
     SITE_CLASSES,
     TC_N_SF,
-    TD_N_SF,
     VS30_LIST,
     LocationReplacement,
 )
@@ -338,23 +337,39 @@ def fit_Td(
         tc: spectral-acceleration-plateau corner period [seconds]
 
     Returns:
-        Td: spectral-velocity-plateau corner period [seconds]
+        td: spectral-velocity-plateau corner period [seconds]
     """
     relevant_spectrum, relevant_periods = relevant_spectrum_domain(
         spectrum, periods, tc
     )
 
-    # minimize error via a precise Td value
+    # minimize error via an optimized Td value
     bounds = [(relevant_periods[0], relevant_periods[-1])]
-    Td_0 = 3
-    Td = minimize(
+    td_0 = 3
+    td_optimized = minimize(
         Td_fit_error,
-        Td_0,
+        td_0,
         args=(relevant_periods, relevant_spectrum, pga, sas, tc),
         bounds=bounds,
     ).x[0]
 
-    return Td
+    # select potential Td values in the applicable increments
+    if td_optimized not in relevant_periods:
+        td_idx = np.searchsorted(relevant_periods,td_optimized)
+        if td_idx > 1:
+            td_options = relevant_periods[td_idx-1:td_idx+1]
+        elif td_idx <= 1:
+            td_options = relevant_periods[0:2]
+        else:
+            assert 0
+    else:
+        td_options = [td_optimized]
+
+    # select Td option with the minimum error
+    td_error = [Td_fit_error(td,relevant_periods,relevant_spectrum,pga,sas,tc) for td in td_options]
+    td = td_options[np.argmin(td_error)]
+
+    return td
 
 
 def fit_Td_array(
@@ -419,8 +434,11 @@ def fit_Td_array(
 
                 Td[i_vs30, i_site_int, i_rp] = fit_Td(spectrum, periods, pga, sas, tc)
 
+<<<<<<< HEAD
     Td = sig_figs(Td, TD_N_SF)  # type: ignore
 
+=======
+>>>>>>> d313169 (return Td in increments of 0.1)
     return Td
 
 
