@@ -1,3 +1,4 @@
+import pickle as pkl
 from pathlib import Path
 
 import pandas as pd
@@ -13,6 +14,7 @@ working_folder = Path(WORKING_FOLDER)
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
 
+
 SITECLASS_COLUMN_MAPPING = {
     "SiteClass_IV": "Site Class IV",
     "SiteClass_V": "Site Class V",
@@ -21,18 +23,22 @@ SITECLASS_COLUMN_MAPPING = {
 
 @pytest.fixture(scope="module")
 def sas_tc_td_parameters():
-    path = FIXTURES / "sas-tc-td_parameters/TS_parameters_nshmv5_allvariables_allsites.xlsx"
+    path = (
+        FIXTURES
+        / "sas-tc-td_parameters/TS_parameters_nshmv5_allvariables_allsites.xlsx"
+    )
     df_dict = pd.read_excel(path, sheet_name=None)
     for key in df_dict.keys():
-        df_dict[key].set_index('Location', inplace=True)
+        df_dict[key].set_index("Location", inplace=True)
     yield df_dict
+
 
 @pytest.fixture(scope="module")
 def output_table_mini():
-    path = working_folder / 'mini_SaT-variables.pkl'
+    path = working_folder / "mini_SaT-variables.pkl"
     with open(path, "rb") as file:
         df = pkl.load(file)
-    yield
+    yield df
 
 
 
@@ -86,7 +92,6 @@ def sa_table_original(monkeymodule, mini_hcurves_hdf5_path):
 @pytest.fixture(scope="module")
 def sa_table_reduced(mini_hcurves_hdf5_path):
     yield sa_gen.create_sa_table(mini_hcurves_hdf5_path)
-
 
 
 

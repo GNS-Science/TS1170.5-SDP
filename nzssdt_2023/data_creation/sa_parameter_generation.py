@@ -343,7 +343,10 @@ def fit_Td(
     )
 
     # select period with the minimum error
-    td_error = [Td_fit_error(td,relevant_periods,relevant_spectrum,pga,sas,tc) for td in relevant_periods]
+    td_error = [
+        Td_fit_error(td, relevant_periods, relevant_spectrum, pga, sas, tc)
+        for td in relevant_periods
+    ]
     td = relevant_periods[np.argmin(td_error)]
 
     return td
@@ -714,6 +717,7 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
         PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list
     )
 
+
     if DIAGNOSTICS:
         print("DIAG #2")
         print("=" * 40)
@@ -723,6 +727,7 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
         print()
         assert PGA2.shape == (6,)
         assert (PGA1 == PGA2).all()
+
 
     log.info("begin create_mean_sa_table")
     mean_df = create_mean_sa_table(
