@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import minimize
 
 from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
@@ -343,31 +342,9 @@ def fit_Td(
         spectrum, periods, tc
     )
 
-    # minimize error via an optimized Td value
-    bounds = [(relevant_periods[0], relevant_periods[-1])]
-    td_0 = 3
-    td_optimized = minimize(
-        Td_fit_error,
-        td_0,
-        args=(relevant_periods, relevant_spectrum, pga, sas, tc),
-        bounds=bounds,
-    ).x[0]
-
-    # select potential Td values in the applicable increments
-    if td_optimized not in relevant_periods:
-        td_idx = np.searchsorted(relevant_periods,td_optimized)
-        if td_idx > 1:
-            td_options = relevant_periods[td_idx-1:td_idx+1]
-        elif td_idx <= 1:
-            td_options = relevant_periods[0:2]
-        else:
-            assert 0
-    else:
-        td_options = [td_optimized]
-
-    # select Td option with the minimum error
-    td_error = [Td_fit_error(td,relevant_periods,relevant_spectrum,pga,sas,tc) for td in td_options]
-    td = td_options[np.argmin(td_error)]
+    # select period with the minimum error
+    td_error = [Td_fit_error(td,relevant_periods,relevant_spectrum,pga,sas,tc) for td in relevant_periods]
+    td = relevant_periods[np.argmin(td_error)]
 
     return td
 
@@ -434,11 +411,6 @@ def fit_Td_array(
 
                 Td[i_vs30, i_site_int, i_rp] = fit_Td(spectrum, periods, pga, sas, tc)
 
-<<<<<<< HEAD
-    Td = sig_figs(Td, TD_N_SF)  # type: ignore
-
-=======
->>>>>>> d313169 (return Td in increments of 0.1)
     return Td
 
 

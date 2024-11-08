@@ -2,9 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+import pickle as pkl
 
 # import nzssdt_2023.data_creation.constants as constants
 import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
+
+from nzssdt_2023.config import WORKING_FOLDER
+
+working_folder = Path(WORKING_FOLDER)
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
 
@@ -13,6 +18,22 @@ SITECLASS_COLUMN_MAPPING = {
     "SiteClass_V": "Site Class V",
     "SiteClass_VI": "Site Class VI",
 }  # modify CSV file headings to match ours
+
+@pytest.fixture(scope="module")
+def sas_tc_td_parameters():
+    path = FIXTURES / "sas-tc-td_parameters/TS_parameters_nshmv5_allvariables_allsites.xlsx"
+    df_dict = pd.read_excel(path, sheet_name=None)
+    for key in df_dict.keys():
+        df_dict[key].set_index('Location', inplace=True)
+    yield df_dict
+
+@pytest.fixture(scope="module")
+def output_table_mini():
+    path = working_folder / 'mini_SaT-variables.pkl'
+    with open(path, "rb") as file:
+        df = pkl.load(file)
+    yield
+
 
 
 @pytest.fixture(scope="module")
@@ -65,3 +86,7 @@ def sa_table_original(monkeymodule, mini_hcurves_hdf5_path):
 @pytest.fixture(scope="module")
 def sa_table_reduced(mini_hcurves_hdf5_path):
     yield sa_gen.create_sa_table(mini_hcurves_hdf5_path)
+
+
+
+

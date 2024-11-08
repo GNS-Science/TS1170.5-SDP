@@ -19,7 +19,7 @@ borb = "^2.1.13"
 toshi-hazard-store = "^0.7.9"
 h5py = "^3.11.0"
 geopandas = "^1.0.1"
-scipy = "^1.14.1"
+openpyxl = "^3.1.5"
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}
