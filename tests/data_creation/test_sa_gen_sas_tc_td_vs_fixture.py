@@ -9,7 +9,9 @@ Sas, Tc, Td values vs external fixtures
 import pytest
 
 @pytest.mark.skip('replace `output_table_mini` pickle fixture a with functional test')
-@pytest.mark.parametrize("site", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
+@pytest.mark.parametrize(
+    "site", ["Auckland", "Christchurch", "Dunedin", "Hamilton", "Wellington"]
+)
 @pytest.mark.parametrize(
     "return_period", ["25", "50", "100", "250", "500", "1000", "2500"]
 )

@@ -37,7 +37,7 @@ if mini:
     sa_path = output_folder / "mini_SaT-variables.pkl"
     dm_path = output_folder / "mini_D-M-tables.csv"
 
-    site_list = ["Auckland", "Christchurch", "Dunedin", "Wellington"]
+    site_list = ["Auckland", "Christchurch", "Dunedin", "Hamilton", "Wellington"]
 else:
     hf_path = output_folder / "all_hcurves.hdf5"
     sa_path = output_folder / "all_SaT-variables.pkl"
