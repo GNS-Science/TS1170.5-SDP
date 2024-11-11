@@ -145,9 +145,10 @@ SITE_CLASSES: dict[str, SiteClass] = {
     "VI": SiteClass("VI", 175, "Site Class VI", 150, 200),
 }
 
-
+# CDC/Anne have agreed this list should be stable
+# also...
+#  - HDF5 is built such that this list matches the vs30 in HDF5, value AND order (descending)
 VS30_LIST = [SITE_CLASSES[sc].representative_vs30 for sc in SITE_CLASSES.keys()]
-
 
 LOWER_BOUND_PARAMETERS: dict[str, str | float] = {
     "controlling_site": "Auckland",

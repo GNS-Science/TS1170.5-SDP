@@ -56,7 +56,7 @@ def monkeymodule():
 
 @pytest.fixture(scope="module")
 def sa_table_original(monkeymodule, mini_hcurves_hdf5_path):
-    monkeymodule.setattr(sa_gen, "TEST_NO_PGA_REDUCTION", True)
+    monkeymodule.setattr(sa_gen, "PGA_REDUCTION_ENABLED", False)
     yield sa_gen.create_sa_table(mini_hcurves_hdf5_path)
 
 

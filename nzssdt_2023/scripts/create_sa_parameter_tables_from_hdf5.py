@@ -21,7 +21,7 @@ from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
-mini = True
+mini = False
 
 output_folder = Path(WORKING_FOLDER)
 

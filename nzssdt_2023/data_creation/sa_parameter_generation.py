@@ -41,9 +41,9 @@ if TYPE_CHECKING:
     import numpy.typing as npt
     import pandas.typing as pdt
 
-TEST_NO_PGA_REDUCTION = False  # for testing only, skips `reduce_PGAs()` function call.
-TEST_SKIP_CPA_PGA_ROUNDING = False  # testing also
-TEST_REDUCE_VS30_MOD = False # testing also
+PGA_REDUCTION_ENABLED = True  # for testing only, skips `reduce_PGAs()` function call.
+# TEST_SKIP_CPA_PGA_ROUNDING = True  # testing also
+# TEST_REDUCE_VS30_MOD = False # testing also
 
 def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str:
     """Returns the site class for the selected vs30 value
@@ -174,7 +174,9 @@ def reduce_PGAs(PGA: "npt.NDArray") -> "npt.NDArray":
     n_vs30s, n_sites, n_rps, n_stats = PGA.shape
     reduced_PGA = PGA.copy()
 
-    def do_replacements():
+    for sc in PGA_REDUCTIONS.keys():
+        vs30 = int(SITE_CLASSES[sc].representative_vs30)
+        i_vs30 = VS30_LIST.index(vs30)  # TODO: this assumes the ndarray vs30 are sorted same as VS30_LIST right??
         for i_site in range(n_sites):
             for i_rp in range(n_rps):
                 for i_stat in range(n_stats):
@@ -182,17 +184,6 @@ def reduce_PGAs(PGA: "npt.NDArray") -> "npt.NDArray":
                     reduced_PGA[i_vs30, i_site, i_rp, i_stat] = calc_reduced_PGA(
                         pga, sc
                     )
-
-    for sc in PGA_REDUCTIONS.keys():
-
-        if TEST_REDUCE_VS30_MOD == True:
-            for i_vs30 in range(n_vs30s):
-                do_replacements()
-        else:
-            # originally
-            vs30 = int(SITE_CLASSES[sc].representative_vs30)
-            i_vs30 = VS30_LIST.index(vs30)  # TODO: this assumes the ndarray vs30 are sorted same as VS30_LIST right??
-            do_replacements()
 
     return reduced_PGA
 
@@ -450,16 +441,16 @@ def calculate_parameter_arrays(
 
     PGA = acc_spectra[:, :, IMT_LIST.index("PGA"), :, :]
 
-    if not TEST_NO_PGA_REDUCTION:
+    if PGA_REDUCTION_ENABLED:
         log.debug(f"PGA array {PGA}")
         PGA = reduce_PGAs(PGA)
     else:
         log.warning(
-            f"PGA reduction skipped because `TEST_NO_PGA_REDUCTION` == {TEST_NO_PGA_REDUCTION}"
+            f"PGA reduction skipped because `PGA_REDUCTION_ENABLED` == {PGA_REDUCTION_ENABLED}"
         )
 
-    if not TEST_SKIP_CPA_PGA_ROUNDING:
-        PGA = np.round(PGA, PGA_N_DP)
+    # if not TEST_SKIP_CPA_PGA_ROUNDING:
+    #     PGA = np.round(PGA, PGA_N_DP)
 
     Sas = 0.9 * np.max(acc_spectra, axis=2)
     Sas = np.round(Sas, SAS_N_DP)
