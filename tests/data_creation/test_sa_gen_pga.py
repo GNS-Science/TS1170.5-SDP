@@ -4,7 +4,6 @@ test the pga functions in `nzssdt_2023.data_creation.sa_parameter_generation`
 
 import numpy as np
 import pytest
-from pytest_lazy_fixtures import lf
 
 import nzssdt_2023.data_creation.constants as constants
 import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
@@ -70,5 +69,3 @@ def test_reduce_PGAs(mini_hcurves_hdf5_path):
     assert (
         reduced_PGA <= PGA
     ).all(), "reduced PGA should not exceed the original value"
-
-

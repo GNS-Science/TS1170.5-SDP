@@ -11,8 +11,9 @@ FIXTURES = Path(__file__).parent.parent / "fixtures"
 SITECLASS_COLUMN_MAPPING = {
     "SiteClass_IV": "Site Class IV",
     "SiteClass_V": "Site Class V",
-    "SiteClass_VI": "Site Class VI"
+    "SiteClass_VI": "Site Class VI",
 }  # modify CSV file headings to match ours
+
 
 @pytest.fixture(scope="module")
 def mini_hcurves_hdf5_path():
@@ -29,6 +30,7 @@ def pga_reduced_rp_2500():
 def pga_reduced_rp_500():
     path = FIXTURES / "reduced_PGA/PGA_Adjusted_RP_500_years.csv"
     yield pd.read_csv(path).rename(columns=SITECLASS_COLUMN_MAPPING)
+
 
 @pytest.fixture(scope="module")
 def pga_original_rp_2500():

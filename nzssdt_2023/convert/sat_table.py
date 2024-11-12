@@ -7,10 +7,11 @@ from pathlib import Path
 import pandas as pd
 
 from nzssdt_2023.config import RESOURCES_FOLDER
+from nzssdt_2023.data_creation import constants
 
-APoEs = [f"APoE: 1/{rp}" for rp in [25, 100, 250, 500, 1000, 2500]]
+APoEs = [f"APoE: 1/{rp}" for rp in constants.DEFAULT_RPS]
 site_class_labels = [
-    f"Site Soil Class {n}" for n in ["I", "II", "III", "IV", "V", "VI"]
+    f"Site Soil Class {key}" for key in constants.SITE_CLASSES
 ]
 
 
@@ -61,6 +62,22 @@ class SatTable:
         sites = list(df.Location.unique())
         grid_sites = [site for site in sites if "~" in site]
         return df[df.Location.isin(grid_sites)]
+
+
+def one_off_export_for_cdlt():
+    filename = "WORKING/all_SaT-variables.pkl"
+    df = pd.read_pickle(Path(filename))
+    sat = SatTable(df)
+
+    # SAT named
+    out_path = Path("WORKING/named_locations_not_rounded.json")
+    sat.named_location_df().to_json(
+        out_path,
+        index=False,
+        orient="table",
+        indent=2,
+        double_precision=12,
+    )
 
 
 if __name__ == "__main__":

@@ -2,19 +2,27 @@
 PGA value diagnostics
 """
 
-import pytest
 import numpy as np
-import random
+import pytest
 from pytest_lazy_fixtures import lf
 
 import nzssdt_2023.data_creation.constants as constants
 import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
 
+
 @pytest.mark.skip("exploratory parked - stil need to find our point of reference ")
 @pytest.mark.parametrize(
     "site_class", [f"Site Class {sc}" for sc in "V,VI,IV".split(",")]
 )
-@pytest.mark.parametrize("city", [ "Auckland", "Christchurch", "Dunedin", "Wellington",])
+@pytest.mark.parametrize(
+    "city",
+    [
+        "Auckland",
+        "Christchurch",
+        "Dunedin",
+        "Wellington",
+    ],
+)
 @pytest.mark.parametrize(
     "return_period, expected_pgas",
     [
@@ -31,26 +39,39 @@ def test_create_sa_table_reduced_pga_diagnostic(
     df0 = sa_gen.create_sa_table(mini_hcurves_hdf5_path)
     mini_hcurves_hdf5_path
 
-
-    print(f'DIAG #5 the expected PGAs from Chris dlT csv files')
-    print('=' * 40)
+    print("DIAG #5 the expected PGAs from Chris dlT csv files")
+    print("=" * 40)
     df1 = expected_pgas
-    expected_df = df1[df1["City"].isin(["Auckland", "Christchurch", "Dunedin", "Wellington",])]
+    expected_df = df1[
+        df1["City"].isin(
+            [
+                "Auckland",
+                "Christchurch",
+                "Dunedin",
+                "Wellington",
+            ]
+        )
+    ]
     print(expected_df)
     print()
 
     # assert pytest.approx(round(df_reduced.loc[city,site_class],8)) == pga_reduced
 
-    assert pytest.approx(expected_df[expected_df["City"] == city][site_class], abs=5e-3) == float(
-        df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city]
-    )
+    assert pytest.approx(
+        expected_df[expected_df["City"] == city][site_class], abs=5e-3
+    ) == float(df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city])
 
 
 @pytest.mark.skip("exploratory parked - stil need to find our point of reference ")
 @pytest.mark.parametrize(
-    "site_class", [ "Site Class V", ] # "Site Class VI","Site Class IV"
+    "site_class",
+    [
+        "Site Class V",
+    ],  # "Site Class VI","Site Class IV"
 )
-@pytest.mark.parametrize("city", ["Christchurch"]) #Auckland"]) #  ), "Christchurch", "Dunedin", "Wellington"])
+@pytest.mark.parametrize(
+    "city", ["Christchurch"]
+)  # Auckland"]) #  ), "Christchurch", "Dunedin", "Wellington"])
 @pytest.mark.parametrize(
     "return_period, pga_reduced_table",
     [
@@ -59,13 +80,18 @@ def test_create_sa_table_reduced_pga_diagnostic(
     ],
 )
 def test_reduce_PGAs_vs_expected_values(
-    site_class, city, return_period, mini_hcurves_hdf5_path, pga_reduced_table, monkeypatch
+    site_class,
+    city,
+    return_period,
+    mini_hcurves_hdf5_path,
+    pga_reduced_table,
+    monkeypatch,
 ):
     """PGA reduction on CdlT's original PGAs"""
 
     monkeypatch.setattr(sa_gen, "PGA_REDUCTION_ENABLED", True)
-    #monkeypatch.setattr(sa_gen, "TEST_SKIP_CPA_PGA_ROUNDING", True)
-    #monkeypatch.setattr(sa_gen, "TEST_REDUCE_VS30_MOD", True)
+    # monkeypatch.setattr(sa_gen, "TEST_SKIP_CPA_PGA_ROUNDING", True)
+    # monkeypatch.setattr(sa_gen, "TEST_REDUCE_VS30_MOD", True)
 
     EXPECTED_TABLE = """
     DIAG #5 the expected PGAs from Chris dlT csv files
@@ -90,7 +116,6 @@ def test_reduce_PGAs_vs_expected_values(
     PGA = acc_spectra[:, :, constants.IMT_LIST.index("PGA"), :, :]
     reduced_pgas = sa_gen.reduce_PGAs(PGA)
 
-
     SITE_IDX = 0  # Auckland
     SITE_IDX = 1  # Christchurch
     RP_IDX = constants.DEFAULT_RPS.index(2500)
@@ -105,8 +130,8 @@ def test_reduce_PGAs_vs_expected_values(
     print(reduced_pgas[:, SITE_IDX, RP_IDX, STAT_IDX])
     print()
 
-    df_reduced  = pga_reduced_table.set_index('City')
-    pga_expected = df_reduced.loc[city,site_class]
+    df_reduced = pga_reduced_table.set_index("City")
+    pga_expected = df_reduced.loc[city, site_class]
 
     print("reduced PGAs expected")
     print(pga_expected)
@@ -116,21 +141,18 @@ def test_reduce_PGAs_vs_expected_values(
     ### from sa_create_table
     PGA2, Sas, PSV, Tc = sa_gen.calculate_parameter_arrays(mini_hcurves_hdf5_path)
 
-    assert (np.round(PGA2,3) == np.round(PGA,3)).all()
-    assert (np.round(PGA2,5) == np.round(PGA,5)).all()
-    assert (np.round(PGA2,9) == np.round(PGA,9)).all()
+    assert (np.round(PGA2, 3) == np.round(PGA, 3)).all()
+    assert (np.round(PGA2, 5) == np.round(PGA, 5)).all()
+    assert (np.round(PGA2, 9) == np.round(PGA, 9)).all()
 
     assert 0
-
 
     SITE_IDX = 0  # Auckland
     SITE_IDX = 1  # Christchurch
 
     RP_IDX = constants.DEFAULT_RPS.index(2500)
     STAT_IDX = 0  # mean
-    PGA1 = reduced_pgas[:, SITE_IDX, RP_IDX, STAT_IDX]
-
-
+    # PGA1 = reduced_pgas[:, SITE_IDX, RP_IDX, STAT_IDX]
 
     # site_list = [city]
 
@@ -157,7 +179,6 @@ def test_reduce_PGAs_vs_expected_values(
     # assert pytest.approx(df_reduced.loc[city,site_class]) == pga_reduced # 0.3433339156821064 (AKL, V, 2500)
 
 
-
 ## TEST 1) Annes test....
 # showing that the sa_gen.calc_reduced_PGA() function returns
 #  PGA values aligned with expected PGA table from Chris DlT to full machine precision
@@ -166,7 +187,7 @@ def test_reduce_PGAs_vs_expected_values(
 #  test values are slightly different than those expected in the final case,
 ##
 @pytest.mark.parametrize(
-    "site_class", [ "Site Class V", "Site Class VI","Site Class IV" ]
+    "site_class", ["Site Class V", "Site Class VI", "Site Class IV"]
 )
 @pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
 @pytest.mark.parametrize(
@@ -184,23 +205,21 @@ def test_PGA_reduction_anne(
     # monkeypatch.setattr(sa_gen, "PGA_REDUCTION_ENABLED", True)
     # monkeypatch.setattr(sa_gen, "TEST_SKIP_CPA_PGA_ROUNDING", True)
 
-    sc = site_class.split(' ')[-1]
+    sc = site_class.split(" ")[-1]
 
-    df_original = pga_original_table.set_index('City')
-    df_reduced  = pga_reduced_table.set_index('City')
+    df_original = pga_original_table.set_index("City")
+    df_reduced = pga_reduced_table.set_index("City")
 
-    pga_original = df_original.loc[city,site_class]
+    pga_original = df_original.loc[city, site_class]
     pga_reduced = sa_gen.calc_reduced_PGA(pga_original, sc)
 
     print(pga_reduced)
     print()
-    print(df_reduced.loc[city,site_class])
+    print(df_reduced.loc[city, site_class])
 
-    assert pytest.approx(df_reduced.loc[city,site_class], 1e-18) == pga_reduced # 0.3433339156821064 (AKL, V, 2500)
+    assert (
+        pytest.approx(df_reduced.loc[city, site_class], 1e-18) == pga_reduced
+    )  # 0.3433339156821064 (AKL, V, 2500)
     # # assert 0
     # if random.choice([1,2,3]) == 3:
     #     assert 0
-
-
-
-

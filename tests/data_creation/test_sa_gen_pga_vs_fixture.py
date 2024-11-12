@@ -12,16 +12,16 @@ TODO:
  This would be much cleaner if the `sa_gen.create_sa_table` function could do this instead.
 """
 
+import numpy as np
 import pytest
 from pytest_lazy_fixtures import lf
-
-import numpy as np
 
 import nzssdt_2023.data_creation.constants as constants
 import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
 from nzssdt_2023.data_creation import extract_data
 
-@pytest.mark.skip('WIP - exploratory ')
+
+@pytest.mark.skip("WIP - exploratory ")
 @pytest.mark.parametrize(
     "site_class", ["Site Class VI", "Site Class V", "Site Class IV"]
 )
@@ -95,6 +95,7 @@ def test_original_PGAs(
     assert pytest.approx(round(float(expected_df[site_class]), 2)) == round(
         sa_gen_df[("APoE: 1/2500", site_class, "PGA")][city], 2
     )
+
 
 @pytest.mark.skip("SKIP until we have non-rounded expected fixtures")
 @pytest.mark.parametrize(
@@ -176,7 +177,9 @@ def test_reduce_PGAs_main_cities_FAST(
     print(expected_df)
 
     assert pytest.approx(round(float(expected_df[site_class]), 2)) == round(
-        sa_gen_df[("APoE: 1/2500", site_class, "PGA")][city], 2)
+        sa_gen_df[("APoE: 1/2500", site_class, "PGA")][city], 2
+    )
+
 
 @pytest.mark.skip("SKIP until we have non-rounded expected fixtures")
 def test_reduce_PGAs_main_cities_SIMPLE_SLOW(
@@ -222,6 +225,7 @@ def test_reduce_PGAs_main_cities_SIMPLE_SLOW(
     assert pytest.approx(round(float(akl["SiteClass_IV"]), 2)) == float(
         df0[("APoE: 1/2500", "Site Class IV", "PGA")]["Auckland"]
     )
+
 
 @pytest.mark.skip("SKIP until we have non-rounded expected fixtures")
 @pytest.mark.parametrize(
@@ -284,7 +288,7 @@ def test_create_sa_table_original_pga(
 
 ## Annes test....
 @pytest.mark.parametrize(
-    "site_class", [ "Site Class V", "Site Class VI","Site Class IV" ]
+    "site_class", ["Site Class V", "Site Class VI", "Site Class IV"]
 )
 @pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
 @pytest.mark.parametrize(
@@ -299,25 +303,32 @@ def test_PGA_reduction(
 ):
     """PGA reduction on CdlT's original PGAs"""
 
-    sc = site_class.split(' ')[-1]
+    sc = site_class.split(" ")[-1]
 
-    df_original = pga_original_table.set_index('City')
-    df_reduced  = pga_reduced_table.set_index('City')
+    df_original = pga_original_table.set_index("City")
+    df_reduced = pga_reduced_table.set_index("City")
 
-    pga_original = df_original.loc[city,site_class]  # get the single PGA vlue using city/site_class indices
-    pga_reduced = sa_gen.calc_reduced_PGA(pga_original, sc)  # get the single PGA value using our formulae and NSHM hazard tables
+    pga_original = df_original.loc[
+        city, site_class
+    ]  # get the single PGA vlue using city/site_class indices
+    pga_reduced = sa_gen.calc_reduced_PGA(
+        pga_original, sc
+    )  # get the single PGA value using our formulae and NSHM hazard tables
 
     print(pga_reduced)
     print()
-    print(df_reduced.loc[city,site_class])
+    print(df_reduced.loc[city, site_class])
 
     # the two values must be equivalent to 8 decimal places
-    assert pytest.approx(df_reduced.loc[city,site_class], 1e-18) == pga_reduced # 0.3433339156821064 (AKL, V, 2500)
+    assert (
+        pytest.approx(df_reduced.loc[city, site_class], 1e-18) == pga_reduced
+    )  # 0.3433339156821064 (AKL, V, 2500)
 
 
 def test_hdf5_vs30_indices(mini_hcurves_hdf5_path):
     vs30_list = extract_data.extract_vs30s(mini_hcurves_hdf5_path)
     assert vs30_list == constants.VS30_LIST
+
 
 def test_hdf5_site_indices(mini_hcurves_hdf5_path):
     site_list = list(extract_data.extract_sites(mini_hcurves_hdf5_path).index)
@@ -329,16 +340,18 @@ def getpga(pga_array, siteclass, sitelist, city, return_period):
     vs30 = constants.SITE_CLASSES[siteclass].representative_vs30
     i_vs30 = constants.VS30_LIST.index(vs30)
     i_site = sitelist.index(city)
-    i_rp  = constants.DEFAULT_RPS.index(return_period)
+    i_rp = constants.DEFAULT_RPS.index(return_period)
     i_stat = 0
     return pga_array[i_vs30, i_site, i_rp, i_stat]
 
 
 @pytest.mark.skip('SKIP until we have non-rounded expected fixtures"')
 @pytest.mark.parametrize(
-    "site_class", [ "Site Class V", "Site Class VI","Site Class IV" ]
+    "site_class", ["Site Class V", "Site Class VI", "Site Class IV"]
 )
-@pytest.mark.parametrize("city", [ "Christchurch", "Dunedin", "Wellington"]) #  "Auckland",
+@pytest.mark.parametrize(
+    "city", ["Christchurch", "Dunedin", "Wellington"]
+)  # "Auckland",
 @pytest.mark.parametrize(
     "return_period, pga_original_table, pga_reduced_table",
     [
@@ -347,15 +360,20 @@ def getpga(pga_array, siteclass, sitelist, city, return_period):
     ],
 )
 def test_calculate_parameter_arrays_function(
-    site_class, city, return_period, pga_original_table, pga_reduced_table, mini_hcurves_hdf5_path, monkeypatch
+    site_class,
+    city,
+    return_period,
+    pga_original_table,
+    pga_reduced_table,
+    mini_hcurves_hdf5_path,
+    monkeypatch,
 ):
 
     # monkeypatch.setattr(sa_gen, "TEST_NO_PGA_REDUCTION", False)
     # monkeypatch.setattr(sa_gen, "TEST_SKIP_CPA_PGA_ROUNDING", False)
     # monkeypatch.setattr(sa_gen, "TEST_REDUCE_VS30_MOD", False)
 
-    sc = site_class.split(' ')[-1]
-    siteclass_obj = constants.SITE_CLASSES[sc]
+    sc = site_class.split(" ")[-1]
 
     # print()
     # print(f'sc: {sc}')
@@ -367,7 +385,6 @@ def test_calculate_parameter_arrays_function(
     # print(df_reduced.loc[city,site_class])
 
     site_list = list(sa_gen.extract_sites(mini_hcurves_hdf5_path).index)
-
 
     # ##########
     # # setup for no PGA reduction ....
@@ -387,26 +404,30 @@ def test_calculate_parameter_arrays_function(
     # assert pytest.approx(test_original_pga) == df_original.loc[city,site_class]
     # ###########
 
-
     PGA, Sas, PSV, Tc = sa_gen.calculate_parameter_arrays(mini_hcurves_hdf5_path)
 
     test_reduced_pga = getpga(PGA, sc, site_list, city, return_period)
 
-    print('test_reduced_pga:', test_reduced_pga)
+    print("test_reduced_pga:", test_reduced_pga)
 
-    df_reduced  = pga_reduced_table.set_index('City')
-    print(df_reduced.loc[city,site_class])
+    df_reduced = pga_reduced_table.set_index("City")
+    print(df_reduced.loc[city, site_class])
 
-    print('test pga_reduced PGA array')
-    print(df_reduced.loc[city,:],)
-    assert pytest.approx(round(test_reduced_pga,2)) == round(df_reduced.loc[city,site_class], 2)
-
+    print("test pga_reduced PGA array")
+    print(
+        df_reduced.loc[city, :],
+    )
+    assert pytest.approx(round(test_reduced_pga, 2)) == round(
+        df_reduced.loc[city, site_class], 2
+    )
 
 
 @pytest.mark.parametrize(
-    "site_class", [ "Site Class V", "Site Class VI","Site Class IV" ]
+    "site_class", ["Site Class V", "Site Class VI", "Site Class IV"]
 )
-@pytest.mark.parametrize("city", ["Christchurch", "Dunedin", "Wellington"]) #  "Auckland",
+@pytest.mark.parametrize(
+    "city", ["Christchurch", "Dunedin", "Wellington"]
+)  # "Auckland"
 @pytest.mark.parametrize(
     "return_period, pga_original_table, pga_reduced_table",
     [
@@ -414,14 +435,22 @@ def test_calculate_parameter_arrays_function(
         (500, lf("pga_original_rp_500"), lf("pga_reduced_rp_500")),
     ],
 )
-def test_extract_spectra_and_reproduce_rounding_error(site_class, city, return_period, pga_original_table, pga_reduced_table, mini_hcurves_hdf5_path):
+def test_extract_spectra_and_reproduce_rounding_error(
+    site_class,
+    city,
+    return_period,
+    pga_original_table,
+    pga_reduced_table,
+    mini_hcurves_hdf5_path,
+):
     """
-    This test helped us figure out that the reason other tests are failing is that the fixtures/reduced_PGA tables were based on
-    an `all_SaT-varaibles.pkl` file that had PGA rounded to two DP, instead of to full precision.
+    This test helped us figure out that the reason other tests are failing is that the
+    fixtures/reduced_PGA tables were based on an `all_SaT-varaibles.pkl` file that
+    had PGA rounded to two DP, instead of to full precision.
 
-    Note that 'Auckland' is excluded from these tests becuase it requires another step
+    Note that 'Auckland' is excluded from these tests becuase it requires the lower_bound step
     """
-    sc = site_class.split(' ')[-1]
+    sc = site_class.split(" ")[-1]
 
     # from calculate_parameter_arrays( in sa_gen
     acc_spectra, imtls = extract_data.extract_spectra(mini_hcurves_hdf5_path)
@@ -433,14 +462,18 @@ def test_extract_spectra_and_reproduce_rounding_error(site_class, city, return_p
 
     # Part ONE
     # check expected PGA before reduction
-    df_original  = pga_original_table.set_index('City')
-    assert pytest.approx(round(test_original_pga,2)) == df_original.loc[city,site_class]
+    df_original = pga_original_table.set_index("City")
+    assert (
+        pytest.approx(round(test_original_pga, 2)) == df_original.loc[city, site_class]
+    )
 
     # PART TWO !!!!
-    # here's we're rounding the PGA values to reproduce what the erroneous fixtures do.
-    reduced_pga = sa_gen.reduce_PGAs(np.round(PGA,2))  ## THIS reproduced the test fixtures provided by CdlT
+    # here we're rounding the PGA values to reproduce what the erroneous fixtures do.
+    reduced_pga = sa_gen.reduce_PGAs(
+        np.round(PGA, 2)
+    )  # THIS reproduced the test fixtures provided by CdlT
 
-    df_reduced  = pga_reduced_table.set_index('City')
+    df_reduced = pga_reduced_table.set_index("City")
 
     test_reduced_pga = getpga(reduced_pga, sc, site_list, city, return_period)
-    assert pytest.approx(test_reduced_pga) == df_reduced.loc[city,site_class]
+    assert pytest.approx(test_reduced_pga) == df_reduced.loc[city, site_class]
