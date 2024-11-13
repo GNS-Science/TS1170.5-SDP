@@ -13,12 +13,11 @@ from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
 from nzssdt_2023.data_creation.constants import DEFAULT_RPS  # FOR TESTING
 from nzssdt_2023.data_creation.constants import (
-    AGG_LIST,
+    AGG_LIST,  # PGA_N_DP,
     IMT_LIST,
     IMTL_LIST,
     LOCATION_REPLACEMENTS,
     LOWER_BOUND_PARAMETERS,
-    # PGA_N_DP,
     PGA_REDUCTIONS,
     SAS_N_DP,
     SITE_CLASSES,
@@ -326,7 +325,7 @@ def Td_fit_error(
     return error
 
 
-def     fit_Td(
+def fit_Td(
     spectrum: "npt.NDArray", periods: "npt.NDArray", pga: float, sas: float, tc: float
 ) -> float:
     """Fit the Td value to obtain the best fit over the response spectrum

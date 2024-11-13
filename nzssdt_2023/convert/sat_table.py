@@ -10,9 +10,7 @@ from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.data_creation import constants
 
 APoEs = [f"APoE: 1/{rp}" for rp in constants.DEFAULT_RPS]
-site_class_labels = [
-    f"Site Soil Class {key}" for key in constants.SITE_CLASSES
-]
+site_class_labels = [f"Site Soil Class {key}" for key in constants.SITE_CLASSES]
 
 
 parameters = ["PGA", "Sas", "Tc"]
