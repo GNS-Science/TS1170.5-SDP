@@ -71,7 +71,7 @@ def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str
         else:
             side = "right"
 
-        sc_idx = np.searchsorted(-boundaries, -vs30, side=side)
+        sc_idx = np.searchsorted(-boundaries, -vs30, side=side)   # type: ignore
         sc = [SITE_CLASSES[sc].site_class for sc in SITE_CLASSES][sc_idx]
 
     elif (vs30 == min_vs30) & lower_bound:
@@ -393,7 +393,7 @@ def fit_Td_array(
     n_vs30s, _, n_periods, n_apoes, n_stats = interpolated_spectra.shape
     n_sites = len(sites_of_interest)
     Td = np.zeros([n_vs30s, n_sites, n_apoes])
-    print(type(Td))
+    # print(type(Td))
 
     # cycle through all hazard parameters
     count = 0
@@ -419,7 +419,7 @@ def fit_Td_array(
 
                 Td[i_vs30, i_site_int, i_rp] = fit_Td(spectrum, periods, pga, sas, tc)
 
-    Td = sig_figs(Td, TD_N_SF)
+    Td = sig_figs(Td, TD_N_SF)  # type: ignore
 
     return Td
 
