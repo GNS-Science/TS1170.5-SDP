@@ -11,9 +11,9 @@ from scipy.optimize import minimize
 
 from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
-from nzssdt_2023.data_creation.constants import DEFAULT_RPS  # FOR TESTING
+from nzssdt_2023.data_creation.constants import AGG_LIST  # PGA_N_DP,
 from nzssdt_2023.data_creation.constants import (
-    AGG_LIST,  # PGA_N_DP,
+    DEFAULT_RPS,
     IMT_LIST,
     IMTL_LIST,
     LOCATION_REPLACEMENTS,
@@ -41,8 +41,6 @@ if TYPE_CHECKING:
     import pandas.typing as pdt
 
 PGA_REDUCTION_ENABLED = True  # for testing only, skips `reduce_PGAs()` function call.
-# TEST_SKIP_CPA_PGA_ROUNDING = True  # testing also
-# TEST_REDUCE_VS30_MOD = False # testing also
 
 
 def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str:
@@ -71,7 +69,7 @@ def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str
         else:
             side = "right"
 
-        sc_idx = np.searchsorted(-boundaries, -vs30, side=side)   # type: ignore
+        sc_idx = np.searchsorted(-boundaries, -vs30, side=side)  # type: ignore
         sc = [SITE_CLASSES[sc].site_class for sc in SITE_CLASSES][sc_idx]
 
     elif (vs30 == min_vs30) & lower_bound:
@@ -226,7 +224,7 @@ def uhs_value(
         SaT = Sas * Tc / period
     else:
         SaT = Sas * Tc / period * (Td / period) ** 0.5
-    # return SaT
+
     return float(SaT)
 
 
@@ -451,9 +449,6 @@ def calculate_parameter_arrays(
         log.warning(
             f"PGA reduction skipped because `PGA_REDUCTION_ENABLED` == {PGA_REDUCTION_ENABLED}"
         )
-
-    # if not TEST_SKIP_CPA_PGA_ROUNDING:
-    #     PGA = np.round(PGA, PGA_N_DP)
 
     Sas = 0.9 * np.max(acc_spectra, axis=2)
     Sas = np.round(Sas, SAS_N_DP)
@@ -695,37 +690,40 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
 
     acc_spectra, imtls = extract_spectra(data_file)
 
-    # DIAGNOSTICS
+    DIAGNOSTICS = True
     # why is PGA off by ~0.01 for some permutations??
     # PGA (dimensions: vs30, site, return period, statistic)
-    np.set_printoptions(precision=8)
-    pd.set_option("display.precision", 8)
+    # Leaving this in only until we get PGA tests working with updated tables
+    # otherwise these would be log.dbug messages.
+    if DIAGNOSTICS:
+        np.set_printoptions(precision=8)
+        pd.set_option("display.precision", 8)
 
-    print("DIAG #1")
-    print("=" * 40)
-    SITE_IDX = 0  # Auckland
-    RP_IDX = DEFAULT_RPS.index(2500)
-    STAT_IDX = 0  # mean
-    PGA1 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
-    print(PGA1)
-    print("=" * 40)
-    print()
-    assert PGA1.shape == (6,)
+        print("DIAG #1")
+        print("=" * 40)
+        SITE_IDX = 0  # Auckland
+        RP_IDX = DEFAULT_RPS.index(2500)
+        STAT_IDX = 0  # mean
+        PGA1 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
+        print(PGA1)
+        print("=" * 40)
+        print()
+        assert PGA1.shape == (6,)
 
     log.info("begin fit_Td_array for mean Tds")
     mean_Td = fit_Td_array(
         PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list
     )
 
-    print("DIAG #2")
-    print("=" * 40)
-    PGA2 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
-    print(PGA2)
-    print("=" * 40)
-    print()
-    assert PGA2.shape == (6,)
-
-    assert (PGA1 == PGA2).all()
+    if DIAGNOSTICS:
+        print("DIAG #2")
+        print("=" * 40)
+        PGA2 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
+        print(PGA2)
+        print("=" * 40)
+        print()
+        assert PGA2.shape == (6,)
+        assert (PGA1 == PGA2).all()
 
     log.info("begin create_mean_sa_table")
     mean_df = create_mean_sa_table(
@@ -736,12 +734,12 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
         ("APoE: 1/2500", f"Site Class {sc}", "PGA") for sc in "VI,V,IV".split(",")
     ]
 
-    print("DIAG #3 post create_mean_sa_table")
-    # print('        mean_df AKL APoE:', ' 1/2500', 'Site Class V', 'PGA')
-    print("=" * 40)
-    print(mean_df[COLUMNS])  # [mean_df.index=="Auckland"])
-    print("=" * 40)
-    print()
+    if DIAGNOSTICS:
+        print("DIAG #3 post create_mean_sa_table")
+        print("=" * 40)
+        print(mean_df[COLUMNS])  # [mean_df.index=="Auckland"])
+        print("=" * 40)
+        print()
 
     log.info("begin update_lower_bound_sa")
     df = update_lower_bound_sa(
@@ -757,11 +755,12 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
         quantile_list,
     )
 
-    print("DIAG #4 post update_lower_bound_sa")
-    print("=" * 40)
-    print(df[COLUMNS])
-    print("=" * 40)
-    print()
+    if DIAGNOSTICS:
+        print("DIAG #4 post update_lower_bound_sa")
+        print("=" * 40)
+        print(df[COLUMNS])
+        print("=" * 40)
+        print()
 
     df = replace_relevant_locations(df)
 
