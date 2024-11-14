@@ -11,13 +11,14 @@ from scipy.optimize import minimize
 
 from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
-from nzssdt_2023.data_creation.constants import AGG_LIST  # PGA_N_DP,
 from nzssdt_2023.data_creation.constants import (
+    AGG_LIST,
     DEFAULT_RPS,
     IMT_LIST,
     IMTL_LIST,
     LOCATION_REPLACEMENTS,
     LOWER_BOUND_PARAMETERS,
+    PGA_N_DP,
     PGA_REDUCTIONS,
     SAS_N_DP,
     SITE_CLASSES,
@@ -40,7 +41,10 @@ if TYPE_CHECKING:
     import numpy.typing as npt
     import pandas.typing as pdt
 
-PGA_REDUCTION_ENABLED = True  # for testing only, skips `reduce_PGAs()` function call.
+PGA_REDUCTION_ENABLED = (
+    True  # for testing only, False skips `reduce_PGAs()` function call.
+)
+PGA_ROUNDING_ENABLED = True  # for testing only, as above.
 
 
 def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str:
@@ -174,9 +178,7 @@ def reduce_PGAs(PGA: "npt.NDArray") -> "npt.NDArray":
 
     for sc in PGA_REDUCTIONS.keys():
         vs30 = int(SITE_CLASSES[sc].representative_vs30)
-        i_vs30 = VS30_LIST.index(
-            vs30
-        )  # TODO: this assumes the ndarray vs30 are sorted same as VS30_LIST right??
+        i_vs30 = VS30_LIST.index(vs30)
         for i_site in range(n_sites):
             for i_rp in range(n_rps):
                 for i_stat in range(n_stats):
@@ -448,6 +450,13 @@ def calculate_parameter_arrays(
     else:
         log.warning(
             f"PGA reduction skipped because `PGA_REDUCTION_ENABLED` == {PGA_REDUCTION_ENABLED}"
+        )
+
+    if PGA_ROUNDING_ENABLED:
+        PGA = np.round(PGA, PGA_N_DP)
+    else:
+        log.warning(
+            f"PGA rounding skipped because `PGA_ROUNDING_ENABLED` == {PGA_ROUNDING_ENABLED}"
         )
 
     Sas = 0.9 * np.max(acc_spectra, axis=2)
