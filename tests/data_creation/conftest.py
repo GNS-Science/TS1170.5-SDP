@@ -1,9 +1,7 @@
-import pickle as pkl
 from pathlib import Path
 
 import pandas as pd
 import pytest
-import pickle as pkl
 
 import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
 
