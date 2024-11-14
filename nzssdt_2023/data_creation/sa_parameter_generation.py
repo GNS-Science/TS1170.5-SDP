@@ -13,6 +13,7 @@ from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
 from nzssdt_2023.data_creation.constants import (
     AGG_LIST,
+    DEFAULT_RPS,
     IMT_LIST,
     IMTL_LIST,
     LOCATION_REPLACEMENTS,
@@ -39,6 +40,11 @@ log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     import numpy.typing as npt
     import pandas.typing as pdt
+
+PGA_REDUCTION_ENABLED = (
+    True  # for testing only, False skips `reduce_PGAs()` function call.
+)
+PGA_ROUNDING_ENABLED = True  # for testing only, as above.
 
 
 def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str:
@@ -67,7 +73,7 @@ def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str
         else:
             side = "right"
 
-        sc_idx = np.searchsorted(-boundaries, -vs30, side=side)
+        sc_idx = np.searchsorted(-boundaries, -vs30, side=side)  # type: ignore
         sc = [SITE_CLASSES[sc].site_class for sc in SITE_CLASSES][sc_idx]
 
     elif (vs30 == min_vs30) & lower_bound:
@@ -173,7 +179,6 @@ def reduce_PGAs(PGA: "npt.NDArray") -> "npt.NDArray":
     for sc in PGA_REDUCTIONS.keys():
         vs30 = int(SITE_CLASSES[sc].representative_vs30)
         i_vs30 = VS30_LIST.index(vs30)
-
         for i_site in range(n_sites):
             for i_rp in range(n_rps):
                 for i_stat in range(n_stats):
@@ -185,7 +190,9 @@ def reduce_PGAs(PGA: "npt.NDArray") -> "npt.NDArray":
     return reduced_PGA
 
 
-def uhs_value(period: float, PGA: float, Sas: float, Tc: float, Td: float) -> float:
+def uhs_value(
+    period: Union[float, "npt.NDArray"], PGA: float, Sas: float, Tc: float, Td: float
+) -> float:
     """Derive the spectral acceleration Sa(T) at a given period (T), based on the seismic demand parameters.
     Sa(T) equations come from TS Eq. 3.2-3.5
 
@@ -196,9 +203,19 @@ def uhs_value(period: float, PGA: float, Sas: float, Tc: float, Td: float) -> fl
         Tc: spectral-acceleration-plateau corner period [seconds]
         Td: spectral-velocity-plateau corner period [seconds]
 
+    Todo:
+        this works (i.e. it handles the code as it's called now) -  but
+        I think there's a better way to do this sort of thing whe your data is in numpy arrays
+        see: https://stackoverflow.com/questions/42594695/
+        how-to-apply-a-function-map-values-of-each-element-in-a-2d-numpy-array-matrix
+
     Returns:
         SaT: spectral acceleration [g]
     """
+    if isinstance(period, np.ndarray):
+        assert len(period) == 1
+        period = float(period[0])
+
     if period == 0:
         SaT = PGA
     elif period < 0.1:
@@ -208,15 +225,9 @@ def uhs_value(period: float, PGA: float, Sas: float, Tc: float, Td: float) -> fl
     elif period < Td:
         SaT = Sas * Tc / period
     else:
-        # TODO: CBC or CDC, any thoughts on how to fix this?
-        # When using this function in a scipy optimization (and only then), it returns an array of length 1
-        try:
-            assert len(Sas * Tc / period * (Td / period) ** 0.5) == 1
-            SaT = float((Sas * Tc / period * (Td / period) ** 0.5)[0])
-        except TypeError:
-            SaT = Sas * Tc / period * (Td / period) ** 0.5
+        SaT = Sas * Tc / period * (Td / period) ** 0.5
 
-    return SaT
+    return float(SaT)
 
 
 def interpolate_spectra(
@@ -356,7 +367,7 @@ def fit_Td_array(
     vs30_list: List[int],
     hazard_rp_list: List[int],
     i_stat: int = 0,
-    sites_of_interest: List[str] = None,
+    sites_of_interest: Optional[List[str]] = None,
 ) -> "npt.NDArray":
     """Fit the Td values for all sites, site classes and APoE of interest
 
@@ -382,11 +393,12 @@ def fit_Td_array(
     n_vs30s, _, n_periods, n_apoes, n_stats = interpolated_spectra.shape
     n_sites = len(sites_of_interest)
     Td = np.zeros([n_vs30s, n_sites, n_apoes])
+    # print(type(Td))
 
     # cycle through all hazard parameters
     count = 0
     expected_count = n_sites
-    for i_site_int,site in enumerate(sites_of_interest):
+    for i_site_int, site in enumerate(sites_of_interest):
         count += 1
         log.info(
             f"fit_Td_array progress: Site #{count} of {expected_count}. "
@@ -407,7 +419,7 @@ def fit_Td_array(
 
                 Td[i_vs30, i_site_int, i_rp] = fit_Td(spectrum, periods, pga, sas, tc)
 
-    Td = sig_figs(Td, TD_N_SF)
+    Td = sig_figs(Td, TD_N_SF)  # type: ignore
 
     return Td
 
@@ -431,8 +443,21 @@ def calculate_parameter_arrays(
     vel_spectra = acc_spectra_to_vel(acc_spectra, imtls)
 
     PGA = acc_spectra[:, :, IMT_LIST.index("PGA"), :, :]
-    PGA = reduce_PGAs(PGA)
-    PGA = np.round(PGA, PGA_N_DP)
+
+    if PGA_REDUCTION_ENABLED:
+        log.debug(f"PGA array {PGA}")
+        PGA = reduce_PGAs(PGA)
+    else:
+        log.warning(
+            f"PGA reduction skipped because `PGA_REDUCTION_ENABLED` == {PGA_REDUCTION_ENABLED}"
+        )
+
+    if PGA_ROUNDING_ENABLED:
+        PGA = np.round(PGA, PGA_N_DP)
+    else:
+        log.warning(
+            f"PGA rounding skipped because `PGA_ROUNDING_ENABLED` == {PGA_ROUNDING_ENABLED}"
+        )
 
     Sas = 0.9 * np.max(acc_spectra, axis=2)
     Sas = np.round(Sas, SAS_N_DP)
@@ -477,7 +502,16 @@ def create_mean_sa_table(
 
 
 def update_lower_bound_sa(
-    mean_df, PGA, Sas, Tc, PSV, acc_spectra, imtls, vs30_list, hazard_rp_list, quantile_list
+    mean_df,
+    PGA,
+    Sas,
+    Tc,
+    PSV,
+    acc_spectra,
+    imtls,
+    vs30_list,
+    hazard_rp_list,
+    quantile_list,
 ):
     site_list = list(mean_df.index)
     index = site_list
@@ -492,6 +526,10 @@ def update_lower_bound_sa(
     i_site = site_list.index(controlling_site)
     i_stat = 1 + quantile_list.index(
         float(LOWER_BOUND_PARAMETERS["controlling_percentile"])
+    )
+    log.debug(
+        f"update_lower_bound_sa() controlling_site: {controlling_site};"
+        f' controlling_percentile {LOWER_BOUND_PARAMETERS["controlling_percentile"]}'
     )
     lower_bound_Td = fit_Td_array(
         PGA,
@@ -656,24 +694,83 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
     quantile_list = extract_quantiles(data_file)
     vs30_list = VS30_LIST
 
-    log.info(f"begin calculate_parameter_arrays")
+    log.info("begin calculate_parameter_arrays")
     PGA, Sas, PSV, Tc = calculate_parameter_arrays(data_file)
 
     acc_spectra, imtls = extract_spectra(data_file)
 
-    log.info(f"begin fit_Td_array for mean Tds")
+    DIAGNOSTICS = True
+    # why is PGA off by ~0.01 for some permutations??
+    # PGA (dimensions: vs30, site, return period, statistic)
+    # Leaving this in only until we get PGA tests working with updated tables
+    # otherwise these would be log.dbug messages.
+    if DIAGNOSTICS:
+        np.set_printoptions(precision=8)
+        pd.set_option("display.precision", 8)
+
+        print("DIAG #1")
+        print("=" * 40)
+        SITE_IDX = 0  # Auckland
+        RP_IDX = DEFAULT_RPS.index(2500)
+        STAT_IDX = 0  # mean
+        PGA1 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
+        print(PGA1)
+        print("=" * 40)
+        print()
+        assert PGA1.shape == (6,)
+
+    log.info("begin fit_Td_array for mean Tds")
     mean_Td = fit_Td_array(
         PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list
     )
 
-    log.info(f"begin create_mean_sa_table")
+    if DIAGNOSTICS:
+        print("DIAG #2")
+        print("=" * 40)
+        PGA2 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
+        print(PGA2)
+        print("=" * 40)
+        print()
+        assert PGA2.shape == (6,)
+        assert (PGA1 == PGA2).all()
+
+    log.info("begin create_mean_sa_table")
     mean_df = create_mean_sa_table(
         PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list
     )
-    log.info(f"begin update_lower_bound_sa")
+
+    COLUMNS = [
+        ("APoE: 1/2500", f"Site Class {sc}", "PGA") for sc in "VI,V,IV".split(",")
+    ]
+
+    if DIAGNOSTICS:
+        print("DIAG #3 post create_mean_sa_table")
+        print("=" * 40)
+        print(mean_df[COLUMNS])  # [mean_df.index=="Auckland"])
+        print("=" * 40)
+        print()
+
+    log.info("begin update_lower_bound_sa")
     df = update_lower_bound_sa(
-        mean_df, PGA, Sas, Tc, PSV, acc_spectra, imtls, vs30_list, hazard_rp_list, quantile_list
+        mean_df,
+        PGA,
+        Sas,
+        Tc,
+        PSV,
+        acc_spectra,
+        imtls,
+        vs30_list,
+        hazard_rp_list,
+        quantile_list,
     )
+
+    if DIAGNOSTICS:
+        print("DIAG #4 post update_lower_bound_sa")
+        print("=" * 40)
+        print(df[COLUMNS])
+        print("=" * 40)
+        print()
+
     df = replace_relevant_locations(df)
 
     return df

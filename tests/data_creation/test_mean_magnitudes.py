@@ -107,7 +107,9 @@ def mock_get_disagg(
     imts,
     probabilities,
 ):
-    dissag_filepth = Path(__file__).parent / "fixtures" / "disagg_fixture_all.json"
+    dissag_filepth = (
+        Path(__file__).parent.parent / "fixtures" / "disagg_fixture_all.json"
+    )
     with dissag_filepth.open() as disagg_file:
         disaggs = json.load(disagg_file)
     for disagg in disaggs:
@@ -168,7 +170,7 @@ def get_disagg_fixture(monkeypatch):
 def test_mean_mag_df_legacy(get_disagg_fixture):
 
     raw_df_filepath_leg = (
-        Path(__file__).parent / "fixtures" / "SRWG214_mean_mag_legacy.csv"
+        Path(__file__).parent.parent / "fixtures" / "SRWG214_mean_mag_legacy.csv"
     )
     df_expected_leg = get_df_expected(raw_df_filepath_leg)
     df_leg = get_mean_mag_df(HAZARD_ID, LOCATIONS, POES, HAZARD_AGG, legacy=True)
@@ -178,7 +180,7 @@ def test_mean_mag_df_legacy(get_disagg_fixture):
 
 def test_mean_mag_df(get_disagg_fixture, tmp_path):
 
-    raw_df_filepath = Path(__file__).parent / "fixtures" / "SRWG214_mean_mag.csv"
+    raw_df_filepath = Path(__file__).parent.parent / "fixtures" / "SRWG214_mean_mag.csv"
     df_expected = get_df_expected(raw_df_filepath)
 
     df = get_mean_mag_df(HAZARD_ID, LOCATIONS, POES, HAZARD_AGG, legacy=False)

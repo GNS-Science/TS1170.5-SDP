@@ -20,7 +20,7 @@ def extract_spectra(data_file: str | Path) -> Tuple["npt.NDArray", dict]:
         data_file: name of hazard hdf5 file
 
     Returns:
-        acc_spectra: acceleration spectra
+        acc_spectra: acceleration spectra (dimensions: vs30, site, return period, statistic)
         imtls: keys: intensity measures e.g., SA(1.0), values: list of intensity levels
 
     """

@@ -11,17 +11,14 @@ pre-requisities:
 """
 
 import logging
-import pickle as pkl
 from pathlib import Path
 from typing import Optional
-
-import numpy as np
 
 from nzssdt_2023.config import WORKING_FOLDER
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
 # configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
 mini = False
@@ -34,11 +31,15 @@ if mini:
     hf_path = output_folder / "mini_hcurves.hdf5"
     sa_path = output_folder / "mini_SaT-variables.pkl"
 
-    site_list = ["Auckland", "Christchurch", "Dunedin", "Wellington", ]
+    site_list = [
+        "Auckland",
+        "Christchurch",
+        "Dunedin",
+        "Wellington",
+    ]
 else:
     hf_path = output_folder / "all_hcurves.hdf5"
     sa_path = output_folder / "all_SaT-variables.pkl"
 
 df = sa_gen.create_sa_table(hf_path)
 sa_gen.save_table_to_pkl(df, sa_path)
-

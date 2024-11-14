@@ -7,6 +7,9 @@
  - new `nzssdt_2023.scripts` package for cli scripts
  - mkdocs with some intitial structure and standard NSHM doc pages.
  - new `nzssdt_2023.config` module with ENV option for WORKING_FOLDER, used for intermediate file storage
+ - test coverage on `data_creation` package
+ - PGA reduction feature (committee update)
+ - Td calcs and Tc sig figs (committee update)
 
 ### Changed
  - migrated report.py into new `publish` package
