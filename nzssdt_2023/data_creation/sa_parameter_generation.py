@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import minimize
 
 from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
 from nzssdt_2023.data_creation import query_NSHM as q_haz
@@ -23,7 +22,6 @@ from nzssdt_2023.data_creation.constants import (
     SAS_N_DP,
     SITE_CLASSES,
     TC_N_SF,
-    TD_N_SF,
     VS30_LIST,
     LocationReplacement,
 )
@@ -338,23 +336,20 @@ def fit_Td(
         tc: spectral-acceleration-plateau corner period [seconds]
 
     Returns:
-        Td: spectral-velocity-plateau corner period [seconds]
+        td: spectral-velocity-plateau corner period [seconds]
     """
     relevant_spectrum, relevant_periods = relevant_spectrum_domain(
         spectrum, periods, tc
     )
 
-    # minimize error via a precise Td value
-    bounds = [(relevant_periods[0], relevant_periods[-1])]
-    Td_0 = 3
-    Td = minimize(
-        Td_fit_error,
-        Td_0,
-        args=(relevant_periods, relevant_spectrum, pga, sas, tc),
-        bounds=bounds,
-    ).x[0]
+    # select period with the minimum error
+    td_error = [
+        Td_fit_error(td, relevant_periods, relevant_spectrum, pga, sas, tc)
+        for td in relevant_periods
+    ]
+    td = relevant_periods[np.argmin(td_error)]
 
-    return Td
+    return td
 
 
 def fit_Td_array(
@@ -418,8 +413,6 @@ def fit_Td_array(
                 tc = Tc[i_vs30, i_site, i_rp, i_stat]
 
                 Td[i_vs30, i_site_int, i_rp] = fit_Td(spectrum, periods, pga, sas, tc)
-
-    Td = sig_figs(Td, TD_N_SF)  # type: ignore
 
     return Td
 

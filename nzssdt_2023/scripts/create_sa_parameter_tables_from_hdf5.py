@@ -31,12 +31,6 @@ if mini:
     hf_path = output_folder / "mini_hcurves.hdf5"
     sa_path = output_folder / "mini_SaT-variables.pkl"
 
-    site_list = [
-        "Auckland",
-        "Christchurch",
-        "Dunedin",
-        "Wellington",
-    ]
 else:
     hf_path = output_folder / "all_hcurves.hdf5"
     sa_path = output_folder / "all_SaT-variables.pkl"
