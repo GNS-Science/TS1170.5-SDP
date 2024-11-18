@@ -13,7 +13,7 @@ import dacite
 import nzshm_common
 import nzshm_model
 
-from .config import RESOURCES_FOLDER
+from ..config import RESOURCES_FOLDER
 
 VERSION_LIST_FILENAME = "version_list.json"
 
@@ -52,7 +52,7 @@ class VersionInfo:
     A dataclass defining the attributes of a NZSDDT version.
 
     Args:
-        version_number: a unique version number.
+        version_id: a unique version number.
         nzshm_model_version: the NSHM mode version string.
         description: a versions description.
         conversions: a list of files converted (from AH to versioned) TODO: maybe deprecatable.
@@ -61,7 +61,7 @@ class VersionInfo:
         nzshm_model_lib_version: the version of the nzshm_model library used to produce this version.
     """
 
-    version_number: int = field(hash=True)
+    version_id: str = field(hash=True)
     nzshm_model_version: str  # nzshm_model.CURRENT_VERSION  # default to latest
     description: Optional[str] = None
     conversions: List[ConvertedFile] = field(default_factory=list)
@@ -70,10 +70,10 @@ class VersionInfo:
     nzshm_model_lib_version: str = nzshm_model.__version__
 
 
-def standard_output_filename(version: Union[int, "VersionInfo"]):
+def standard_output_filename(version: Union[str, "VersionInfo"]):
     # print(type(version))
     if isinstance(version, VersionInfo):
-        version = version.version_number
+        version = version.version_id
     return f"nzssdt_2023_v{version}.json.zip"
 
 

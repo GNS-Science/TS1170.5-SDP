@@ -36,6 +36,7 @@ nzshm-common = "^0.6.1"
 nzshm-model = "^0.10.6"
 twine = "^5.1.1"
 pytest-lazy-fixtures = "^1.1.1"
+pytest-mock = "^3.14.0"
 
 [tool.poetry.group.doc]
 optional = true

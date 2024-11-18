@@ -2410,6 +2410,23 @@ files = [
 pytest = ">=7"
 
 [[package]]
+name = "pytest-mock"
+version = "3.14.0"
+description = "Thin-wrapper around the mock package for easier use with pytest"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pytest-mock-3.14.0.tar.gz", hash = "sha256:2719255a1efeceadbc056d6bf3df3d1c5015530fb40cf347c0f9afac88410bd0"},
+    {file = "pytest_mock-3.14.0-py3-none-any.whl", hash = "sha256:0b72c38033392a5f4621342fe11e9219ac11ec9d375f8e2a0c164539e0d70f6f"},
+]
+
+[package.dependencies]
+pytest = ">=6.2.5"
+
+[package.extras]
+dev = ["pre-commit", "pytest-asyncio", "tox"]
+
+[[package]]
 name = "python-barcode"
 version = "0.15.1"
 description = "Create standard barcodes with Python. No external modules needed. (optional Pillow support included)."
@@ -3255,4 +3272,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "f3a9f4956f569bd182f40c36f4a22da460782456e6d996a9311649d760f248ee"
+content-hash = "67f3cbf63e1143d128b58312ea94ca8fda729db2d8c7ffa89cdd57c4822170c3"

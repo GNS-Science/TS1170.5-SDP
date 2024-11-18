@@ -13,34 +13,17 @@ from nzssdt_2023.versioning import read_version_list, write_version_list
 def cli():
     """Main CLI for the NZ Seismic Site Demand Table 2023 (NZSSDT 2023)"""
 
-
-@cli.command("lsv")
-@click.option("--verbose", "-V", is_flag=True, default=False)
-@click.option(
-    "--resources_path",
-    "-R",
-    default=lambda: Path(Path(os.getcwd()).parent, "resources"),
-)
-def list_versions(resources_path, verbose):
-    """List the available versions of NZSSDT 2023"""
-    if verbose:
-        click.echo("Resources path: %s" % resources_path)
-
-    for version_info in read_version_list():
-        click.echo(version_info)
-
-
 @cli.command("add")
-@click.argument("version_number", type=int)
+@click.argument("version_id", type=int)
 @click.option("--nzshm_model_version", "-N", default="NSHM_v1.0.4")
 @click.option("--verbose", "-V", is_flag=True, default=False)
-def build_and_append_version(version_number, nzshm_model_version, verbose):
+def build_and_append_version(version_id, nzshm_model_version, verbose):
     """Add a new published version of NZSSDT 2023"""
     if verbose:
         click.echo("nzshm_model_version: %s" % nzshm_model_version)
-        click.echo("build version: %s" % version_number)
+        click.echo("build version: %s" % version_id)
 
-    if version_number == 1:
+    if version_id == 1:
         vi = build_version_one()
 
         # update the version list
