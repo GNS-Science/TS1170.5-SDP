@@ -6,7 +6,6 @@ from .versioning import (
     ConvertedFile,
     IncludedFile,
     VersionInfo,
-    read_version_list,
+    VersionManager,
     standard_output_filename,
-    write_version_list,
 )

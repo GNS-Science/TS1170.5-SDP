@@ -5,7 +5,9 @@ from pathlib import Path
 
 import click
 
-from nzssdt_2023.versioning import VersionInfo, read_version_list, write_version_list
+from nzssdt_2023.versioning import VersionInfo, VersionManager
+
+version_manager = VersionManager()
 
 
 @click.group()
@@ -25,7 +27,7 @@ def list_versions(resources_path, verbose):
     if verbose:
         click.echo("Resources path: %s" % resources_path)
 
-    for version_info in read_version_list():
+    for version_info in version_manager.read_version_list():
         click.echo(version_info)
 
 
@@ -41,10 +43,9 @@ def build_and_append_version(version_id, nzshm_model_version, verbose):
         )
 
     vi = VersionInfo(version_id=version_id, nzshm_model_version=nzshm_model_version)
-
-    current_versions = read_version_list()
+    current_versions = version_manager.read_version_list()
     current_versions.append(vi)
-    write_version_list(current_versions)
+    version_manager.write_version_list(current_versions)
     if verbose:
         click.echo(f"Wrote our new version {vi}")
     #    click.echo("did nothing, sorry")

@@ -6,7 +6,9 @@
 import click
 
 from nzssdt_2023.build import build_version_one
-from nzssdt_2023.versioning import read_version_list, write_version_list
+from nzssdt_2023.versioning import VersionManager
+
+version_manager = VersionManager()
 
 
 @click.group()
@@ -28,9 +30,9 @@ def build_and_append_version(version_id, nzshm_model_version, verbose):
         vi = build_version_one()
 
         # update the version list
-        current_versions = read_version_list()
+        current_versions = version_manager.read_version_list()
         current_versions.append(vi)
-        write_version_list(current_versions)
+        version_manager.write_version_list(current_versions)
         click.echo(f"Wrote our new version {vi}")
         return
 

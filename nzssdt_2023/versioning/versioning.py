@@ -77,17 +77,25 @@ def standard_output_filename(version: Union[str, "VersionInfo"]):
     return f"nzssdt_2023_v{version}.json.zip"
 
 
-def read_version_list():
-    """returns the current version list."""
-    vl = Path(RESOURCES_FOLDER, VERSION_LIST_FILENAME)
-    if not vl.exists():
-        return []
-    version_list = json.load(open(vl))
-    return [dacite.from_dict(data_class=VersionInfo, data=vi) for vi in version_list]
+class VersionManager:
+    """A class to manage the reading/writing of versions."""
 
+    def __init__(self, resource_folder: Optional[str] = None):
+        self._resource_folder = resource_folder or RESOURCES_FOLDER
+        self._version_list_path = Path(self._resource_folder, VERSION_LIST_FILENAME)
 
-def write_version_list(new_list: Iterable[VersionInfo]):
-    """creates/updates the version list."""
-    vl = Path(RESOURCES_FOLDER, VERSION_LIST_FILENAME)
-    with open(vl, "w") as fout:
-        json.dump([dataclasses.asdict(vi) for vi in new_list], fout, indent=2)
+    def read_version_list(self):
+        """returns the current version list."""
+        if not self._version_list_path.exists():
+            raise RuntimeError(
+                f"the version_list file {self._version_list_path} was not found."
+            )
+        version_list = json.load(open(self._version_list_path))
+        return [
+            dacite.from_dict(data_class=VersionInfo, data=vi) for vi in version_list
+        ]
+
+    def write_version_list(self, new_list: Iterable[VersionInfo]):
+        """creates/updates the version list."""
+        with open(self._version_list_path, "w") as fout:
+            json.dump([dataclasses.asdict(vi) for vi in new_list], fout, indent=2)

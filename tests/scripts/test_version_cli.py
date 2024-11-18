@@ -27,11 +27,12 @@ def test_init_verbose(mocker):
     # patch the underlying functions
     vi_og = version_cli.VersionInfo("MY_NEW_VER", "NSHM_v99")
     vi_new = version_cli.VersionInfo("MY_NEW_ONE", "NSHM_v00")
-    mocked_read_version_list = mocker.patch(
-        "nzssdt_2023.scripts.version_cli.read_version_list", return_value=[vi_og]
+
+    mocked_read_version_list = mocker.patch.object(
+        version_cli.version_manager, "read_version_list", return_value=[vi_og]
     )
-    mocked_write_version_list = mocker.patch(
-        "nzssdt_2023.scripts.version_cli.write_version_list", return_value=[vi_new]
+    mocked_write_version_list = mocker.patch.object(
+        version_cli.version_manager, "write_version_list", return_value=[vi_new]
     )
 
     runner = CliRunner()
