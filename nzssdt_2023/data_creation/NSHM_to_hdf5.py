@@ -3,10 +3,18 @@ helper functions for producing an HDF5 file for the NZSSDT tables
 """
 import os
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from .constants import DEFAULT_RPS
+from nzssdt_2023.data_creation import query_NSHM as q_haz
 
+from nzssdt_2023.data_creation.constants import (
+    AGG_LIST,
+    DEFAULT_RPS,
+    IMT_LIST,
+    IMTL_LIST,
+    VS30_LIST,
+)
 if TYPE_CHECKING:
     import numpy.typing as npt
 
@@ -235,4 +243,45 @@ def save_hdf(hf_name, data):
                     )
                     dset[:] = np.array(data["hazard_design"][intensity_type][dset_name])
 
-    print(f"\nHazard curve data is saved in {hf_name},\n\tin {os.getcwd()}")
+    print(f"\nHazard curve data is saved as {hf_name}")
+
+
+def query_NSHM_to_hdf5(
+    hf_name: Path,
+    hazard_id: str = "NSHM_v1.0.4",
+    site_list: Optional[list[str]] = None
+):
+    """Query the NSHM and save the results to an hdf5
+
+    Args:
+        hf_name: name of hdf5 file with hazard curve data
+        hazard_id: NSHM model id
+        site_list: list of sites to include in the sa parameter table
+
+    Todo:
+        - Chris BC, the default hazard_id should actually be part of your version control
+
+    """
+
+    if site_list is None:
+        sites = pd.concat(
+            [q_haz.create_sites_df(), q_haz.create_sites_df(named_sites=False)]
+        )
+    else:
+        sites = q_haz.create_sites_df(site_list=site_list)
+
+    # query NSHM
+    hcurves, _ = q_haz.retrieve_hazard_curves(
+        sites, VS30_LIST, IMT_LIST, AGG_LIST, hazard_id
+    )
+
+    # prep hcurves dictionary
+    data = create_hcurve_dictionary(
+        sites, VS30_LIST, IMT_LIST, IMTL_LIST, AGG_LIST, hcurves
+    )
+
+    # add uhs spectra
+    data = add_uniform_hazard_spectra(data)
+
+    # save file
+    save_hdf(hf_name, data)
