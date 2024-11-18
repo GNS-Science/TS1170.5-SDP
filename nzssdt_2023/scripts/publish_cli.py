@@ -1,7 +1,7 @@
 """A simple Command Line Interface to manage the resources files."""
 
-import os
-from pathlib import Path
+# import os
+# from pathlib import Path
 
 import click
 
@@ -12,6 +12,7 @@ from nzssdt_2023.versioning import read_version_list, write_version_list
 @click.group()
 def cli():
     """Main CLI for the NZ Seismic Site Demand Table 2023 (NZSSDT 2023)"""
+
 
 @cli.command("add")
 @click.argument("version_id", type=int)

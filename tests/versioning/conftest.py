@@ -1,2 +1,7 @@
-import pytest
-from nzssdt_2023.versioning import VersionInfo, read_version_list, write_version_list
+import pytest  # noqa
+
+# from nzssdt_2023.versioning import (
+#     VersionInfo,
+#     read_version_list,  # noqa
+#     write_version_list,
+# )
