@@ -1,4 +1,4 @@
-"""A simple Command Line Interface to manage the resources files."""
+"""A simple Command Line Interface to manage artefact versions of TS1170.5."""
 
 import os
 from pathlib import Path
@@ -12,7 +12,7 @@ version_manager = VersionManager()
 
 @click.group()
 def cli():
-    """CLI for managing versions of the  NZ Seismic Site Demand Tables for TS1170.5"""
+    """CLI for managing versions of the NZ Seismic Site Demand Tables for TS1170.5"""
 
 
 @cli.command("ls")
@@ -48,7 +48,6 @@ def build_and_append_version(version_id, nzshm_model_version, verbose):
     version_manager.write_version_list(current_versions)
     if verbose:
         click.echo(f"Wrote our new version {vi}")
-    #    click.echo("did nothing, sorry")
 
 
 if __name__ == "__main__":
