@@ -1,7 +1,4 @@
-"""A simple Command Line Interface to manage artefact versions of TS1170.5."""
-
-import os
-from pathlib import Path
+"""A simple CLI to manage artefact versions of TS1170.5."""
 
 import click
 
@@ -12,23 +9,21 @@ version_manager = VersionManager()
 
 @click.group()
 def cli():
-    """CLI for managing versions of the NZ Seismic Site Demand Tables for TS1170.5"""
+    """A CLI for managing versions of the NZ Seismic Site Demand Tables for TS1170.5"""
 
 
 @cli.command("ls")
 @click.option("--verbose", "-V", is_flag=True, default=False)
-@click.option(
-    "--resources_path",
-    "-R",
-    default=lambda: Path(Path(os.getcwd()).parent, "resources"),
-)
-def list_versions(resources_path, verbose):
+def list_versions(verbose):
     """List the available versions of NZSSDT 2023"""
-    if verbose:
-        click.echo("Resources path: %s" % resources_path)
 
-    for version_info in version_manager.read_version_list():
-        click.echo(version_info)
+    if verbose:
+        click.echo("version_id, nzshm_model_version")
+        for vi in version_manager.read_version_list():
+            click.echo(f"{vi.version_id}, {vi.nzshm_model_version}")
+    else:
+        for vi in version_manager.read_version_list():
+            click.echo(f"{vi.version_id}")
 
 
 @cli.command("init")
@@ -48,6 +43,16 @@ def build_and_append_version(version_id, nzshm_model_version, verbose):
     version_manager.write_version_list(current_versions)
     if verbose:
         click.echo(f"Wrote our new version {vi}")
+
+
+@cli.command("info")
+@click.argument("version_id", type=str)
+@click.option("--verbose", "-V", is_flag=True, default=False)
+def version_info(version_id, verbose):
+    """Get detailed info for a given version_id"""
+    for vi in version_manager.read_version_list():
+        if vi.version_id == version_id:
+            click.echo(vi)
 
 
 if __name__ == "__main__":
