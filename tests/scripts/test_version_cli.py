@@ -3,11 +3,7 @@ import pytest
 
 from click.testing import CliRunner
 from nzssdt_2023.scripts.version_cli import cli as version
-
-
-### some fixtures in a temporary resources folder
-
-
+from nzssdt_2023.scripts import version_cli  # module reference for patching
 
 ### the actual tests ...
 
@@ -17,6 +13,7 @@ def test_ls():
   assert result.exit_code == 0
   assert "VersionInfo(version_id='1'" in result.output
 
+
 def test_ls_verbose():
   runner = CliRunner()
   result = runner.invoke(version, ['ls', '--verbose'])
@@ -24,10 +21,23 @@ def test_ls_verbose():
   assert 'Resources path:' in result.output
   assert "VersionInfo(version_id='1'" in result.output
 
-@pytest.mark.skip('WIP - need fixture setup')
-def test_init():
+
+def test_init_verbose(mocker):
+
+  # patch the underlying functions
+  vi_og = version_cli.VersionInfo("MY_NEW_VER", 'NSHM_v99')
+  vi_new = version_cli.VersionInfo("MY_NEW_ONE", 'NSHM_v00')
+  mocked_read_version_list = mocker.patch('nzssdt_2023.scripts.version_cli.read_version_list', return_value=[vi_og])
+  mocked_write_version_list = mocker.patch('nzssdt_2023.scripts.version_cli.write_version_list', return_value=[vi_new])
+
   runner = CliRunner()
-  result = runner.invoke(version, ['init', 'MY_NEW_VERSION', '--verbose'])
+  result = runner.invoke(version, ['init', 'MY_NEW_ONE', '-N', 'NSHM_v00', '--verbose'])
+
+  mocked_read_version_list.assert_called_once()
+  mocked_write_version_list.assert_called_once_with([vi_og, vi_new])
+
   print( result.output )
+
   assert result.exit_code == 0
-  assert "VersionInfo(version_id='MY_NEW_VERSION'" in result.output
+  assert f"VersionInfo(version_id='{vi_new.version_id}'" in result.output
+  assert f"nzshm_model_version='{vi_new.nzshm_model_version}'" in result.output

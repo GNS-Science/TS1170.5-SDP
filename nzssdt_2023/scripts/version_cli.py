@@ -34,11 +34,11 @@ def list_versions(resources_path, verbose):
 def build_and_append_version(version_id, nzshm_model_version, verbose):
     """Add a new published version of NZSSDT 2023"""
     if verbose:
-        click.echo("nzshm_model_version: %s" % nzshm_model_version)
-        click.echo("build version: %s" % version_id)
+        click.echo(f"version_id: {version_id}, nzshm_model_version: {nzshm_model_version}")
 
     vi = VersionInfo(
-        version_id=version_id, nzshm_model_version=nzshm_model_version, description="description"
+        version_id=version_id,
+        nzshm_model_version=nzshm_model_version
     )
 
     current_versions = read_version_list()
