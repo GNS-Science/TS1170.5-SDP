@@ -8,6 +8,7 @@ import pandas as pd
 
 from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.data_creation import constants
+from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
 APoEs = [f"APoE: 1/{rp}" for rp in constants.DEFAULT_RPS]
 site_class_labels = [f"Site Class {key}" for key in constants.SITE_CLASSES]
@@ -60,12 +61,20 @@ def flatten_sat_df(df: pd.DataFrame):
     )
     return df3.sort_values(by=["APoE (1/n)", "Site Class"])
 
-def sat_table_to_json(df: pd.DataFrame, out_folder: Union[str, Path]):
+def sat_table_to_json(hf_path: Path, version_folder: Union[str, Path]):
+    """Creates sat table and saves to json
 
+    Args:
+        hf_path: hdf5 filename, containing the hazard data
+        version_folder: version folder to save json to
+
+    """
+
+    df = sa_gen.create_sa_table(hf_path)
     sat = SatTable(df)
 
     # SAT named locations
-    out_path = Path(out_folder, "named_locations.json")
+    out_path = Path(version_folder, "named_locations.json")
     sat.named_location_df().to_json(
         out_path,
         index=False,
@@ -75,7 +84,7 @@ def sat_table_to_json(df: pd.DataFrame, out_folder: Union[str, Path]):
     )
 
     # SAT grid locations
-    out_path = Path(out_folder, "grid_locations.json")
+    out_path = Path(version_folder, "grid_locations.json")
     sat.grid_location_df().to_json(
         out_path,
         index=False,
@@ -83,3 +92,4 @@ def sat_table_to_json(df: pd.DataFrame, out_folder: Union[str, Path]):
         indent=2,
         double_precision=3,  # need to confirm that this is as intended for sigfig rounding
     )
+

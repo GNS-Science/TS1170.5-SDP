@@ -12,16 +12,17 @@ from typing import Optional
 import numpy as np
 
 from nzssdt_2023.config import WORKING_FOLDER
-from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
-from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
+from nzssdt_2023.data_creation.NSHM_to_hdf5 import query_NSHM_to_hdf5
+from nzssdt_2023.data_creation.sa_parameter_generation import create_sa_table
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
+from nzssdt_2023.publish.convert import sat_table_to_json
 
 # configure logging
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
 working_folder = Path(WORKING_FOLDER)
-version_folder = str(PurePath(os.path.realpath(__file__)).parent.parent)
+version_folder = Path(PurePath(os.path.realpath(__file__)).parent.parent.parent, "resources", "v_test")
 
 mini = True
 override = False
@@ -33,11 +34,17 @@ else:
     hf_path = working_folder / "all_hcurves.hdf5"
     site_list: Optional[list[str]] = None
 
+# query NSHM
 if override | (not hf_path.exists()):
-    to_hdf5.query_NSHM_to_hdf5(hf_path, site_list=site_list)
+    query_NSHM_to_hdf5(hf_path, site_list=site_list)
 
-# generate Sa Parameter Tables (writes pkl and hdf5 files)
-# sa_gen.create_sa_pkl(hf_path, site_list=site_list)
+# create table
+if override | (not (version_folder / "named_locations.json").exists()):
+    sat_table_to_json(hf_path, version_folder)
+
+
+
+
 
 # # extract metadata from Sa Parameter Tables
 # with open(sa_path, "rb") as file:

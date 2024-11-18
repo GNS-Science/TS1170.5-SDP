@@ -681,16 +681,48 @@ def replace_relevant_locations(
     return df
 
 
-def create_sa_table(data_file: Path) -> "pdt.DataFrame":
-    site_list = list(extract_sites(data_file).index)
-    APoEs, hazard_rp_list = extract_APoEs(data_file)
-    quantile_list = extract_quantiles(data_file)
+def remove_lower_bound_metadata(df: "pdt.DataFrame"):
+    """Removes the metadata flags related to the lower bound hazard
+
+    Args:
+        df: mutli-index dataframe of sa parameters for all locations, APoEs, and site classes
+
+    Returns:
+        df: same df with fewer columns
+    """
+
+    df = df.copy(deep=True)
+
+    APoEs = list(df.columns.levels[0])
+    sc_labels = list(df.columns.levels[1])
+
+    for APoE in APoEs:
+        for sc in sc_labels:
+            for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor", "Td Floor"]:
+                df.drop((APoE, sc, parameter), axis=1, inplace=True)
+
+    return df
+
+
+def create_sa_table(hf_path: Path, lower_bound_flags: bool=False) -> "pdt.DataFrame":
+    """Creates a pandas dataframe with the sa parameters
+
+    Args:
+        hf_path: hdf5 filename, containing the hazard data
+        lower_bound_flags: True includes the metadata for updating the lower bound hazard
+
+    Returns:
+        df: dataframe of sa parameters
+    """
+    site_list = list(extract_sites(hf_path).index)
+    APoEs, hazard_rp_list = extract_APoEs(hf_path)
+    quantile_list = extract_quantiles(hf_path)
     vs30_list = VS30_LIST
 
     log.info("begin calculate_parameter_arrays")
-    PGA, Sas, PSV, Tc = calculate_parameter_arrays(data_file)
+    PGA, Sas, PSV, Tc = calculate_parameter_arrays(hf_path)
 
-    acc_spectra, imtls = extract_spectra(data_file)
+    acc_spectra, imtls = extract_spectra(hf_path)
 
     DIAGNOSTICS = True
     # why is PGA off by ~0.01 for some permutations??
@@ -766,83 +798,9 @@ def create_sa_table(data_file: Path) -> "pdt.DataFrame":
 
     df = replace_relevant_locations(df)
 
+    if not lower_bound_flags:
+        df = remove_lower_bound_metadata(df)
+
     return df
 
 
-def save_table_to_pkl(
-    df: "pdt.DataFrame", sa_name: Path, save_floor_flags: bool = False
-):
-    """Save the sa parameter table dataframe to a pickle file
-
-    Args:
-        df: mutli-index dataframe of sa parameters for all locations, APoEs, and site classes
-        sa_name: .pkl filename
-        save_floor_flags: True saves a .pkl that includes metadata on the lower bound hazard
-
-    TODO:
-     - to json direct rather than to_pickle (or gherkin)
-    """
-    df = df.copy(deep=True)
-
-    # TODO: maybe this should be a separate function?
-    if save_floor_flags:
-        floor_filename = str(sa_name).replace(".pkl", "_with-floor-flags.pkl")
-        df.to_pickle(floor_filename)
-
-    APoEs = list(df.columns.levels[0])
-    sc_labels = list(df.columns.levels[1])
-
-    for APoE in APoEs:
-        for sc in sc_labels:
-            for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor", "Td Floor"]:
-                df.drop((APoE, sc, parameter), axis=1, inplace=True)
-
-    df.to_pickle(sa_name)
-
-
-def create_sa_pkl(
-    hf_name: Path,
-    sa_name: Path,
-    hazard_id: str = "NSHM_v1.0.4",
-    site_list: Optional[list[str]] = None,
-    save_floor_flags: bool = False,
-):
-    """Generate sa parameter tables and save as .pkl file
-
-    Args:
-        hf_name: name of intermediate hdf5 file with hazard curve data
-        sa_name: name of .pkl file
-        hazard_id: NSHM model id
-        site_list: list of sites to include in the sa parameter table
-        save_floor_flags: True saves a .pkl that includes metadata on the lower bound hazard
-
-    Todo:
-        * add option to pass alternate return periods to to_hdf5.add_uniform_hazard_spectra
-
-    """
-
-    if site_list is None:
-        sites = pd.concat(
-            [q_haz.create_sites_df(), q_haz.create_sites_df(named_sites=False)]
-        )
-    else:
-        sites = q_haz.create_sites_df(site_list=site_list)
-
-    log.info(f"begin create_sa_pkl for {len(sites)}")
-
-    # query NSHM
-    hcurves, _ = q_haz.retrieve_hazard_curves(
-        sites, VS30_LIST, IMT_LIST, AGG_LIST, hazard_id
-    )
-
-    # prep and save hcurves to hdf5
-    data = to_hdf5.create_hcurve_dictionary(
-        sites, VS30_LIST, IMT_LIST, IMTL_LIST, AGG_LIST, hcurves
-    )
-
-    data = to_hdf5.add_uniform_hazard_spectra(data)
-    to_hdf5.save_hdf(hf_name, data)
-
-    # create sa table
-    df = create_sa_table(hf_name)
-    save_table_to_pkl(df, sa_name, save_floor_flags)
