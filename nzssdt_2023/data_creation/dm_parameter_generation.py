@@ -10,12 +10,13 @@ TODO:
 import itertools
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List
 
 import numpy as np
 import pandas as pd
 from toshi_hazard_store.model import AggregationEnum
 
+from nzssdt_2023.data_creation.constants import DEFAULT_RPS
 from nzssdt_2023.data_creation.mean_magnitudes import (
     empty_mean_mag_df,
     frequency_to_poe,
@@ -65,27 +66,6 @@ def calc_distance_to_faults(
     gdf.index.names = [""]
 
     return gdf[["D"]]
-
-
-def return_table_indices(df: "pdt.DataFrame") -> Tuple[List[str], List[str], List[str]]:
-    """Returns the row and column indices of the parameter df
-
-    Args:
-        df: sa parameter table
-
-    Returns:
-        site_list: list of sites included in the sa tables
-        APoEs    : list of APoEs included in the sa tables
-        site_class_list: list of site classes included in the sa tables
-
-    """
-    site_list = list(df.index)
-
-    columns = list(df.columns.levels)
-    APoEs = list(columns[0])
-    site_class_list = list(columns[1])
-
-    return site_list, APoEs, site_class_list
 
 
 def extract_m_values(
@@ -148,9 +128,9 @@ def extract_m_values(
     return mags.loc[site_names, freqs]
 
 
-def create_D_and_M_table(
+def create_D_and_M_df(
     site_list: List[str],
-    APoEs: List[str],
+    rp_list: List[int] = DEFAULT_RPS,
     no_cache: bool = False,
     legacy: bool = False,
 ) -> "pdt.DataFrame":
@@ -158,9 +138,9 @@ def create_D_and_M_table(
 
     Args:
         site_list: list of sites of interest
-        APoEs    : list of APoEs of interest
+        rp_list    : list of return periods of interest
         no_cache: if True, ignore the cache file
-        legacy: if True double rounds magnitudes to match origional mean mags from v1 of the workflow.
+        legacy: if True double rounds magnitudes to match original mean mags from v1 of the workflow.
 
     Returns:
         D_and_M: dataframe of the d and m tables
@@ -171,6 +151,8 @@ def create_D_and_M_table(
 
     D_values = pd.read_json(Path(folder, "D_values.json"))
     D_sites = [site for site in list(D_values.index) if site in site_list]
+
+    APoEs = [f"APoE: 1/{rp}" for rp in rp_list]
 
     M_mean = extract_m_values(site_list, APoEs, AggregationEnum.MEAN, no_cache, legacy)
     M_p90 = extract_m_values(["Auckland"], APoEs, AggregationEnum._90, no_cache, legacy)
