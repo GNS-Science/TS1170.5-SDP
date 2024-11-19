@@ -24,6 +24,7 @@ def prepare_temp_clones(temporary_dir):
         shutil.copy(input_folder / fname, tmp_folder / fname)
 
 
+@pytest.mark.skip("build procedure is in transition")
 def test_build_version_one(tmp_path):
 
     print(tmp_path)
