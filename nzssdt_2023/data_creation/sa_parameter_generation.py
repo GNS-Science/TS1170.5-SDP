@@ -8,13 +8,9 @@ from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from nzssdt_2023.data_creation import NSHM_to_hdf5 as to_hdf5
-from nzssdt_2023.data_creation import query_NSHM as q_haz
 from nzssdt_2023.data_creation.constants import (
-    AGG_LIST,
     DEFAULT_RPS,
     IMT_LIST,
-    IMTL_LIST,
     LOCATION_REPLACEMENTS,
     LOWER_BOUND_PARAMETERS,
     PGA_N_DP,
@@ -704,7 +700,7 @@ def remove_lower_bound_metadata(df: "pdt.DataFrame"):
     return df
 
 
-def create_sa_table(hf_path: Path, lower_bound_flags: bool=False) -> "pdt.DataFrame":
+def create_sa_table(hf_path: Path, lower_bound_flags: bool = False) -> "pdt.DataFrame":
     """Creates a pandas dataframe with the sa parameters
 
     Args:
@@ -802,5 +798,3 @@ def create_sa_table(hf_path: Path, lower_bound_flags: bool=False) -> "pdt.DataFr
         df = remove_lower_bound_metadata(df)
 
     return df
-
-

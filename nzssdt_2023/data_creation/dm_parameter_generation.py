@@ -10,17 +10,13 @@ TODO:
 import itertools
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List
 
 import numpy as np
 import pandas as pd
 from toshi_hazard_store.model import AggregationEnum
 
-from nzssdt_2023.data_creation.constants import (
-    DEFAULT_RPS,
-    SITE_CLASSES,
-)
-
+from nzssdt_2023.data_creation.constants import DEFAULT_RPS
 from nzssdt_2023.data_creation.mean_magnitudes import (
     empty_mean_mag_df,
     frequency_to_poe,
@@ -70,27 +66,6 @@ def calc_distance_to_faults(
     gdf.index.names = [""]
 
     return gdf[["D"]]
-
-
-# def return_table_indices(df: "pdt.DataFrame") -> Tuple[List[str], List[str], List[str]]:
-#     """Returns the row and column indices of the parameter df
-#
-#     Args:
-#         df: sa parameter table
-#
-#     Returns:
-#         site_list: list of sites included in the sa tables
-#         APoEs    : list of APoEs included in the sa tables
-#         site_class_list: list of site classes included in the sa tables
-#
-#     """
-#     site_list = list(df.index)
-#
-#     columns = list(df.columns.levels)
-#     APoEs = list(columns[0])
-#     site_class_list = list(columns[1])
-#
-#     return site_list, APoEs, site_class_list
 
 
 def extract_m_values(
@@ -196,4 +171,3 @@ def create_D_and_M_df(
 
     D_and_M = replace_relevant_locations(D_and_M)
     return D_and_M
-

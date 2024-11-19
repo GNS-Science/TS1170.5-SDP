@@ -1,13 +1,13 @@
 """
 helper functions for producing an HDF5 file for the NZSSDT tables
 """
-import os
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from nzssdt_2023.data_creation import query_NSHM as q_haz
+import pandas as pd
 
+from nzssdt_2023.data_creation import query_NSHM as q_haz
 from nzssdt_2023.data_creation.constants import (
     AGG_LIST,
     DEFAULT_RPS,
@@ -15,6 +15,7 @@ from nzssdt_2023.data_creation.constants import (
     IMTL_LIST,
     VS30_LIST,
 )
+
 if TYPE_CHECKING:
     import numpy.typing as npt
 
@@ -247,9 +248,7 @@ def save_hdf(hf_name, data):
 
 
 def query_NSHM_to_hdf5(
-    hf_name: Path,
-    hazard_id: str = "NSHM_v1.0.4",
-    site_list: Optional[list[str]] = None
+    hf_name: Path, hazard_id: str = "NSHM_v1.0.4", site_list: Optional[list[str]] = None
 ):
     """Query the NSHM and save the results to an hdf5
 

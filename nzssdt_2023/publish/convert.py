@@ -2,14 +2,13 @@
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Union, List
+from typing import List, Union
 
 import pandas as pd
 
-from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.data_creation import constants
-from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
+from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
 parameters = ["PGA", "Sas", "Tc"]  # Td will be added after this workflow is established
 
@@ -59,6 +58,7 @@ def flatten_sat_df(df: pd.DataFrame):
     )
     return df3.sort_values(by=["APoE (1/n)", "Site Class"])
 
+
 def sat_table_to_json(hf_path: Path, version_folder: Union[str, Path]):
     """Creates sat table and saves to json
 
@@ -99,7 +99,7 @@ class DistMagTable:
     @lru_cache
     def flatten(self):
         df2 = self.raw_table
-        df2['Location'] = df2.index
+        df2["Location"] = df2.index
         df2 = df2.set_index(["Location", "D"]).stack().reset_index()
         df2.level_2 = df2.level_2.apply(lambda x: int(x.replace("APoE: 1/", "")))
         df2 = df2.rename(
@@ -112,11 +112,11 @@ class DistMagTable:
 
 
 def d_and_m_table_to_json(
-        version_folder,
-        site_list: List[str],
-        rp_list: List[int] = constants.DEFAULT_RPS,
-        no_cache: bool = False,
-        legacy: bool = False,
+    version_folder,
+    site_list: List[str],
+    rp_list: List[int] = constants.DEFAULT_RPS,
+    no_cache: bool = False,
+    legacy: bool = False,
 ):
     """Compiles the D and M parameter tables
 
@@ -128,7 +128,9 @@ def d_and_m_table_to_json(
         legacy: if True double rounds magnitudes to match original mean mags from v1 of the workflow.
 
     """
-    dm_df = dm_gen.create_D_and_M_df(site_list, rp_list=rp_list, no_cache=no_cache, legacy=legacy)
+    dm_df = dm_gen.create_D_and_M_df(
+        site_list, rp_list=rp_list, no_cache=no_cache, legacy=legacy
+    )
     dandm = DistMagTable(dm_df)
 
     out_path = Path(version_folder, "d_and_m.json")
@@ -138,5 +140,3 @@ def d_and_m_table_to_json(
         orient="table",
         indent=2,
     )
-
-
