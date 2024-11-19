@@ -2,6 +2,13 @@
 """
 This module defines data structures and input output utilities for the resource versions.
 
+
+Classes:
+    VersionInfo: dataclass defining the attributes of a NZSDDT version.
+    VersionManager: manage the reading/writing of versions.
+
+
+
 """
 import dataclasses
 import json
@@ -85,7 +92,11 @@ class VersionManager:
         self._version_list_path = Path(self._resource_folder, VERSION_LIST_FILENAME)
 
     def read_version_list(self) -> Dict[str, VersionInfo]:
-        """return the current version list as a dict."""
+        """return the version list as a dict.
+
+        Returns:
+            version_dict: a dictionary of version info instances.
+        """
         if not self._version_list_path.exists():
             raise RuntimeError(
                 f"the version_list file {self._version_list_path} was not found."
@@ -113,15 +124,23 @@ class VersionManager:
         """get a version, given a valid id.
 
         Args:
-            version_id: the vesron id string.
+            version_id: the version id string.
 
         Returns:
-            version_Info: the version info instance
+            version_info: the version info instance
         """
         versions = self.read_version_list()
         return versions.get(version_id)
 
     def add(self, version_info: VersionInfo):
+        """add a version instance.
+
+        Args:
+            version_info: the version_info instance.
+
+        Raises:
+            KeyError: if the version_id already exists.
+        """
         versions = self.read_version_list()
         if versions.get(version_info.version_id):
             raise (KeyError("Item already exists"))
@@ -129,6 +148,14 @@ class VersionManager:
         self.write_version_list(list(versions.values()))
 
     def update(self, version_info: VersionInfo):
+        """update a version instance.
+
+        Args:
+            version_info: the modified version instance.
+
+        Raises:
+            KeyError: if the version_id was not found
+        """
         versions = self.read_version_list()
         current = versions.get(version_info.version_id, None)
         if not current:
@@ -137,6 +164,14 @@ class VersionManager:
         self.write_version_list(versions.values())
 
     def remove(self, version_id: str) -> VersionInfo:
+        """remove a version by version_id.
+
+        Args:
+            version_id: the version id string.
+
+        Returns:
+            version_info: the removed version info instance
+        """
         versions = self.read_version_list()
         vi = versions.pop(version_id)
         self.write_version_list(versions.values())
