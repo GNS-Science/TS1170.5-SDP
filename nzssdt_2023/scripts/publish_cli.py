@@ -5,7 +5,7 @@
 
 import click
 
-from nzssdt_2023.build import build_version_one
+from nzssdt_2023.build import build_version_one  # noqa: typing
 from nzssdt_2023.versioning import VersionManager
 
 version_manager = VersionManager()
