@@ -2,16 +2,14 @@
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 import pandas as pd
 
 from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
-
-APoEs = [f"APoE: 1/{rp}" for rp in constants.DEFAULT_RPS]
-site_class_labels = [f"Site Class {key}" for key in constants.SITE_CLASSES]
+from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 
 parameters = ["PGA", "Sas", "Tc"]  # Td will be added after this workflow is established
 
@@ -92,4 +90,53 @@ def sat_table_to_json(hf_path: Path, version_folder: Union[str, Path]):
         indent=2,
         double_precision=3,  # need to confirm that this is as intended for sigfig rounding
     )
+
+
+class DistMagTable:
+    def __init__(self, raw_table: pd.DataFrame):
+        self.raw_table = raw_table
+
+    @lru_cache
+    def flatten(self):
+        df2 = self.raw_table
+        df2['Location'] = df2.index
+        df2 = df2.set_index(["Location", "D"]).stack().reset_index()
+        df2.level_2 = df2.level_2.apply(lambda x: int(x.replace("APoE: 1/", "")))
+        df2 = df2.rename(
+            columns={
+                0: "M",
+                "level_2": "APoE (1/n)",
+            }
+        )
+        return df2.set_index(["Location", "APoE (1/n)"])
+
+
+def d_and_m_table_to_json(
+        version_folder,
+        site_list: List[str],
+        rp_list: List[int] = constants.DEFAULT_RPS,
+        no_cache: bool = False,
+        legacy: bool = False,
+):
+    """Compiles the D and M parameter tables
+
+    Args:
+        version_folder: version folder to save json to
+        site_list: list of sites of interest
+        rp_list    : list of return periods of interest
+        no_cache: if True, ignore the cache file
+        legacy: if True double rounds magnitudes to match original mean mags from v1 of the workflow.
+
+    """
+    dm_df = dm_gen.create_D_and_M_df(site_list, rp_list=rp_list, no_cache=no_cache, legacy=legacy)
+    dandm = DistMagTable(dm_df)
+
+    out_path = Path(version_folder, "d_and_m.json")
+    dandm.flatten().to_json(
+        out_path,
+        index=True,
+        orient="table",
+        indent=2,
+    )
+
 

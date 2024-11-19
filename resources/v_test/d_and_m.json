@@ -1,0 +1,239 @@
+{
+  "schema":{
+    "fields":[
+      {
+        "name":"Location",
+        "type":"string"
+      },
+      {
+        "name":"APoE (1\/n)",
+        "type":"integer"
+      },
+      {
+        "name":"D",
+        "type":"string"
+      },
+      {
+        "name":"M",
+        "type":"string"
+      }
+    ],
+    "primaryKey":[
+      "Location",
+      "APoE (1\/n)"
+    ],
+    "pandas_version":"1.4.0"
+  },
+  "data":[
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":25,
+      "D":"",
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":50,
+      "D":"",
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":100,
+      "D":"",
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":250,
+      "D":"",
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":500,
+      "D":"",
+      "M":6.3
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":1000,
+      "D":"",
+      "M":6.3
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":2500,
+      "D":"",
+      "M":6.4
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":25,
+      "D":"",
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":50,
+      "D":"",
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":100,
+      "D":"",
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":250,
+      "D":"",
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":500,
+      "D":"",
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":1000,
+      "D":"",
+      "M":6.4
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":2500,
+      "D":"",
+      "M":6.5
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":25,
+      "D":"",
+      "M":6.2
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":50,
+      "D":"",
+      "M":6.2
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":100,
+      "D":"",
+      "M":6.3
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":250,
+      "D":"",
+      "M":6.3
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":500,
+      "D":"",
+      "M":6.4
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":1000,
+      "D":"",
+      "M":6.5
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":2500,
+      "D":"",
+      "M":6.6
+    },
+    {
+      "Location":"Hamilton",
+      "APoE (1\/n)":25,
+      "D":"",
+      "M":6.6
+    },
+    {
+      "Location":"Hamilton",
+      "APoE (1\/n)":50,
+      "D":"",
+      "M":6.7
+    },
+    {
+      "Location":"Hamilton",
+      "APoE (1\/n)":100,
+      "D":"",
+      "M":6.8
+    },
+    {
+      "Location":"Hamilton",
+      "APoE (1\/n)":250,
+      "D":"",
+      "M":6.8
+    },
+    {
+      "Location":"Hamilton",
+      "APoE (1\/n)":500,
+      "D":"",
+      "M":6.8
+    },
+    {
+      "Location":"Hamilton",
+      "APoE (1\/n)":1000,
+      "D":"",
+      "M":6.9
+    },
+    {
+      "Location":"Hamilton",
+      "APoE (1\/n)":2500,
+      "D":"",
+      "M":6.9
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":25,
+      "D":0,
+      "M":6.9
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":50,
+      "D":0,
+      "M":7.2
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":100,
+      "D":0,
+      "M":7.5
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":250,
+      "D":0,
+      "M":7.7
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":500,
+      "D":0,
+      "M":7.8
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":1000,
+      "D":0,
+      "M":7.9
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":2500,
+      "D":0,
+      "M":7.9
+    }
+  ]
+}
