@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # """
 # The build module builds a final version.
 #

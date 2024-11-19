@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # #! test_build.py
 #
 # import pathlib
