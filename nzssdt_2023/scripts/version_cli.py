@@ -19,10 +19,10 @@ def list_versions(verbose):
 
     if verbose:
         click.echo("version_id, nzshm_model_version")
-        for vi in version_manager.read_version_list():
+        for vi in version_manager.read_version_list().values():
             click.echo(f"{vi.version_id}, {vi.nzshm_model_version}")
     else:
-        for vi in version_manager.read_version_list():
+        for vi in version_manager.read_version_list().values():
             click.echo(f"{vi.version_id}")
 
 
@@ -30,7 +30,7 @@ def list_versions(verbose):
 @click.argument("version_id", type=str)
 @click.option("--nzshm_model_version", "-N", default="NSHM_v1.0.4")
 @click.option("--verbose", "-V", is_flag=True, default=False)
-def build_and_append_version(version_id, nzshm_model_version, verbose):
+def init(version_id, nzshm_model_version, verbose):
     """Add a new published version of NZSSDT 2023"""
     if verbose:
         click.echo(
@@ -38,9 +38,9 @@ def build_and_append_version(version_id, nzshm_model_version, verbose):
         )
 
     vi = VersionInfo(version_id=version_id, nzshm_model_version=nzshm_model_version)
-    current_versions = version_manager.read_version_list()
-    current_versions.append(vi)
-    version_manager.write_version_list(current_versions)
+    # current_versions = version_manager.read_version_list()
+    # current_versions.append(vi)
+    version_manager.add(vi)
     if verbose:
         click.echo(f"Wrote our new version {vi}")
 
@@ -50,9 +50,8 @@ def build_and_append_version(version_id, nzshm_model_version, verbose):
 @click.option("--verbose", "-V", is_flag=True, default=False)
 def version_info(version_id, verbose):
     """Get detailed info for a given version_id"""
-    for vi in version_manager.read_version_list():
-        if vi.version_id == version_id:
-            click.echo(vi)
+    vi = version_manager.get(version_id)
+    click.echo(vi)
 
 
 if __name__ == "__main__":

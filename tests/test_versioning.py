@@ -29,7 +29,7 @@ def test_standard_filename_from_version_info(version_info_fixture):
 
 
 class TestVersionInfo(object):
-    def test_add_version(self, version_info_fixture):
+    def test_new_version(self, version_info_fixture):
         nv = version_info_fixture
 
         assert nv.description is None

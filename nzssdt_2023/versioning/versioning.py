@@ -7,7 +7,7 @@ import dataclasses
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Union
 
 import dacite
 import nzshm_common
@@ -37,7 +37,7 @@ class ConvertedFile:
 @dataclass(frozen=True)
 class IncludedFile:
     """
-    A dataclass defining a resoource file.
+    A dataclass defining a resource file.
 
     Args:
         filepath: path to the file.
@@ -84,18 +84,60 @@ class VersionManager:
         self._resource_folder = resource_folder or RESOURCES_FOLDER
         self._version_list_path = Path(self._resource_folder, VERSION_LIST_FILENAME)
 
-    def read_version_list(self):
-        """returns the current version list."""
+    def read_version_list(self) -> Dict[str, VersionInfo]:
+        """return the current version list as a dict."""
         if not self._version_list_path.exists():
             raise RuntimeError(
                 f"the version_list file {self._version_list_path} was not found."
             )
         version_list = json.load(open(self._version_list_path))
-        return [
-            dacite.from_dict(data_class=VersionInfo, data=vi) for vi in version_list
-        ]
+        version_dict = {}
+        seen = []
+        for vi in version_list:
+            obj = dacite.from_dict(data_class=VersionInfo, data=vi)
+            assert obj.version_id not in seen, "duplicate version id"
+            version_dict[obj.version_id] = obj
+            seen.append(obj.version_id)
+        return version_dict
 
     def write_version_list(self, new_list: Iterable[VersionInfo]):
-        """creates/updates the version list."""
+        """write the version list.
+
+        Args:
+            new_list: the list data to write to disk.
+        """
         with open(self._version_list_path, "w") as fout:
             json.dump([dataclasses.asdict(vi) for vi in new_list], fout, indent=2)
+
+    def get(self, version_id: str) -> Union[VersionInfo, None]:
+        """get a version, given a valid id.
+
+        Args:
+            version_id: the vesron id string.
+
+        Returns:
+            version_Info: the version info instance
+        """
+        versions = self.read_version_list()
+        return versions.get(version_id)
+
+    def add(self, version_info: VersionInfo):
+        versions = self.read_version_list()
+        if versions.get(version_info.version_id):
+            raise (KeyError("Item already exists"))
+        versions[version_info.version_id] = version_info
+        self.write_version_list(list(versions.values()))
+
+    def update(self, version_info: VersionInfo):
+        versions = self.read_version_list()
+        current = versions.get(version_info.version_id, None)
+        if not current:
+            raise (KeyError)
+        versions[version_info.version_id] = version_info
+        self.write_version_list(versions.values())
+
+    def remove(self, version_id: str) -> VersionInfo:
+        versions = self.read_version_list()
+        vi = versions.pop(version_id)
+        self.write_version_list(versions.values())
+        return vi
