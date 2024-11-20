@@ -33,7 +33,7 @@ def test_table_rows(dm_table, sat_table):
     print(d_and_m_df)
 
     named_df = sat_table.named_location_df()
-    grid_df = sat_table.grid_location_df()
+    # grid_df = sat_table.grid_location_df()
 
     table_rows = list(generate_table_rows(named_df, d_and_m_df, apoe=25))[:5]
     print(table_rows)

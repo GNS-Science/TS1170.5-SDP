@@ -1,13 +1,10 @@
-import itertools
 from pathlib import Path
 
 import pandas as pd
 import pandas.testing
-import pytest
 from toshi_hazard_store.model import AggregationEnum
 
 import nzssdt_2023.data_creation.dm_parameter_generation as dm_parameter_generation
-import nzssdt_2023.data_creation.mean_magnitudes as mean_magnitudes
 
 SITE_NAMES = ["Paihia", "Opua", "-46.200~166.600"]
 FREQUENCIES = [
@@ -18,6 +15,7 @@ FREQUENCIES = [
     "APoE: 1/2500",
 ]
 AGG = AggregationEnum.MEAN
+
 
 # no cache, do I get the correct DataFrame?
 def test_extract_m_values(mean_mags_fixture):

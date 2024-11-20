@@ -8,12 +8,13 @@ from io import StringIO
 # from nzssdt_2023.data_creation import constants
 import pandas
 
-# import pathlib
-import pytest
-
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.publish.convert import DistMagTable
+
+# import pathlib
+# import pytest
+
 
 # from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
