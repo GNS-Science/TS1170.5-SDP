@@ -37,7 +37,7 @@ from borb.pdf import (
 from borb.pdf.page.page_size import PageSize
 
 from nzssdt_2023.config import RESOURCES_FOLDER
-from nzssdt_2023.convert import DistMagTable, SatTable
+from nzssdt_2023.publish.convert import DistMagTable, SatTable
 
 MAX_PAGE_ROWS = 30
 SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
