@@ -17,7 +17,7 @@ def cli():
 
 
 @cli.command("add")
-@click.argument("version_id", type=int)
+@click.argument("version_id")
 @click.option("--nzshm_model_version", "-N", default="NSHM_v1.0.4")
 @click.option("--verbose", "-V", is_flag=True, default=False)
 def build_and_append_version(version_id, nzshm_model_version, verbose):
@@ -26,6 +26,7 @@ def build_and_append_version(version_id, nzshm_model_version, verbose):
         click.echo("nzshm_model_version: %s" % nzshm_model_version)
         click.echo("build version: %s" % version_id)
 
+    # TODO: more than just v1 !!
     if version_id == 1:
         vi = build_version_one()
 

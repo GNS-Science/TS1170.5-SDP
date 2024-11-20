@@ -2,20 +2,22 @@
 Check the new dataframes, serialised are similar to v1
 """
 
-# import pathlib
-# import pytest
+from io import StringIO
 
 # from nzssdt_2023.config import RESOURCES_FOLDER
 # from nzssdt_2023.data_creation import constants
 import pandas
-from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
-# from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
+# import pathlib
+import pytest
+
+from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.publish.convert import DistMagTable
 
-from io import StringIO
+# from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
 
+@pytest.mark.skip("test needs refactoring, it will try to talk to AWS as it stands")
 def test_d_and_m_json_serialisation():
     # pick up https://github.com/GNS-Science/TS1170.5-SDP/issues/61
 
@@ -29,7 +31,8 @@ def test_d_and_m_json_serialisation():
         fsim,
         index=True,
         orient="table",
-        indent=2,)
+        indent=2,
+    )
 
     fsim.seek(0)
     # print(fsim.readlines())
@@ -37,6 +40,5 @@ def test_d_and_m_json_serialisation():
 
     rehydrated = pandas.read_json(fsim, orient="table")
 
-    assert rehydrated.M.dtype == 'float'
-    assert rehydrated.D.dtype == 'float'
-
+    assert rehydrated.M.dtype == "float"
+    assert rehydrated.D.dtype == "float"
