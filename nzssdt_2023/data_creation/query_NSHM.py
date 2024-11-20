@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from nzshm_common.grids import RegionGrid
-from nzshm_common.location.code_location import CodedLocation
-from nzshm_common.location.location import LOCATION_LISTS, location_by_id
+from nzshm_common.location import CodedLocation, location_by_id
+from nzshm_common.location.location import LOCATION_LISTS
 from toshi_hazard_store.query import get_hazard_curves
 
 if TYPE_CHECKING:

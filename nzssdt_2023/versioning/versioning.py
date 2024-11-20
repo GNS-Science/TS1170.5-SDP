@@ -18,7 +18,6 @@ from typing import Dict, Iterable, List, Optional, Union
 
 import dacite
 import nzshm_common
-import nzshm_model
 
 from ..config import RESOURCES_FOLDER
 
@@ -65,7 +64,6 @@ class VersionInfo:
         conversions: a list of files converted (from AH to versioned) TODO: maybe deprecatable.
         manifest: the files that make up the version
         nzshm_common_lib_version: the version of the nzshm_common library used to produce this version.
-        nzshm_model_lib_version: the version of the nzshm_model library used to produce this version.
     """
 
     version_id: str = field(hash=True)
@@ -74,7 +72,6 @@ class VersionInfo:
     conversions: List[ConvertedFile] = field(default_factory=list)
     manifest: List[IncludedFile] = field(default_factory=list)
     nzshm_common_lib_version: str = nzshm_common.__version__
-    nzshm_model_lib_version: str = nzshm_model.__version__
 
 
 def standard_output_filename(version: Union[str, "VersionInfo"]):
