@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable, List, Union
 
 import numpy as np
 import pandas as pd
-from nzshm_common.location.code_location import CodedLocation
-from nzshm_common.location.location import LOCATION_LISTS, location_by_id
+from nzshm_common.location import CodedLocation, location_by_id
+from nzshm_common.location.location import LOCATION_LISTS
 from toshi_hazard_store import model, query
 
 from .constants import ALL_SITES, POE_TO_RP, RP_TO_POE, lat_lon_from_id
