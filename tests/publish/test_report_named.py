@@ -15,10 +15,13 @@ def sat_table():
     df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1", filename))
     return SatTable(df)
 
+
 @pytest.fixture(scope="module")
 def dm_table():
     filename = "D_and_M_with_floor.csv"
-    csv_path = pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1", filename) # not as per publish/report @ v1
+    csv_path = pathlib.Path(
+        RESOURCES_FOLDER, "pipeline", "v1", filename
+    )  # not as per publish/report @ v1
     # df = pd.read_csv(csv_path)
     return DistMagTable(csv_path)
 
@@ -34,7 +37,29 @@ def test_table_rows(dm_table, sat_table):
 
     table_rows = list(generate_table_rows(named_df, d_and_m_df, apoe=25))[:5]
     print(table_rows)
-    assert table_rows[0] == ['Kaitaia', 6.2, 'n/a', 0.02, 0.03, 0.4, 0.02, 0.04, 0.4, 0.02, 0.05, 0.5, 0.03, 0.06, 0.5, 0.03, 0.07, 0.5, 0.03, 0.09, 0.6]
+    assert table_rows[0] == [
+        "Kaitaia",
+        6.2,
+        "n/a",
+        0.02,
+        0.03,
+        0.4,
+        0.02,
+        0.04,
+        0.4,
+        0.02,
+        0.05,
+        0.5,
+        0.03,
+        0.06,
+        0.5,
+        0.03,
+        0.07,
+        0.5,
+        0.03,
+        0.09,
+        0.6,
+    ]
 
 
 def test_report_sat_table(sat_table, dm_table):
