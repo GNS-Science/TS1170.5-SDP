@@ -58,7 +58,7 @@ def calc_distance_to_faults(
     )
 
     gdf["D"] = gdf["distance"].astype("int")
-    gdf.loc[gdf["D"] >= 20, "D"] = ""
+    gdf.loc[gdf["D"] >= 20, "D"] = None
 
     wgs_epsg = 4326
     gdf = gdf.to_crs(epsg=wgs_epsg)

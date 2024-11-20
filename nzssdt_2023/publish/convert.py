@@ -134,7 +134,7 @@ def d_and_m_table_to_json(
     dandm = DistMagTable(dm_df)
 
     out_path = Path(version_folder, "d_and_m.json")
-    dandm.flatten().to_json(
+    dandm.flatten().infer_objects().to_json(
         out_path,
         index=True,
         orient="table",

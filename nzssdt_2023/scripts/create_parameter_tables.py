@@ -25,7 +25,7 @@ version_folder = Path(
 )
 
 mini = True
-override = False
+override = True
 
 if mini:
     hf_path = working_folder / "mini_hcurves.hdf5"
