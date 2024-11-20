@@ -1,20 +1,17 @@
 """
 Check the new dataframes, serialised are similar to v1
 """
-
+# import pathlib
 from io import StringIO
 
 # from nzssdt_2023.config import RESOURCES_FOLDER
 # from nzssdt_2023.data_creation import constants
-import pandas
+import pandas as pd
+import pytest
 
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.publish.convert import DistMagTable
-
-# import pathlib
-# import pytest
-
 
 # from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
@@ -27,6 +24,26 @@ def test_build_and_serialise_named_locations_json_serialisation():
 def test_build_and_serialise_grid_locations():
     # this should use truncated list e.g. 5 locations
     ...
+
+
+@pytest.mark.parametrize(
+    "city",
+    [
+        "Auckland",
+        "Christchurch",
+        "Dunedin",
+        "Wellington",
+    ],
+)
+@pytest.mark.parametrize("apoe", constants.DEFAULT_RPS)
+def test_d_and_m_tables_version1_vs_2(dm_table_v1, dm_table_v2, city, apoe):
+    # D&M values shouldn't have changed between versions
+    v1_flat = dm_table_v1.flatten()
+    v2_flat = dm_table_v2  # v2 has been flattened before serialization
+
+    _v1 = v1_flat.loc[(city, apoe)]
+    _v2 = v2_flat.loc[(city, apoe)]
+    assert _v1.all() == _v2.all()
 
 
 def test_d_and_m_json_serialisation(mean_mags_fixture, workingfolder_fixture):
@@ -47,7 +64,7 @@ def test_d_and_m_json_serialisation(mean_mags_fixture, workingfolder_fixture):
 
     fsim.seek(0)
 
-    rehydrated = pandas.read_json(fsim, orient="table")
+    rehydrated = pd.read_json(fsim, orient="table")
 
     # check M & D are numeric dtypes
     assert rehydrated.M.dtype == "float"

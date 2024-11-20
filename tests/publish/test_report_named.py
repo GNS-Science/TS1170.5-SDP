@@ -10,30 +10,29 @@ from nzssdt_2023.publish.report import build_report_page, generate_table_rows
 
 
 @pytest.fixture(scope="module")
-def sat_table():
+def sat_table_v1():
     filename = "SaT-variables_v5_corrected-locations.pkl"
     df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1", filename))
     return SatTable(df)
 
 
 @pytest.fixture(scope="module")
-def dm_table():
+def dm_table_v1():
     filename = "D_and_M_with_floor.csv"
     csv_path = pathlib.Path(
         RESOURCES_FOLDER, "pipeline", "v1", filename
     )  # not as per publish/report @ v1
-    # df = pd.read_csv(csv_path)
     return DistMagTable(csv_path)
 
 
-def test_table_rows(dm_table, sat_table):
+def test_table_rows_v1(dm_table_v1, sat_table_v1):
 
-    print(dm_table)
-    d_and_m_df = dm_table.flatten()
+    print(dm_table_v1)
+    d_and_m_df = dm_table_v1.flatten()
     print(d_and_m_df)
 
-    named_df = sat_table.named_location_df()
-    # grid_df = sat_table.grid_location_df()
+    named_df = sat_table_v1.named_location_df()
+    # grid_df = sat_table_v1.grid_location_df()
 
     table_rows = list(generate_table_rows(named_df, d_and_m_df, apoe=25))[:5]
     print(table_rows)
@@ -62,10 +61,10 @@ def test_table_rows(dm_table, sat_table):
     ]
 
 
-def test_report_sat_table(sat_table, dm_table):
+def test_report_sat_table_v1(sat_table_v1, dm_table_v1):
 
-    named_df = sat_table.named_location_df()
-    d_and_m_df = dm_table.flatten()
+    named_df = sat_table_v1.named_location_df()
+    d_and_m_df = dm_table_v1.flatten()
 
     report: Document = Document()
     table_rows = list(generate_table_rows(named_df, d_and_m_df, apoe=25))[:5]
