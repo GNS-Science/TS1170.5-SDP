@@ -107,13 +107,13 @@ setuptools = ">=51.1.1"
 
 [[package]]
 name = "botocore"
-version = "1.35.65"
+version = "1.35.66"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.35.65-py3-none-any.whl", hash = "sha256:8fcaa82ab2338f412e1494449c4c57f9ca785623fb0303f6be5b279c4d27522c"},
-    {file = "botocore-1.35.65.tar.gz", hash = "sha256:46652f732f2b2fb395fffcc33cacb288d05ea283047c9a996fb59d6849464919"},
+    {file = "botocore-1.35.66-py3-none-any.whl", hash = "sha256:d0683e9c18bb6852f768da268086c3749d925332a664db0dd1459cfa7e96e475"},
+    {file = "botocore-1.35.66.tar.gz", hash = "sha256:51f43220315f384959f02ea3266740db4d421592dd87576c18824e424b349fdb"},
 ]
 
 [package.dependencies]
@@ -1836,7 +1836,7 @@ files = [
 
 [[package]]
 name = "nzshm-common"
-version = "0.8.3"
+version = "0.8.4"
 description = "A small pure python library for shared NZ NSHM data like locations."
 optional = false
 python-versions = ">=3.8,<4.0.0"
@@ -1853,7 +1853,7 @@ test = []
 type = "git"
 url = "https://github.com/GNS-Science/nzshm-common-py.git"
 reference = "pre-release"
-resolved_reference = "a0f90c8af4b9149b93cc5fa9d44f24bcb3a71a40"
+resolved_reference = "63110b9edba9a0b80121e12cbc9312d7c47c94fa"
 
 [[package]]
 name = "openpyxl"
@@ -2976,7 +2976,7 @@ files = [
 
 [[package]]
 name = "toshi-hazard-store"
-version = "0.7.9"
+version = "0.7.10"
 description = "Library for saving and retrieving NZHSM openquake hazard results with convenience (uses AWS Dynamodb)."
 optional = false
 python-versions = ">=3.10,<3.13"
@@ -2999,8 +2999,8 @@ test = []
 [package.source]
 type = "git"
 url = "https://github.com/GNS-Science/toshi-hazard-store.git"
-reference = "update-common"
-resolved_reference = "71b6dfc2cf95230595a9523a03d2cd24a5a73996"
+reference = "HEAD"
+resolved_reference = "f73bcc78a572e72f10d5241b5b6c5c71f9ed8906"
 
 [[package]]
 name = "tox"
