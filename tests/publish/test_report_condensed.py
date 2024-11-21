@@ -1,12 +1,14 @@
-# import pathlib
-
-# import pandas as pd
-# import pytest
+import pathlib
+import pandas as pd
+import pytest
 # from borb.pdf import Document
 
-# from nzssdt_2023.config import RESOURCES_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 # from nzssdt_2023.convert import DistMagTable, SatTable
 from nzssdt_2023.publish import report_v2
+from nzssdt_2023.publish import report_condensed_v2
+
+
 
 # from nzssdt_2023.publish import report_v2
 
@@ -26,8 +28,24 @@ def test_SITE_CLASSES_constant():
     assert ["I", "II", "III", "IV", "V", "VI"] == report_v2.SITE_CLASSES
 
 
-def test_generate_table_rows():
-    ...
+@pytest.fixture(scope="module")
+def sat_named_table_v2_new():
+    filepath = pathlib.Path(RESOURCES_FOLDER) / "v_cbc" / "named_locations.json"
+    return pd.read_json(filepath, orient="table")
+
+@pytest.fixture(scope="module")
+def dm_table_v2_new():
+    filepath = pathlib.Path(RESOURCES_FOLDER) / "v_cbc" / "d_and_m.json"
+    return pd.read_json(filepath, orient="table")
+
+def test_generate_table_rows(sat_named_table_v2_new, dm_table_v2_new):
+    named_df = sat_named_table_v2_new
+    # grid_df = sat_grid_table_v2()
+    d_and_m_df = dm_table_v2_new
+
+    rows = report_condensed_v2.generate_table_rows(named_df, d_and_m_df, 25)
+    print(next(rows))
+    assert 0
 
 
 def test_build_page_n():

@@ -50,7 +50,7 @@ VERTICAL_BUFFER = 40
 
 def build_report_page(
     table_id: str,
-    apoe: Tuple[str, int] = ("a", 25),
+    # apoe: Tuple[str, int] = ("a", 25),
     rowdata=List[List],
     table_part: int = 1,
 ):
@@ -68,8 +68,8 @@ def build_report_page(
     # add Page to Document
     doc.add_page(page)
 
-    heading = f"TABLE {table_id}({apoe[0]}) part {table_part}: Site demand parameters for an annual"
-    heading += f" probability of exceedance of 1/{apoe[1]}"
+    heading = f"TABLE {table_id} part {table_part}: Site demand parameters"
+    # heading += f" probability of exceedance of 1/{apoe[1]}"
     layout.add(
         Paragraph(
             heading,
@@ -81,15 +81,15 @@ def build_report_page(
 
     # create a FixedColumnWidthTable
     table = FixedColumnWidthTable(
-        number_of_columns=3 + (6 * 4),  # 4 parameters now!
+        number_of_columns=4 + (6 * 4),  # 4 intro, + 4 parameters per siteclass
         number_of_rows=2 + len(rowdata),
         # adjust the ratios of column widths for this FixedColumnWidthTable
-        column_widths=[Decimal(3), Decimal(0.5), Decimal(0.5)]
+        column_widths=[Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)]
         + 6 * [Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)],
     )
 
     def add_row_0(table: FixedColumnWidthTable):
-        table.add(TableCell(Paragraph(""), column_span=3))
+        table.add(TableCell(Paragraph(""), column_span=4))
         for sss in SITE_CLASSES:
             table.add(
                 TableCell(
@@ -109,17 +109,26 @@ def build_report_page(
         table.add(
             TableCell(
                 Paragraph(
-                    "Location",
-                    font="Helvetica-bold-oblique",
-                    font_size=Decimal(8),
+                    "Site",
+                    font="Helvetica-bold",
+                    font_size=Decimal(7),
                     horizontal_alignment=Alignment.LEFT,
                 )
             )
         ).add(
             TableCell(
                 Paragraph(
+                    "APOE",
+                    font="Helvetica-bold",
+                    font_size=Decimal(7),
+                    horizontal_alignment=Alignment.CENTERED,
+                )
+            )
+        ).add(
+            TableCell(
+                Paragraph(
                     "M",
-                    font="Helvetica-bold-oblique",
+                    font="Helvetica-bold",
                     font_size=Decimal(8),
                     horizontal_alignment=Alignment.CENTERED,
                 )
@@ -128,7 +137,7 @@ def build_report_page(
             TableCell(
                 Paragraph(
                     "D",
-                    font="Helvetica-bold-oblique",
+                    font="Helvetica-bold",
                     font_size=Decimal(8),
                     horizontal_alignment=Alignment.CENTERED,
                 )
@@ -139,14 +148,14 @@ def build_report_page(
                 Paragraph(
                     "PGA",
                     font="Helvetica-bold-oblique",
-                    font_size=Decimal(7),
+                    font_size=Decimal(8),
                     horizontal_alignment=Alignment.CENTERED,
                 )
             ).add(
                 HeterogeneousParagraph(
                     [
                         ChunkOfText(
-                            "S", font="Helvetica-bold-oblique", font_size=Decimal(9)
+                            "S", font="Helvetica-bold-oblique", font_size=Decimal(8)
                         ),
                         ChunkOfText(
                             "as",
@@ -163,7 +172,7 @@ def build_report_page(
                         ChunkOfText(
                             "T",
                             font="Helvetica-bold-oblique",
-                            font_size=Decimal(9),
+                            font_size=Decimal(8),
                         ),
                         ChunkOfText(
                             "c",
@@ -180,7 +189,7 @@ def build_report_page(
                         ChunkOfText(
                             "T",
                             font="Helvetica-bold-oblique",
-                            font_size=Decimal(9),
+                            font_size=Decimal(8),
                         ),
                         ChunkOfText(
                             "d",
@@ -198,30 +207,30 @@ def build_report_page(
     table = add_row_0(table)
     table = add_row_1(table)
 
-    # data rows
-    for row in rowdata:
-        table.add(
-            Paragraph(
-                row[0],
-                font="Helvetica",
-                font_size=Decimal(8),
-                horizontal_alignment=Alignment.LEFT,
-            )
-        )
+    # # data rows
+    # for row in rowdata:
+    #     table.add(
+    #         Paragraph(
+    #             row[0],
+    #             font="Helvetica",
+    #             font_size=Decimal(8),
+    #             horizontal_alignment=Alignment.LEFT,
+    #         )
+    #     )
 
-        print(f"**** {row}")
-        for cell in row[1:]:
-            try:
-                table.add(
-                    Paragraph(
-                        str(cell),
-                        font="Helvetica",
-                        font_size=Decimal(8),
-                        horizontal_alignment=Alignment.CENTERED,
-                    )
-                )
-            except Exception:
-                print(f"bang! `{cell}`")
+    #     print(f"**** {row}")
+    #     for cell in row[1:]:
+    #         try:
+    #             table.add(
+    #                 Paragraph(
+    #                     str(cell),
+    #                     font="Helvetica",
+    #                     font_size=Decimal(8),
+    #                     horizontal_alignment=Alignment.CENTERED,
+    #                 )
+    #             )
+    #         except Exception:
+    #             print(f"bang! `{cell}`")
 
     table.set_padding_on_all_cells(
         Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)
@@ -303,38 +312,46 @@ if __name__ == "__main__":
 
         print(report_grp)
         print()
-        for apoe in APOE_MAPPINGS:
+        # for apoe in APOE_MAPPINGS:
 
-            filename = f"{report_names[report_grp]}_location_report_apoe({apoe[1]})"
-            print(f"report: {filename}")
+        filename = f"{report_names[report_grp]}_location_report_v2"
+        print(f"report: {filename}")
 
-            report: Document = Document()
+        report: Document = Document()
 
-            table_rows = list(generate_table_rows(location_df, d_and_m_df, apoe[1]))
+        # table_rows = list(generate_table_rows(location_df, d_and_m_df, apoe[1]))
 
-            # ### CSV
-            # with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
-            #     writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
-            #     header = ["location", "M", "D"]
-            #     for sss in SITE_CLASSES:
-            #         for attr in ["PGA", "Sas", "Tc"]:
-            #             header.append(f"{sss}-{attr}")
-            #     writer.writerow(header)
-            #     for row in table_rows:
-            #         writer.writerow(row)
+        # ### CSV
+        # with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
+        #     writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
+        #     header = ["location", "M", "D"]
+        #     for sss in SITE_CLASSES:
+        #         for attr in ["PGA", "Sas", "Tc"]:
+        #             header.append(f"{sss}-{attr}")
+        #     writer.writerow(header)
+        #     for row in table_rows:
+        #         writer.writerow(row)
 
-            ### PDF
-            for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_ROWS)):
-                report.add_page(
-                    build_report_page(
-                        f"{report_grp_titles[report_grp]}",
-                        apoe,
-                        list(chunk),
-                        table_part=idx + 1,
-                    )
+        # ### PDF
+        # for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_ROWS)):
+        #     report.add_page(
+        #         build_report_page(
+        #             f"{report_grp_titles[report_grp]}",
+        #             apoe,
+        #             list(chunk),
+        #             table_part=idx + 1,
+        #         )
+        #     )
+
+        report.add_page(
+                build_report_page(
+                    f"{report_grp_titles[report_grp]}",
+                    [],
+                    table_part=1,
                 )
+            )
 
-            with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
-                PDF.dumps(out_file_handle, report)
+        with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
+            PDF.dumps(out_file_handle, report)
 
-            assert 0
+        assert 0
