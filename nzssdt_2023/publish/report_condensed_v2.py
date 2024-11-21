@@ -1,13 +1,10 @@
 """
-Build PDF and equivalent CSV table structures for version 2+ using the condensed format.
+Build PDF and equivalent CSV table structures for version 2+ using the OLD format.
 
 This module uses the `borb` library to produce the PDF document.
 
 TODO:
  - [x] extra column Td to each soil/site class
- - table reorg. Instead of table per APOE, now we want rows per APOE per Auckland
-   (see example, but don't include units!)
- - Versioning & manifest data structures needs further work once the main characteristics of V2 are defined.
 
 methods:
  build_report_page
@@ -38,7 +35,6 @@ from borb.pdf.page.page_size import PageSize
 
 from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
-from nzssdt_2023.publish.convert import DistMagTable, SatTable
 
 MAX_PAGE_ROWS = 30
 SITE_CLASSES = list(constants.SITE_CLASSES.keys())  # check sorting

@@ -26,7 +26,7 @@ def test_build_and_serialise_grid_locations():
     ...
 
 
-@pytest.mark.skip('WIP')
+@pytest.mark.skip("WIP")
 def test_sat_named_tables_version1_vs_2(sat_table_v1, sat_named_table_v2):
     print(sat_table_v1.named_location_df())
     # print(sat_table_v1.grid_location_df())
