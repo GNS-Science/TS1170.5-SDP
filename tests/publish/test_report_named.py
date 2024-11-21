@@ -9,22 +9,6 @@ from nzssdt_2023.convert import DistMagTable, SatTable
 from nzssdt_2023.publish.report import build_report_page, generate_table_rows
 
 
-@pytest.fixture(scope="module")
-def sat_table_v1():
-    filename = "SaT-variables_v5_corrected-locations.pkl"
-    df = pd.read_pickle(pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1", filename))
-    return SatTable(df)
-
-
-@pytest.fixture(scope="module")
-def dm_table_v1():
-    filename = "D_and_M_with_floor.csv"
-    csv_path = pathlib.Path(
-        RESOURCES_FOLDER, "pipeline", "v1", filename
-    )  # not as per publish/report @ v1
-    return DistMagTable(csv_path)
-
-
 def test_table_rows_v1(dm_table_v1, sat_table_v1):
 
     print(dm_table_v1)
@@ -37,7 +21,7 @@ def test_table_rows_v1(dm_table_v1, sat_table_v1):
     table_rows = list(generate_table_rows(named_df, d_and_m_df, apoe=25))[:5]
     print(table_rows)
     assert table_rows[0] == [
-        "Kaitaia",
+        "Auckland",
         6.2,
         "n/a",
         0.02,

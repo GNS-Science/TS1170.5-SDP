@@ -21,15 +21,21 @@ logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
 working_folder = Path(WORKING_FOLDER)
 version_folder = Path(
-    PurePath(os.path.realpath(__file__)).parent.parent.parent, "resources", "v_test"
+    PurePath(os.path.realpath(__file__)).parent.parent.parent, "resources", "v_cbc"
 )
 
-mini = True
-override = True
+mini = False
+override = False
 
 if mini:
     hf_path = working_folder / "mini_hcurves.hdf5"
-    site_list = ["Auckland", "Christchurch", "Dunedin", "Hamilton", "Wellington"]
+    site_list = [
+        "Auckland",
+        "Christchurch",
+        "Dunedin",
+        "Hamilton",
+        "Wellington",
+    ]  # be nice if we could do these too... "-43.900~169.100"
 else:
     hf_path = working_folder / "all_hcurves.hdf5"
     site_list: Optional[list[str]] = None
@@ -38,8 +44,13 @@ else:
 if override | (not hf_path.exists()):
     query_NSHM_to_hdf5(hf_path, site_list=site_list)
 
-# create sa table
-if override | (not (version_folder / "named_locations.json").exists()):
+
+# create sa tables
+if (
+    override
+    | (not (version_folder / "named_locations.json").exists())
+    | (not (version_folder / "grid_locations.json").exists())
+):
     sat_table_to_json(hf_path, version_folder)
 
 # create m and d table

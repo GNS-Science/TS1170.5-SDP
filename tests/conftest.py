@@ -7,7 +7,7 @@ import pytest
 import nzssdt_2023.data_creation.dm_parameter_generation as dm_parameter_generation
 import nzssdt_2023.data_creation.mean_magnitudes as mean_magnitudes
 from nzssdt_2023.config import RESOURCES_FOLDER
-from nzssdt_2023.convert import DistMagTable
+from nzssdt_2023.convert import DistMagTable, SatTable
 
 FIXTURES = pathlib.Path(__file__).parent / "fixtures"
 
@@ -37,6 +37,19 @@ def mean_mags_fixture(monkeypatch):
 @pytest.fixture(scope="function")
 def workingfolder_fixture(monkeypatch, tmp_path):
     monkeypatch.setattr(dm_parameter_generation, "WORKING_FOLDER", str(tmp_path))
+
+
+@pytest.fixture(scope="module")
+def sat_table_v1():
+    filepath = FIXTURES / "v1_pkl" / "mini_SaT-variables.pkl"
+    df = pd.read_pickle(filepath)
+    return SatTable(df)
+
+
+@pytest.fixture(scope="module")
+def sat_named_table_v2():
+    filepath = FIXTURES / "v2_json" / "named_locations.json"
+    return pd.read_json(filepath, orient="table")
 
 
 @pytest.fixture(scope="module")

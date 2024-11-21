@@ -6,21 +6,23 @@
 
 # from nzssdt_2023.config import RESOURCES_FOLDER
 # from nzssdt_2023.convert import DistMagTable, SatTable
-from nzssdt_2023.publish import report_condensed
+from nzssdt_2023.publish import report_named_v2
+# from nzssdt_2023.publish import report_named_v2
+
 
 SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
 APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
 
 
 def test_APOE_MAPPINGS_constant():
-    print(report_condensed.APOE_MAPPINGS)
-    assert report_condensed.APOE_MAPPINGS[0] == ("a", 25)
-    assert report_condensed.APOE_MAPPINGS[-1] == ("i", 10000)
+    print(report_named_v2.APOE_MAPPINGS)
+    assert report_named_v2.APOE_MAPPINGS[0] == ("a", 25)
+    assert report_named_v2.APOE_MAPPINGS[-1] == ("g", 2500)
 
 
 def test_SITE_CLASSES_constant():
-    print(report_condensed.SITE_CLASSES)
-    assert ["I", "II", "III", "IV", "V", "VI"] == report_condensed.SITE_CLASSES
+    print(report_named_v2.SITE_CLASSES)
+    assert ["I", "II", "III", "IV", "V", "VI"] == report_named_v2.SITE_CLASSES
 
 
 def test_generate_table_rows():
