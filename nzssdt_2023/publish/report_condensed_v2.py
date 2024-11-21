@@ -30,13 +30,15 @@ from borb.pdf import (
     Paragraph,
     SingleColumnLayout,
     TableCell,
+    Watermark,
+    HexColor
 )
 from borb.pdf.page.page_size import PageSize
 
 from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
 
-MAX_PAGE_ROWS = 30
+MAX_PAGE_BLOCKS = 4  # each location block row has 7 apoe rows
 SITE_CLASSES = list(constants.SITE_CLASSES.keys())  # check sorting
 # APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
 APOE_MAPPINGS = list(
@@ -50,7 +52,6 @@ VERTICAL_BUFFER = 40
 
 def build_report_page(
     table_id: str,
-    # apoe: Tuple[str, int] = ("a", 25),
     rowdata=List[List],
     table_part: int = 1,
 ):
@@ -61,12 +62,25 @@ def build_report_page(
     # create Page
     PAGE_SIZE = PageSize.A4_LANDSCAPE
     page: Page = Page(
-        width=PAGE_SIZE.value[0], height=PAGE_SIZE.value[1] + VERTICAL_BUFFER
+        width=PAGE_SIZE.value[0] + VERTICAL_BUFFER, height=PAGE_SIZE.value[1] + VERTICAL_BUFFER
     )
     layout: PageLayout = SingleColumnLayout(page)
 
     # add Page to Document
     doc.add_page(page)
+
+    # add watermark
+    Watermark(
+        text="DRAFT 2024-11-22",
+        # font="Helvetica-bold",
+        font_size=Decimal(30),
+        angle_in_degrees= 27.5,
+        horizontal_alignment = Alignment.CENTERED,
+        vertical_alignment = Alignment.MIDDLE,
+        font_color=HexColor("070707")).paint(
+            page, None
+    )
+
 
     heading = f"TABLE {table_id} part {table_part}: Site demand parameters"
     # heading += f" probability of exceedance of 1/{apoe[1]}"
@@ -80,11 +94,12 @@ def build_report_page(
     )
 
     # create a FixedColumnWidthTable
+    print(f"len(rowdata): {len(rowdata)}")
     table = FixedColumnWidthTable(
-        number_of_columns=4 + (6 * 4),  # 4 intro, + 4 parameters per siteclass
-        number_of_rows=2 + len(rowdata),
+        number_of_columns=4 + (6 * 4),  # 4 intro, + 4 parameters per siteclass = 28
+        number_of_rows=2 + (len(rowdata) * len(constants.DEFAULT_RPS)),
         # adjust the ratios of column widths for this FixedColumnWidthTable
-        column_widths=[Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)]
+        column_widths=[Decimal(1.75), Decimal(0.75), Decimal(0.5), Decimal(0.5)]
         + 6 * [Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)],
     )
 
@@ -111,7 +126,7 @@ def build_report_page(
                 Paragraph(
                     "Site",
                     font="Helvetica-bold",
-                    font_size=Decimal(7),
+                    font_size=Decimal(8),
                     horizontal_alignment=Alignment.LEFT,
                 )
             )
@@ -207,30 +222,36 @@ def build_report_page(
     table = add_row_0(table)
     table = add_row_1(table)
 
-    # # data rows
-    # for row in rowdata:
-    #     table.add(
-    #         Paragraph(
-    #             row[0],
-    #             font="Helvetica",
-    #             font_size=Decimal(8),
-    #             horizontal_alignment=Alignment.LEFT,
-    #         )
-    #     )
+    # data rows
+    for row in rowdata:
+        #row[0] is location
+        table.add(
+            TableCell(
+                Paragraph(
+                    row[0],  # can't rotate yet
+                    font="Helvetica",
+                    font_size=Decimal(9),
+                    horizontal_alignment=Alignment.LEFT,
+                    vertical_alignment=Alignment.TOP,
+                )
+                ,row_span = len(constants.DEFAULT_RPS)
+            )
+        )
 
-    #     print(f"**** {row}")
-    #     for cell in row[1:]:
-    #         try:
-    #             table.add(
-    #                 Paragraph(
-    #                     str(cell),
-    #                     font="Helvetica",
-    #                     font_size=Decimal(8),
-    #                     horizontal_alignment=Alignment.CENTERED,
-    #                 )
-    #             )
-    #         except Exception:
-    #             print(f"bang! `{cell}`")
+        for subrow in row[1]:
+            print(f"**** {len(subrow)} {subrow}")
+            for cell in subrow:
+                try:
+                    table.add(
+                        Paragraph(
+                                str(cell),
+                                font="Helvetica",
+                                font_size=Decimal(8),
+                                horizontal_alignment=Alignment.CENTERED,
+                        )
+                    )
+                except Exception:
+                    print(f"bang! `{cell}`")
 
     table.set_padding_on_all_cells(
         Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)
@@ -247,33 +268,49 @@ def build_report_page(
             vertical_alignment=Alignment.BOTTOM,
         )
     )
+
+
     return page
 
 
-def generate_table_rows(
-    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, apoe: int
-) -> Iterator:
-    def format_D(value, apoe: int) -> Union[str, int]:
-        """NB NaN in the source dataframe has different meanings, depending on the apoe..."""
-        if pd.isna(value):
-            return "n/a" if apoe < 500 else ">20"
-        return int(value)
+def format_D(value, apoe: int) -> Union[str, int]:
+    """NB NaN in the source dataframe has different meanings, depending on the apoe..."""
+    if pd.isna(value):
+        return "n/a" if apoe < 500 else ">20"
+    return int(value)
 
-    for location in sat_table_flat.Location.unique():
-        location_df = sat_table_flat[sat_table_flat.Location == location]
+def generate_location_block(sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, location: str) -> Iterator:
+    """build a location block, wiht one row per apoe"""
+    location_df = sat_table_flat[sat_table_flat.Location == location]
+    site_classes = location_df['Site Class'].unique().tolist()
+    apoes = location_df["APoE (1/n)"].unique().tolist()
+    for apoe in apoes:
         rec = dm_table_flat.loc[location, apoe]
         d_str = format_D(rec["D"], apoe)
-        for tup in location_df.itertuples():
-            row = [location, rec["M"], d_str]
-            for tup2 in location_df[location_df["APoE (1/n)"] == apoe].itertuples():
+        row = [f"1/{apoe}", rec["M"], d_str]
+        for site_class in site_classes:
+            apoe_df = location_df[(location_df["APoE (1/n)"] == apoe) & (location_df["Site Class"] == site_class)]
+            for sc_tup in apoe_df.itertuples():
                 row += [
-                    round(tup2.PGA, 2),
-                    round(tup2.Sas, 2),
-                    round(tup2.Tc, 1),
-                    round(tup2.Td, 1),
-                ]
-        yield row
+                        round(sc_tup.PGA, 2),
+                        round(sc_tup.Sas, 2),
+                        round(sc_tup.Tc, 1),
+                        round(sc_tup.Td, 1),
+                    ]
+        yield(row)
 
+def generate_table_rows(
+    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame
+) -> Iterator:
+    count = 0
+    for location in sat_table_flat.Location.unique():
+        yield (
+            location.replace('-', ' - '),  # spaces allow wrapping to work
+            generate_location_block(sat_table_flat, dm_table_flat, location)
+        )
+        count +=1
+        if count == 4:
+            break
 
 def chunks(items, chunk_size):
     iterator = iter(items)
@@ -314,12 +351,12 @@ if __name__ == "__main__":
         print()
         # for apoe in APOE_MAPPINGS:
 
-        filename = f"{report_names[report_grp]}_location_report_v2"
+        filename = f"{report_names[report_grp]}_location_report_v2-DRAFT"
         print(f"report: {filename}")
 
         report: Document = Document()
 
-        # table_rows = list(generate_table_rows(location_df, d_and_m_df, apoe[1]))
+        table_rows = list(generate_table_rows(location_df, d_and_m_df))
 
         # ### CSV
         # with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
@@ -332,16 +369,15 @@ if __name__ == "__main__":
         #     for row in table_rows:
         #         writer.writerow(row)
 
-        # ### PDF
-        # for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_ROWS)):
-        #     report.add_page(
-        #         build_report_page(
-        #             f"{report_grp_titles[report_grp]}",
-        #             apoe,
-        #             list(chunk),
-        #             table_part=idx + 1,
-        #         )
-        #     )
+        ### PDF
+        for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_BLOCKS)):
+            report.add_page(
+                build_report_page(
+                    f"{report_grp_titles[report_grp]}",
+                    list(chunk),
+                    table_part=idx + 1,
+                )
+            )
 
         report.add_page(
                 build_report_page(
