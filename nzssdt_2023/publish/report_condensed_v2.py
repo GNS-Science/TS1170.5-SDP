@@ -31,9 +31,11 @@ from borb.pdf import (
     Paragraph,
     SingleColumnLayout,
     TableCell,
+    TrueTypeFont,
     Watermark,
 )
 from borb.pdf.page.page_size import PageSize
+from nzshm_common.location import get_name_with_macrons
 
 from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
@@ -48,6 +50,10 @@ APOE_MAPPINGS = list(
     )
 )  # check content
 VERTICAL_BUFFER = 40
+
+medium_font = TrueTypeFont.true_type_font_from_file(
+    open("./fonts/static/OpenSans-Medium.ttf", "rb").read()
+)
 
 
 def build_report_page(
@@ -172,7 +178,7 @@ def build_report_page(
                             "S", font="Helvetica-bold-oblique", font_size=Decimal(8)
                         ),
                         ChunkOfText(
-                            "as",
+                            "a,s",
                             font="Helvetica-bold",
                             font_size=Decimal(7),
                             vertical_alignment=Alignment.BOTTOM,
@@ -228,10 +234,11 @@ def build_report_page(
             TableCell(
                 Paragraph(
                     row[0],  # can't rotate yet
-                    font="Helvetica",
+                    # font="Helvetica",
+                    font=medium_font,
                     font_size=Decimal(9),
                     horizontal_alignment=Alignment.LEFT,
-                    vertical_alignment=Alignment.TOP,
+                    vertical_alignment=Alignment.MIDDLE,
                 ),
                 row_span=len(constants.DEFAULT_RPS),
             )
@@ -247,6 +254,7 @@ def build_report_page(
                             font="Helvetica",
                             font_size=Decimal(8),
                             horizontal_alignment=Alignment.CENTERED,
+                            vertical_alignment=Alignment.MIDDLE,
                         )
                     )
                 except Exception:
@@ -310,12 +318,14 @@ def generate_table_rows(
     count = 0
     for location in sat_table_flat.Location.unique():
         yield (
-            location.replace("-", " - "),  # spaces allow wrapping to work
+            get_name_with_macrons(
+                location.replace("-", " - ")
+            ),  # spaces allow wrapping to work
             generate_location_block(sat_table_flat, dm_table_flat, location),
         )
-        count += 1
-        if count == 4:
-            break
+        # count += 1
+        # if count == 8:
+        #     break
 
 
 def chunks(items, chunk_size):
