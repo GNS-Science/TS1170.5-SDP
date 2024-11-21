@@ -36,7 +36,6 @@ from borb.pdf.page.page_size import PageSize
 from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
 
-
 MAX_PAGE_ROWS = 30
 SITE_CLASSES = list(constants.SITE_CLASSES.keys())  # check sorting
 # APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))

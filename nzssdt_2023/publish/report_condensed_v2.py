@@ -25,13 +25,13 @@ from borb.pdf import (
     Document,
     FixedColumnWidthTable,
     HeterogeneousParagraph,
+    HexColor,
     Page,
     PageLayout,
     Paragraph,
     SingleColumnLayout,
     TableCell,
     Watermark,
-    HexColor
 )
 from borb.pdf.page.page_size import PageSize
 
@@ -62,7 +62,8 @@ def build_report_page(
     # create Page
     PAGE_SIZE = PageSize.A4_LANDSCAPE
     page: Page = Page(
-        width=PAGE_SIZE.value[0] + VERTICAL_BUFFER, height=PAGE_SIZE.value[1] + VERTICAL_BUFFER
+        width=PAGE_SIZE.value[0] + VERTICAL_BUFFER,
+        height=PAGE_SIZE.value[1] + VERTICAL_BUFFER,
     )
     layout: PageLayout = SingleColumnLayout(page)
 
@@ -74,13 +75,11 @@ def build_report_page(
         text="DRAFT 2024-11-22",
         # font="Helvetica-bold",
         font_size=Decimal(30),
-        angle_in_degrees= 27.5,
-        horizontal_alignment = Alignment.CENTERED,
-        vertical_alignment = Alignment.MIDDLE,
-        font_color=HexColor("070707")).paint(
-            page, None
-    )
-
+        angle_in_degrees=27.5,
+        horizontal_alignment=Alignment.CENTERED,
+        vertical_alignment=Alignment.MIDDLE,
+        font_color=HexColor("070707"),
+    ).paint(page, None)
 
     heading = f"TABLE {table_id} part {table_part}: Site demand parameters"
     # heading += f" probability of exceedance of 1/{apoe[1]}"
@@ -224,7 +223,7 @@ def build_report_page(
 
     # data rows
     for row in rowdata:
-        #row[0] is location
+        # row[0] is location
         table.add(
             TableCell(
                 Paragraph(
@@ -233,8 +232,8 @@ def build_report_page(
                     font_size=Decimal(9),
                     horizontal_alignment=Alignment.LEFT,
                     vertical_alignment=Alignment.TOP,
-                )
-                ,row_span = len(constants.DEFAULT_RPS)
+                ),
+                row_span=len(constants.DEFAULT_RPS),
             )
         )
 
@@ -244,10 +243,10 @@ def build_report_page(
                 try:
                     table.add(
                         Paragraph(
-                                str(cell),
-                                font="Helvetica",
-                                font_size=Decimal(8),
-                                horizontal_alignment=Alignment.CENTERED,
+                            str(cell),
+                            font="Helvetica",
+                            font_size=Decimal(8),
+                            horizontal_alignment=Alignment.CENTERED,
                         )
                     )
                 except Exception:
@@ -269,7 +268,6 @@ def build_report_page(
         )
     )
 
-
     return page
 
 
@@ -279,25 +277,32 @@ def format_D(value, apoe: int) -> Union[str, int]:
         return "n/a" if apoe < 500 else ">20"
     return int(value)
 
-def generate_location_block(sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, location: str) -> Iterator:
+
+def generate_location_block(
+    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, location: str
+) -> Iterator:
     """build a location block, wiht one row per apoe"""
     location_df = sat_table_flat[sat_table_flat.Location == location]
-    site_classes = location_df['Site Class'].unique().tolist()
+    site_classes = location_df["Site Class"].unique().tolist()
     apoes = location_df["APoE (1/n)"].unique().tolist()
     for apoe in apoes:
         rec = dm_table_flat.loc[location, apoe]
         d_str = format_D(rec["D"], apoe)
         row = [f"1/{apoe}", rec["M"], d_str]
         for site_class in site_classes:
-            apoe_df = location_df[(location_df["APoE (1/n)"] == apoe) & (location_df["Site Class"] == site_class)]
+            apoe_df = location_df[
+                (location_df["APoE (1/n)"] == apoe)
+                & (location_df["Site Class"] == site_class)
+            ]
             for sc_tup in apoe_df.itertuples():
                 row += [
-                        round(sc_tup.PGA, 2),
-                        round(sc_tup.Sas, 2),
-                        round(sc_tup.Tc, 1),
-                        round(sc_tup.Td, 1),
-                    ]
-        yield(row)
+                    round(sc_tup.PGA, 2),
+                    round(sc_tup.Sas, 2),
+                    round(sc_tup.Tc, 1),
+                    round(sc_tup.Td, 1),
+                ]
+        yield (row)
+
 
 def generate_table_rows(
     sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame
@@ -305,12 +310,13 @@ def generate_table_rows(
     count = 0
     for location in sat_table_flat.Location.unique():
         yield (
-            location.replace('-', ' - '),  # spaces allow wrapping to work
-            generate_location_block(sat_table_flat, dm_table_flat, location)
+            location.replace("-", " - "),  # spaces allow wrapping to work
+            generate_location_block(sat_table_flat, dm_table_flat, location),
         )
-        count +=1
+        count += 1
         if count == 4:
             break
+
 
 def chunks(items, chunk_size):
     iterator = iter(items)
@@ -380,12 +386,12 @@ if __name__ == "__main__":
             )
 
         report.add_page(
-                build_report_page(
-                    f"{report_grp_titles[report_grp]}",
-                    [],
-                    table_part=1,
-                )
+            build_report_page(
+                f"{report_grp_titles[report_grp]}",
+                [],
+                table_part=1,
             )
+        )
 
         with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
             PDF.dumps(out_file_handle, report)
