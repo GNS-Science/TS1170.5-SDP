@@ -40,6 +40,8 @@ from nzshm_common.location import get_name_with_macrons
 from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
 
+PRODUCE_CSV = False
+
 MAX_PAGE_BLOCKS = 4  # each location block row has 7 apoe rows
 SITE_CLASSES = list(constants.SITE_CLASSES.keys())  # check sorting
 # APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
@@ -230,19 +232,60 @@ def build_report_page(
     # data rows
     for row in rowdata:
         # row[0] is location
-        table.add(
-            TableCell(
-                Paragraph(
-                    row[0],  # can't rotate yet
-                    # font="Helvetica",
-                    font=medium_font,
-                    font_size=Decimal(9),
-                    horizontal_alignment=Alignment.LEFT,
-                    vertical_alignment=Alignment.MIDDLE,
-                ),
-                row_span=len(constants.DEFAULT_RPS),
+        print("@@@ row:",  row)
+
+        if row[0][1] == row[0][0]:
+            table.add(
+                TableCell(
+                    Paragraph(
+                        row[0][0],  # 2nd chunk for searching anglicised names (no macrons)
+                        # font="Helvetica",
+                        font=medium_font,
+                        font_size=Decimal(8),
+                        horizontal_alignment=Alignment.LEFT,
+                        vertical_alignment=Alignment.MIDDLE,
+                    ),
+                    row_span=len(constants.DEFAULT_RPS),
+                )
             )
-        )
+        else:
+            table.add(
+                TableCell(
+                    HeterogeneousParagraph(
+                        [
+                            ChunkOfText(
+                                row[0][0],  # 2nd chunk for searching anglicised names (no macrons)
+                                # font="Helvetica",
+                                font=medium_font,
+                                font_size=Decimal(8),
+                                # font_color=HexColor("ffffff"),
+                                # font_transparency=100
+                            ),
+                            ChunkOfText(" ",
+                                font_size=Decimal(8),
+                                font=medium_font,
+                                font_color=HexColor("ffffff"),
+                            ),
+                            ChunkOfText(
+                                row[0][1],  # 1st Chunk is visible Maconrnised names (can't rotate yet)
+                                # font="Helvetica",
+                                font=medium_font,
+                                font_size=Decimal(8),
+                                font_color=HexColor("ffffff"),
+                            ),
+                        ],
+                        horizontal_alignment=Alignment.LEFT,
+                        vertical_alignment=Alignment.MIDDLE,
+                    ),
+                    # Paragraph(row[0][0],
+                    #     font=medium_font,
+                    #     font_size=Decimal(8),
+                    # ),
+                    row_span=len(constants.DEFAULT_RPS),
+                )
+            )
+
+        print(row[1])
 
         for subrow in row[1]:
             print(f"**** {len(subrow)} {subrow}")
@@ -306,7 +349,7 @@ def generate_location_block(
                 row += [
                     round(sc_tup.PGA, 2),
                     round(sc_tup.Sas, 2),
-                    round(sc_tup.Tc, 1),
+                    round(sc_tup.Tc, 2),
                     round(sc_tup.Td, 1),
                 ]
         yield (row)
@@ -317,15 +360,46 @@ def generate_table_rows(
 ) -> Iterator:
     count = 0
     for location in sat_table_flat.Location.unique():
-        yield (
-            get_name_with_macrons(
-                location.replace("-", " - ")
-            ),  # spaces allow wrapping to work
-            generate_location_block(sat_table_flat, dm_table_flat, location),
-        )
-        # count += 1
-        # if count == 8:
-        #     break
+        #location = location.replace("-", " - ")
+
+        count += 1
+        if count < 85:
+            continue
+
+
+
+        if count in [47, 86]:  #47 `Waihi Bowentown` BOOM, 85 `Ōakura (New Plymouth District)`
+            continue
+
+        yield  ( [
+                get_name_with_macrons(
+                    location
+                ).replace("-", " - "),         # spaces allow wrapping to work
+                location.replace("-", " - ")   # non-macronised for searching
+                ],
+                generate_location_block(sat_table_flat, dm_table_flat, location)
+                )
+
+        if count%10 == 0:
+            print(f"row count: {count}")
+
+        if count >= 4000:
+            break
+
+
+def generate_csv_rows(
+    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame
+) -> Iterator:
+    count = 0
+    for location in sat_table_flat.Location.unique():
+        for block in generate_location_block(sat_table_flat, dm_table_flat, location):
+            yield [
+                get_name_with_macrons(
+                    location
+                ).replace("-", " - "),         # spaces allow wrapping to work
+                location.replace("-", " - ")   # non-macronised for searching
+                ] + block
+        count += 1
 
 
 def chunks(items, chunk_size):
@@ -372,20 +446,24 @@ if __name__ == "__main__":
 
         report: Document = Document()
 
-        table_rows = list(generate_table_rows(location_df, d_and_m_df))
 
-        # ### CSV
-        # with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
-        #     writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
-        #     header = ["location", "M", "D"]
-        #     for sss in SITE_CLASSES:
-        #         for attr in ["PGA", "Sas", "Tc"]:
-        #             header.append(f"{sss}-{attr}")
-        #     writer.writerow(header)
-        #     for row in table_rows:
-        #         writer.writerow(row)
+        if PRODUCE_CSV:
+            csv_rows = generate_csv_rows(location_df, d_and_m_df)
+
+            ### CSV
+            with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
+                writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
+                header = ["location", "location (ascii)", "apoe", "M", "D"]
+                for sss in SITE_CLASSES:
+                    for attr in ["PGA", "Sas", "Tc", "Td"]:
+                        header.append(f"{sss}-{attr}")
+                writer.writerow(header)
+                for row in csv_rows:
+                    writer.writerow(row)
+
 
         ### PDF
+        table_rows = generate_table_rows(location_df, d_and_m_df)
         for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_BLOCKS)):
             report.add_page(
                 build_report_page(
