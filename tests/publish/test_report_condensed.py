@@ -1,18 +1,4 @@
-import pathlib
-
-import pandas as pd
-import pytest
-
-from nzssdt_2023.config import RESOURCES_FOLDER
-
-# from nzssdt_2023.convert import DistMagTable, SatTable
 from nzssdt_2023.publish import report_condensed_v2, report_v2
-
-# from borb.pdf import Document
-
-
-# from nzssdt_2023.publish import report_v2
-
 
 SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
 APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
@@ -29,31 +15,19 @@ def test_SITE_CLASSES_constant():
     assert ["I", "II", "III", "IV", "V", "VI"] == report_v2.SITE_CLASSES
 
 
-@pytest.fixture(scope="module")
-def sat_named_table_v2_new():
-    filepath = pathlib.Path(RESOURCES_FOLDER) / "v_cbc" / "named_locations.json"
-    return pd.read_json(filepath, orient="table")
+def test_generate_location_block(sat_named_table_v2, dm_table_v2):
+    named_df = sat_named_table_v2
+    d_and_m_df = dm_table_v2
 
-
-@pytest.fixture(scope="module")
-def dm_table_v2_new():
-    filepath = pathlib.Path(RESOURCES_FOLDER) / "v_cbc" / "d_and_m.json"
-    return pd.read_json(filepath, orient="table")
-
-
-def test_generate_location_block(sat_named_table_v2_new, dm_table_v2_new):
-    named_df = sat_named_table_v2_new
-    d_and_m_df = dm_table_v2_new
-
-    rows = report_condensed_v2.generate_location_block(named_df, d_and_m_df, "Auckland")
+    rows = report_condensed_v2.generate_location_block(named_df, d_and_m_df, "Haruru")
     res = next(rows)
     print(res)
     assert res[0] == "1/25", "first field is apoe: 25"
 
 
-def test_generate_table_rows(sat_named_table_v2_new, dm_table_v2_new):
-    named_df = sat_named_table_v2_new
-    d_and_m_df = dm_table_v2_new
+def test_generate_table_rows(sat_named_table_v2, dm_table_v2):
+    named_df = sat_named_table_v2
+    d_and_m_df = dm_table_v2
 
     rows = report_condensed_v2.generate_table_rows(named_df, d_and_m_df)
     res = next(rows)
