@@ -1,6 +1,6 @@
 # TS 1170.5 Seismic Demand Parameters
 
-
+<br>
 
 ## Digital supplements for Tables 3.4, 3.5, and 3.2 
 
@@ -8,7 +8,7 @@ This webpage provides access to the digital supplements associated with the Seis
 
 The parameter values vary by location, annual probability of exceedance (APOE), and Site Class.
 
-
+<br>
 
 The spectral shape-related parameters are defined in Section 3.1.2, copied below. 
 
@@ -20,23 +20,24 @@ Additional parameters include:
 
 ![d_definition](d_definition.png)
 
-
+<br>
 
 The TS 1170.5 provides two sets of SDP tables, one table for named urban and rural settlements (Table 3.4) and another table for a 0.1 x 0.1 degree grid of latitudes and longitudes (Table 3.5). The tables are provided in three file formats (PDF, JSON, and CSV), along with geospatial data used in deriving the parameter values.
 
-
+<br>
 
 The relevant metadata for each format and links to the files are provided below. The following tools provide additional support for accessing the data:
 
 - a python package for dynamically querying the parameter tables ([insert link]())
-
 - a webtool (provided by SESOC) for visualising and downloading parameters on a location-by-location basis ([insert link]())
 
-  
+ <br>
 
- 
+<br>
 
-## SDP tables metadata
+## File format metadata
+
+### SDP tables 
 
 The difference between Tables 3.4 and 3.5 is the type of location specified in the location groupings (where each location group includes six APOEs).
 
@@ -67,16 +68,20 @@ Python dictionaries including the SDP values and a schema defining the metadata.
 
 ![pd_table](placeholder_pd_table.png)
 
+<br>
+
+<br>
 
 
-
-
-
-## Geospatial files metadata
+### Geospatial files
 
 <span style="color:red">Todo: finalise the file format and metadata of the .geojson files.</span>
 
+<br>
 
+<br>
+
+## Links to files
 
 ### Named settlements (Table 3.4)
 
