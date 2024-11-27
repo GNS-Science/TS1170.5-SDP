@@ -334,8 +334,8 @@ def build_report_page(
                     print(f"bang! `{cell}`")
 
     table.set_padding_on_all_cells(
-        padding_top=Decimal(1.5),
-        padding_right=Decimal(1.0),
+        padding_top=Decimal(2.5),
+        padding_right=Decimal(1.5),
         padding_bottom=Decimal(1.0),
         padding_left=Decimal(1.5)
     )
@@ -420,7 +420,7 @@ def generate_table_rows(
         if count%10 == 0:
             print(f"row count: {count}")
 
-        if count >= 10:
+        if count >= 20:
             break
 
 
@@ -464,7 +464,7 @@ if __name__ == "__main__":
     grid_df = sat_grid_table_v2()
     d_and_m_df = dm_table_v2()
 
-    report_grps = reversed(list(zip([0, 1], [named_df, grid_df])))
+    report_grps = list(zip([0, 1], [named_df, grid_df]))
     report_grp_titles = ["3.4", "3.5"]
     report_names = ["named", "gridded"]
 
@@ -517,3 +517,5 @@ if __name__ == "__main__":
         with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
             PDF.dumps(out_file_handle, report)
 
+
+        assert 0
