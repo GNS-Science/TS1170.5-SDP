@@ -335,8 +335,8 @@ def build_report_page(
 
     table.set_padding_on_all_cells(
         padding_top=Decimal(1.5),
-        padding_right=Decimal(0.5),
-        padding_bottom=Decimal(0.5),
+        padding_right=Decimal(1.0),
+        padding_bottom=Decimal(1.0),
         padding_left=Decimal(1.5)
     )
     table.set_border_width_on_all_cells(border_width=Decimal(0.5))
