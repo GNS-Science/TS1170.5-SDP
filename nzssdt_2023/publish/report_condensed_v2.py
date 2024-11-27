@@ -55,7 +55,7 @@ APOE_MAPPINGS = list(
 )
 
 medium_font = TrueTypeFont.true_type_font_from_file(
-    open("./fonts/static/OpenSans-Medium.ttf", "rb").read()
+    open(Path(RESOURCES_FOLDER) / "fonts/static/OpenSans-Medium.ttf", "rb").read()
 )
 
 
