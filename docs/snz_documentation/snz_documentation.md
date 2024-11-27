@@ -50,7 +50,7 @@ Table | Location type | Example
 
 Formatted, searchable files, as included in the TS 1170.5 document. Settlement names with macrons are supplemented with a plain text version, for flexible searchability.
 
-<span style="color:red">Todo: switch the location to Whangarei to demonstrate the macrons. (Column header will become Settlement.)</span>
+*Todo: switch the location to Whangarei to demonstrate the macrons. (Column header will become Settlement.)*
 
 ![pdf_table](pdf_table.png)
 
@@ -58,7 +58,7 @@ Formatted, searchable files, as included in the TS 1170.5 document. Settlement n
 
 Unformatted, comma separated text files.
 
-<span style="color:red">Todo: add equivalent set of parameters in .csv format.</span>
+*Todo: add equivalent set of parameters in .csv format.*
 
 #### JSON files
 
@@ -75,7 +75,7 @@ Python dictionaries including the SDP values and a schema defining the metadata.
 
 ### Geospatial files
 
-<span style="color:red">Todo: finalise the file format and metadata of the .geojson files.</span>
+*Todo: finalise the file format and metadata of the .geojson files.*
 
 <br>
 
