@@ -1,11 +1,5 @@
-import pathlib
-
-import pandas as pd
-import pytest
 from borb.pdf import Document
 
-from nzssdt_2023.config import RESOURCES_FOLDER
-from nzssdt_2023.convert import DistMagTable, SatTable
 from nzssdt_2023.publish.report import build_report_page, generate_table_rows
 
 

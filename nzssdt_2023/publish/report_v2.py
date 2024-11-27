@@ -11,7 +11,6 @@ methods:
 
 """
 
-import csv
 from decimal import Decimal
 from itertools import islice
 from pathlib import Path
@@ -33,7 +32,7 @@ from borb.pdf import (
 )
 from borb.pdf.page.page_size import PageSize
 
-from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.data_creation import constants
 
 MAX_PAGE_ROWS = 30

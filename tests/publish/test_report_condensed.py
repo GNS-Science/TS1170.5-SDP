@@ -48,7 +48,7 @@ def test_generate_location_block(sat_named_table_v2_new, dm_table_v2_new):
     rows = report_condensed_v2.generate_location_block(named_df, d_and_m_df, "Auckland")
     res = next(rows)
     print(res)
-    assert res[0] == 25, "first field is apoe: 25"
+    assert res[0] == "1/25", "first field is apoe: 25"
 
 
 def test_generate_table_rows(sat_named_table_v2_new, dm_table_v2_new):
@@ -58,7 +58,7 @@ def test_generate_table_rows(sat_named_table_v2_new, dm_table_v2_new):
     rows = report_condensed_v2.generate_table_rows(named_df, d_and_m_df)
     res = next(rows)
 
-    assert res[0] == "Kaitaia", "first location is Katiaia"
+    assert res[0][0] == "Kaitaia", "first location is Katiaia"
     assert next(res[1]) == next(
         report_condensed_v2.generate_location_block(named_df, d_and_m_df, "Kaitaia")
     ), "Kaitaia table entries"

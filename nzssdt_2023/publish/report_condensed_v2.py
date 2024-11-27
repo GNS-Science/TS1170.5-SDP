@@ -12,14 +12,13 @@ methods:
 """
 
 import csv
+import time
 from decimal import Decimal
 from itertools import islice
 from pathlib import Path
-from typing import Iterator, List, Tuple, Union
-import time
+from typing import Iterator, List, Union
 
 import pandas as pd
-
 from borb.pdf import (
     PDF,
     Alignment,
@@ -39,7 +38,7 @@ from borb.pdf import (
 from borb.pdf.page.page_size import PageSize
 from nzshm_common.location import get_name_with_macrons
 
-from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.data_creation import constants
 
 PRODUCE_CSV = True
@@ -142,7 +141,6 @@ def build_report_page(
                 res.append(non_macronised_words[idx])
         print("searchable name:", " ".join(res))
         return " ".join(res)
-
 
     def add_row_1(table: FixedColumnWidthTable):
         table.add(
@@ -249,13 +247,14 @@ def build_report_page(
     # data rows
     for row in rowdata:
         # row[0] is location
-        print("@@@ row:",  row)
-
+        print("@@@ row:", row)
 
         if row[0][1] == row[0][0]:
             location_str = row[0][0]
         else:
-            location_str = row[0][0] + ', "' +  searchable_ascii_name(row[0][0], row[0][1]) + '"' # add 2nd chunk for searching anglicised names (no macrons)
+            location_str = (
+                row[0][0] + ', "' + searchable_ascii_name(row[0][0], row[0][1]) + '"'
+            )  # add 2nd chunk for searching anglicised names (no macrons)
         table.add(
             TableCell(
                 Paragraph(
@@ -275,16 +274,18 @@ def build_report_page(
         #  It works except for values [`Waihi Bowentown`  `Ōakura (New Plymouth District)`]
         #
         # else:
+        #  1st Chunk is visible Macronnised names
         #     # chunks = [
         #     #                 ChunkOfText(
-        #     #                     row[0][0] + " " +  searchable_ascii_name(row[0][0], row[0][1]),  # 1st Chunk is visible Macronnised names
+        #     #                     row[0][0] + " " +  searchable_ascii_name(row[0][0], row[0][1]),
         #     #                     # font="Helvetica",
         #     #                     font=medium_font,
         #     #                     font_size=Decimal(8),
         #     #                     # font_color=HexColor("ffffff"),
         #     #                     # font_transparency=100
         #     #                 ),
-        #     #                 # ChunkOfText("  " + searchable_ascii_name(row[0][0], row[0][1]), # 2nd chunk for searching anglicised names (no macrons)
+        #  2nd chunk for searching anglicised names (no macrons)
+        #     #                 # ChunkOfText("  " + searchable_ascii_name(row[0][0], row[0][1]),
         #     #                 #     font_size=Decimal(3),
         #     #                 #     font=medium_font,
         #     #                 #     font_color=HexColor("fefefe"),
@@ -340,7 +341,7 @@ def build_report_page(
         padding_top=Decimal(2.5),
         padding_right=Decimal(1.5),
         padding_bottom=Decimal(1.0),
-        padding_left=Decimal(1.5)
+        padding_left=Decimal(1.5),
     )
     table.set_border_width_on_all_cells(border_width=Decimal(0.5))
     layout.add(table)
@@ -392,23 +393,25 @@ def generate_location_block(
         yield (row)
 
 
-def locations_tuple_padded(location:str, modify_locations:bool):
+def locations_tuple_padded(location: str, modify_locations: bool):
     if not modify_locations:
         return get_name_with_macrons(location), location
 
     # spaces allow wrapping to work, # non-macronised for searching
     return (
         get_name_with_macrons(location).replace("-", " - "),
-        location.replace("-", " - ")
-        )
+        location.replace("-", " - "),
+    )
 
 
 def generate_table_rows(
-    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, modify_locations: bool = False
+    sat_table_flat: pd.DataFrame,
+    dm_table_flat: pd.DataFrame,
+    modify_locations: bool = False,
 ) -> Iterator:
     count = 0
     for location in sat_table_flat.Location.unique():
-        #location = location.replace("-", " - ")
+        # location = location.replace("-", " - ")
 
         count += 1
         # if not (location == "Wellington"):
@@ -417,12 +420,12 @@ def generate_table_rows(
         #     continue
         # if count in [47, 86]:  #47 `Waihi Bowentown` BOOM, 85 `Ōakura (New Plymouth District)`
         #     continue
-        yield  (
-                locations_tuple_padded(location, modify_locations),
-                generate_location_block(sat_table_flat, dm_table_flat, location)
-                )
+        yield (
+            locations_tuple_padded(location, modify_locations),
+            generate_location_block(sat_table_flat, dm_table_flat, location),
+        )
 
-        if count%10 == 0:
+        if count % 10 == 0:
             print(f"row count: {count}")
 
         if LOCATION_LIMIT and (count >= LOCATION_LIMIT):
@@ -430,7 +433,9 @@ def generate_table_rows(
 
 
 def generate_csv_rows(
-    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, modify_locations: bool = False
+    sat_table_flat: pd.DataFrame,
+    dm_table_flat: pd.DataFrame,
+    modify_locations: bool = False,
 ) -> Iterator:
     count = 0
     for location in sat_table_flat.Location.unique():
@@ -483,7 +488,9 @@ if __name__ == "__main__":
         report: Document = Document()
 
         if PRODUCE_CSV:
-            csv_rows = generate_csv_rows(location_df, d_and_m_df, report_names[report_grp] == "named")
+            csv_rows = generate_csv_rows(
+                location_df, d_and_m_df, report_names[report_grp] == "named"
+            )
 
             ### CSV
             with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
@@ -496,9 +503,10 @@ if __name__ == "__main__":
                 for row in csv_rows:
                     writer.writerow(row)
 
-
         ### PDF
-        table_rows = generate_table_rows(location_df, d_and_m_df, report_names[report_grp] == "named" )
+        table_rows = generate_table_rows(
+            location_df, d_and_m_df, report_names[report_grp] == "named"
+        )
         for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_BLOCKS)):
             report.add_page(
                 build_report_page(
