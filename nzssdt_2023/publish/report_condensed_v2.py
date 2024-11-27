@@ -40,7 +40,7 @@ from nzshm_common.location import get_name_with_macrons
 from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
 
-PRODUCE_CSV = False
+PRODUCE_CSV = True
 
 MAX_PAGE_BLOCKS = 4  # each location block row has 7 apoe rows
 SITE_CLASSES = list(constants.SITE_CLASSES.keys())  # check sorting
@@ -126,6 +126,22 @@ def build_report_page(
                 )
             )
         return table
+
+    def searchable_ascii_name(macronised, non_maconrised):
+        """return just the macronised substituions for searching"""
+        macronised_words = macronised.split(" ")
+        non_macronised_words = non_maconrised.split(" ")
+        assert len(macronised_words) == len(non_macronised_words)
+
+        res = []
+        for idx, word in enumerate(macronised_words):
+            if word == non_macronised_words[idx]:
+                continue
+            else:
+                res.append(non_macronised_words[idx])
+        print("searchable name:", " ".join(res))
+        return " ".join(res)
+
 
     def add_row_1(table: FixedColumnWidthTable):
         table.add(
@@ -234,56 +250,63 @@ def build_report_page(
         # row[0] is location
         print("@@@ row:",  row)
 
+
         if row[0][1] == row[0][0]:
-            table.add(
-                TableCell(
-                    Paragraph(
-                        row[0][0],  # 2nd chunk for searching anglicised names (no macrons)
-                        # font="Helvetica",
-                        font=medium_font,
-                        font_size=Decimal(8),
-                        horizontal_alignment=Alignment.LEFT,
-                        vertical_alignment=Alignment.MIDDLE,
-                    ),
-                    row_span=len(constants.DEFAULT_RPS),
-                )
-            )
+            location_str = row[0][0]
         else:
-            table.add(
-                TableCell(
-                    HeterogeneousParagraph(
-                        [
-                            ChunkOfText(
-                                row[0][0],  # 2nd chunk for searching anglicised names (no macrons)
-                                # font="Helvetica",
-                                font=medium_font,
-                                font_size=Decimal(8),
-                                # font_color=HexColor("ffffff"),
-                                # font_transparency=100
-                            ),
-                            ChunkOfText(" ",
-                                font_size=Decimal(8),
-                                font=medium_font,
-                                font_color=HexColor("ffffff"),
-                            ),
-                            ChunkOfText(
-                                row[0][1],  # 1st Chunk is visible Maconrnised names (can't rotate yet)
-                                # font="Helvetica",
-                                font=medium_font,
-                                font_size=Decimal(8),
-                                font_color=HexColor("ffffff"),
-                            ),
-                        ],
-                        horizontal_alignment=Alignment.LEFT,
-                        vertical_alignment=Alignment.MIDDLE,
-                    ),
-                    # Paragraph(row[0][0],
-                    #     font=medium_font,
-                    #     font_size=Decimal(8),
-                    # ),
-                    row_span=len(constants.DEFAULT_RPS),
-                )
+            location_str = row[0][0] + ', "' +  searchable_ascii_name(row[0][0], row[0][1]) + '"' # add 2nd chunk for searching anglicised names (no macrons)
+        table.add(
+            TableCell(
+                Paragraph(
+                    location_str,
+                    # font="Helvetica",
+                    font=medium_font,
+                    font_size=Decimal(8),
+                    horizontal_alignment=Alignment.LEFT,
+                    vertical_alignment=Alignment.MIDDLE,
+                ),
+                row_span=len(constants.DEFAULT_RPS),
             )
+        )
+        # else:
+        #     # chunks = [
+        #     #                 ChunkOfText(
+        #     #                     row[0][0] + " " +  searchable_ascii_name(row[0][0], row[0][1]),  # 1st Chunk is visible Macronnised names
+        #     #                     # font="Helvetica",
+        #     #                     font=medium_font,
+        #     #                     font_size=Decimal(8),
+        #     #                     # font_color=HexColor("ffffff"),
+        #     #                     # font_transparency=100
+        #     #                 ),
+        #     #                 # ChunkOfText("  " + searchable_ascii_name(row[0][0], row[0][1]), # 2nd chunk for searching anglicised names (no macrons)
+        #     #                 #     font_size=Decimal(3),
+        #     #                 #     font=medium_font,
+        #     #                 #     font_color=HexColor("fefefe"),
+        #     #                 # ),
+        #     #                 # ChunkOfText(
+        #     #                 #     ,   (can't rotate yet)
+        #     #                 #     # font="Helvetica",
+        #     #                 #     font=medium_font,
+        #     #                 #     font_size=Decimal(8),
+        #     #                 #     font_color=HexColor("ffffff"),
+        #     #                 # ),
+        #     #             ]
+        #     # # chunks = reversed(chunks)
+
+        #     # table.add(
+        #     #     TableCell(
+        #     #         HeterogeneousParagraph(
+        #     #             chunks,
+        #     #             horizontal_alignment=Alignment.LEFT,
+        #     #             vertical_alignment=Alignment.MIDDLE,
+        #     #         ),
+        #     #         # Paragraph(row[0][0],
+        #     #         #     font=medium_font,
+        #     #         #     font_size=Decimal(8),
+        #     #         # ),
+        #     #         row_span=len(constants.DEFAULT_RPS),
+        #     #     )
+        #     # )
 
         print(row[1])
 
@@ -355,50 +378,49 @@ def generate_location_block(
         yield (row)
 
 
+def locations_tuple_padded(location:str, modify_locations:bool):
+    if not modify_locations:
+        return get_name_with_macrons(location), location
+
+    # spaces allow wrapping to work, # non-macronised for searching
+    return (
+        get_name_with_macrons(location).replace("-", " - "),
+        location.replace("-", " - ")
+        )
+
+
 def generate_table_rows(
-    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame
+    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, modify_locations: bool = False
 ) -> Iterator:
     count = 0
     for location in sat_table_flat.Location.unique():
         #location = location.replace("-", " - ")
 
         count += 1
-        if count < 85:
-            continue
-
-
-
-        if count in [47, 86]:  #47 `Waihi Bowentown` BOOM, 85 `Ōakura (New Plymouth District)`
-            continue
-
-        yield  ( [
-                get_name_with_macrons(
-                    location
-                ).replace("-", " - "),         # spaces allow wrapping to work
-                location.replace("-", " - ")   # non-macronised for searching
-                ],
+        # if count < 46:
+        #     continue
+        # if count in [47, 86]:  #47 `Waihi Bowentown` BOOM, 85 `Ōakura (New Plymouth District)`
+        #     continue
+        yield  (
+                locations_tuple_padded(location, modify_locations),
                 generate_location_block(sat_table_flat, dm_table_flat, location)
                 )
 
         if count%10 == 0:
             print(f"row count: {count}")
 
-        if count >= 4000:
-            break
+        # if count >= 99:
+        #     break
+
 
 
 def generate_csv_rows(
-    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame
+    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, modify_locations: bool = False
 ) -> Iterator:
     count = 0
     for location in sat_table_flat.Location.unique():
         for block in generate_location_block(sat_table_flat, dm_table_flat, location):
-            yield [
-                get_name_with_macrons(
-                    location
-                ).replace("-", " - "),         # spaces allow wrapping to work
-                location.replace("-", " - ")   # non-macronised for searching
-                ] + block
+            yield list(locations_tuple_padded(location, modify_locations)) + block
         count += 1
 
 
@@ -431,7 +453,7 @@ if __name__ == "__main__":
     grid_df = sat_grid_table_v2()
     d_and_m_df = dm_table_v2()
 
-    report_grps = list(zip([0, 1], [named_df, grid_df]))
+    report_grps = reversed(list(zip([0, 1], [named_df, grid_df])))
     report_grp_titles = ["3.4", "3.5"]
     report_names = ["named", "gridded"]
 
@@ -448,7 +470,7 @@ if __name__ == "__main__":
 
 
         if PRODUCE_CSV:
-            csv_rows = generate_csv_rows(location_df, d_and_m_df)
+            csv_rows = generate_csv_rows(location_df, d_and_m_df, report_names[report_grp] == "named")
 
             ### CSV
             with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
@@ -463,7 +485,7 @@ if __name__ == "__main__":
 
 
         ### PDF
-        table_rows = generate_table_rows(location_df, d_and_m_df)
+        table_rows = generate_table_rows(location_df, d_and_m_df, report_names[report_grp] == "named" )
         for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_BLOCKS)):
             report.add_page(
                 build_report_page(
@@ -484,4 +506,3 @@ if __name__ == "__main__":
         with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
             PDF.dumps(out_file_handle, report)
 
-        assert 0
