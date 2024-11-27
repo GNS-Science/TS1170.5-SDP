@@ -42,18 +42,17 @@ from nzshm_common.location import get_name_with_macrons
 from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
 
-PRODUCE_CSV = False
+PRODUCE_CSV = True
+LOCATION_LIMIT = 1
 
 MAX_PAGE_BLOCKS = 4  # each location block row has 7 apoe rows
 SITE_CLASSES = list(constants.SITE_CLASSES.keys())  # check sorting
-# APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
 APOE_MAPPINGS = list(
     zip(
         "abcdefghij"[: len(constants.DEFAULT_RPS)],
         sorted(constants.DEFAULT_RPS),
     )
-)  # check content
-PAGE_BUFFER = 0
+)
 
 medium_font = TrueTypeFont.true_type_font_from_file(
     open("./fonts/static/OpenSans-Medium.ttf", "rb").read()
@@ -72,8 +71,8 @@ def build_report_page(
     # create Page
     PAGE_SIZE = PageSize.A4_LANDSCAPE
     page: Page = Page(
-        width=PAGE_SIZE.value[0] + PAGE_BUFFER,
-        height=PAGE_SIZE.value[1] + PAGE_BUFFER,
+        width=PAGE_SIZE.value[0],
+        height=PAGE_SIZE.value[1],
     )
     layout: PageLayout = SingleColumnLayout(page)
 
@@ -149,7 +148,7 @@ def build_report_page(
         table.add(
             TableCell(
                 Paragraph(
-                    "Site",
+                    "Settlement",
                     font="Helvetica-bold",
                     font_size=Decimal(8),
                     horizontal_alignment=Alignment.LEFT,
@@ -160,7 +159,7 @@ def build_report_page(
                 Paragraph(
                     "APOE",
                     font="Helvetica-bold",
-                    font_size=Decimal(7),
+                    font_size=Decimal(8),
                     horizontal_alignment=Alignment.CENTERED,
                 )
             )
@@ -200,7 +199,7 @@ def build_report_page(
                         ChunkOfText(
                             "a,s",
                             font="Helvetica-bold",
-                            font_size=Decimal(7),
+                            font_size=Decimal(8),
                             vertical_alignment=Alignment.BOTTOM,
                         ),
                     ],
@@ -217,7 +216,7 @@ def build_report_page(
                         ChunkOfText(
                             "c",
                             font="Helvetica-bold",
-                            font_size=Decimal(7),
+                            font_size=Decimal(8),
                             vertical_alignment=Alignment.BOTTOM,
                         ),
                     ],
@@ -234,7 +233,7 @@ def build_report_page(
                         ChunkOfText(
                             "d",
                             font="Helvetica-bold",
-                            font_size=Decimal(7),
+                            font_size=Decimal(8),
                             vertical_alignment=Alignment.BOTTOM,
                         ),
                     ],
@@ -270,6 +269,11 @@ def build_report_page(
                 row_span=len(constants.DEFAULT_RPS),
             )
         )
+        ###
+        #
+        #  This was an attempt to do transparent text.
+        #  It works except for values [`Waihi Bowentown`  `Ōakura (New Plymouth District)`]
+        #
         # else:
         #     # chunks = [
         #     #                 ChunkOfText(
@@ -294,7 +298,6 @@ def build_report_page(
         #     #                 # ),
         #     #             ]
         #     # # chunks = reversed(chunks)
-
         #     # table.add(
         #     #     TableCell(
         #     #         HeterogeneousParagraph(
@@ -408,6 +411,8 @@ def generate_table_rows(
         #location = location.replace("-", " - ")
 
         count += 1
+        # if not (location == "Wellington"):
+        #     continue
         # if count < 46:
         #     continue
         # if count in [47, 86]:  #47 `Waihi Bowentown` BOOM, 85 `Ōakura (New Plymouth District)`
@@ -420,9 +425,8 @@ def generate_table_rows(
         if count%10 == 0:
             print(f"row count: {count}")
 
-        if count >= 20:
+        if LOCATION_LIMIT and (count >= LOCATION_LIMIT):
             break
-
 
 
 def generate_csv_rows(
@@ -472,13 +476,11 @@ if __name__ == "__main__":
 
         print(report_grp)
         print()
-        # for apoe in APOE_MAPPINGS:
 
         filename = f"{report_names[report_grp]}_location_report_v2-DRAFT"
         print(f"report: {filename}")
 
         report: Document = Document()
-
 
         if PRODUCE_CSV:
             csv_rows = generate_csv_rows(location_df, d_and_m_df, report_names[report_grp] == "named")
@@ -486,7 +488,7 @@ if __name__ == "__main__":
             ### CSV
             with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
                 writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
-                header = ["location", "location (ascii)", "apoe", "M", "D"]
+                header = ["location", "location_ascii", "apoe", "M", "D"]
                 for sss in SITE_CLASSES:
                     for attr in ["PGA", "Sas", "Tc", "Td"]:
                         header.append(f"{sss}-{attr}")
@@ -516,6 +518,3 @@ if __name__ == "__main__":
 
         with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
             PDF.dumps(out_file_handle, report)
-
-
-        assert 0
