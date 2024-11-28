@@ -50,21 +50,19 @@ Table | Location type | Example
 
 Formatted, searchable files, as included in the TS 1170.5 document. Settlement names with macrons are supplemented with a plain text version, for flexible searchability.
 
-*Todo: switch the location to Whangarei to demonstrate the macrons. (Column header will become Settlement.)*
-
 ![pdf_table](pdf_table.png)
 
 #### CSV files
 
 Unformatted, comma separated text files.
 
-*Todo: add equivalent set of parameters in .csv format.*
+![csv_table](csv_table.png)
 
 #### JSON files
 
 Python dictionaries including the SDP values and a schema defining the metadata. The dictionary can be read as a pandas table using:
 
-        pandas.read_json(filepath, orient="table")
+        pandas.read_json(filepath, orient="table",precise_float=True)
 
 ![pd_table](placeholder_pd_table.png)
 
