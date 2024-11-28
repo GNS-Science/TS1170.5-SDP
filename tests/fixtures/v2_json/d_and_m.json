@@ -1,0 +1,323 @@
+{
+  "schema":{
+    "fields":[
+      {
+        "name":"Location",
+        "type":"string"
+      },
+      {
+        "name":"APoE (1\/n)",
+        "type":"integer"
+      },
+      {
+        "name":"D",
+        "type":"number"
+      },
+      {
+        "name":"M",
+        "type":"number"
+      }
+    ],
+    "primaryKey":[
+      "Location",
+      "APoE (1\/n)"
+    ],
+    "pandas_version":"1.4.0"
+  },
+  "data":[
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":25,
+      "D":0.0,
+      "M":6.9
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":50,
+      "D":0.0,
+      "M":7.2
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":100,
+      "D":0.0,
+      "M":7.5
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":250,
+      "D":0.0,
+      "M":7.7
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":500,
+      "D":0.0,
+      "M":7.8
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":1000,
+      "D":0.0,
+      "M":7.9
+    },
+    {
+      "Location":"Wellington",
+      "APoE (1\/n)":2500,
+      "D":0.0,
+      "M":7.9
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Christchurch",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.5
+    },
+   {
+      "Location":"Dunedin",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.5
+    },
+    {
+      "Location":"Dunedin",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.6
+    }
+  ]
+}

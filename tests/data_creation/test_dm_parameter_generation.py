@@ -1,13 +1,10 @@
-import itertools
 from pathlib import Path
 
 import pandas as pd
 import pandas.testing
-import pytest
 from toshi_hazard_store.model import AggregationEnum
 
 import nzssdt_2023.data_creation.dm_parameter_generation as dm_parameter_generation
-import nzssdt_2023.data_creation.mean_magnitudes as mean_magnitudes
 
 SITE_NAMES = ["Paihia", "Opua", "-46.200~166.600"]
 FREQUENCIES = [
@@ -18,33 +15,6 @@ FREQUENCIES = [
     "APoE: 1/2500",
 ]
 AGG = AggregationEnum.MEAN
-
-
-def mock_get_mean_mags(
-    hazard_id,
-    locations,
-    vs30s,
-    imts,
-    poes,
-    hazard_agg,
-):
-    for location, vs30, imt, poe in itertools.product(locations, vs30s, imts, poes):
-        _, name = mean_magnitudes.get_loc_id_and_name(location.downsample(0.001).code)
-        yield dict(
-            name=name,
-            poe=poe,
-            mag=5.0,
-        )
-
-
-@pytest.fixture
-def mean_mags_fixture(monkeypatch):
-    monkeypatch.setattr(mean_magnitudes, "get_mean_mags", mock_get_mean_mags)
-
-
-@pytest.fixture(scope="function")
-def workingfolder_fixture(monkeypatch, tmp_path):
-    monkeypatch.setattr(dm_parameter_generation, "WORKING_FOLDER", str(tmp_path))
 
 
 # no cache, do I get the correct DataFrame?

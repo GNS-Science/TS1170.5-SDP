@@ -12,7 +12,7 @@ publish = 'nzssdt_2023.scripts.publish_cli:cli'
 version = 'nzssdt_2023.scripts.version_cli:cli'
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.12"
+python = ">=3.10,<3.13"
 pandas = "^2.0.2"
 click = "^8.1.3"
 dacite = "^1.8.1"

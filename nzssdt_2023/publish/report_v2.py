@@ -1,20 +1,16 @@
 """
-Build PDF and equivalent CSV table structures for a version (version 1 format).
+Build PDF and equivalent CSV table structures for version 2+ using the OLD format.
 
 This module uses the `borb` library to produce the PDF document.
 
 TODO:
- - extra column Td to each soil/site class
- - table reorg. Instead of table per APOE, now we want rows per APOE per Auckland
-   (see example, but don't include units!)
- - Versioning & manifest data structures needs further work once the main characteristics of V2 are defined.
+ - [x] extra column Td to each soil/site class
 
 methods:
  build_report_page
 
 """
 
-import csv
 from decimal import Decimal
 from itertools import islice
 from pathlib import Path
@@ -37,11 +33,17 @@ from borb.pdf import (
 from borb.pdf.page.page_size import PageSize
 
 from nzssdt_2023.config import RESOURCES_FOLDER
-from nzssdt_2023.publish.convert import DistMagTable, SatTable
+from nzssdt_2023.data_creation import constants
 
 MAX_PAGE_ROWS = 30
-SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
-APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
+SITE_CLASSES = list(constants.SITE_CLASSES.keys())  # check sorting
+# APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
+APOE_MAPPINGS = list(
+    zip(
+        "abcdefghij"[: len(constants.DEFAULT_RPS)],
+        sorted(constants.DEFAULT_RPS),
+    )
+)  # check content
 VERTICAL_BUFFER = 40
 
 
@@ -78,16 +80,16 @@ def build_report_page(
 
     # create a FixedColumnWidthTable
     table = FixedColumnWidthTable(
-        number_of_columns=3 + (6 * 3),
+        number_of_columns=3 + (6 * 4),  # 4 parameters now!
         number_of_rows=2 + len(rowdata),
         # adjust the ratios of column widths for this FixedColumnWidthTable
         column_widths=[Decimal(3), Decimal(0.5), Decimal(0.5)]
-        + 6 * [Decimal(0.5), Decimal(0.5), Decimal(0.5)],
+        + 6 * [Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)],
     )
 
     def add_row_0(table: FixedColumnWidthTable):
         table.add(TableCell(Paragraph(""), column_span=3))
-        for sss in SOIL_CLASSES:
+        for sss in SITE_CLASSES:
             table.add(
                 TableCell(
                     Paragraph(
@@ -97,7 +99,7 @@ def build_report_page(
                         horizontal_alignment=Alignment.CENTERED,
                         vertical_alignment=Alignment.BOTTOM,
                     ),
-                    column_span=3,
+                    column_span=4,
                 )
             )
         return table
@@ -108,7 +110,7 @@ def build_report_page(
                 Paragraph(
                     "Location",
                     font="Helvetica-bold-oblique",
-                    font_size=Decimal(9),
+                    font_size=Decimal(8),
                     horizontal_alignment=Alignment.LEFT,
                 )
             )
@@ -117,7 +119,7 @@ def build_report_page(
                 Paragraph(
                     "M",
                     font="Helvetica-bold-oblique",
-                    font_size=Decimal(9),
+                    font_size=Decimal(8),
                     horizontal_alignment=Alignment.CENTERED,
                 )
             )
@@ -126,17 +128,17 @@ def build_report_page(
                 Paragraph(
                     "D",
                     font="Helvetica-bold-oblique",
-                    font_size=Decimal(9),
+                    font_size=Decimal(8),
                     horizontal_alignment=Alignment.CENTERED,
                 )
             )
         )
-        for sss in SOIL_CLASSES:
+        for sss in SITE_CLASSES:
             table.add(
                 Paragraph(
                     "PGA",
                     font="Helvetica-bold-oblique",
-                    font_size=Decimal(9),
+                    font_size=Decimal(7),
                     horizontal_alignment=Alignment.CENTERED,
                 )
             ).add(
@@ -171,6 +173,23 @@ def build_report_page(
                     ],
                     horizontal_alignment=Alignment.CENTERED,
                 )
+            ).add(
+                HeterogeneousParagraph(
+                    [
+                        ChunkOfText(
+                            "T",
+                            font="Helvetica-bold-oblique",
+                            font_size=Decimal(9),
+                        ),
+                        ChunkOfText(
+                            "d",
+                            font="Helvetica-bold",
+                            font_size=Decimal(7),
+                            vertical_alignment=Alignment.BOTTOM,
+                        ),
+                    ],
+                    horizontal_alignment=Alignment.CENTERED,
+                )
             )
         return table
 
@@ -184,20 +203,24 @@ def build_report_page(
             Paragraph(
                 row[0],
                 font="Helvetica",
-                font_size=Decimal(9),
+                font_size=Decimal(8),
                 horizontal_alignment=Alignment.LEFT,
             )
         )
 
+        print(f"**** {row}")
         for cell in row[1:]:
-            table.add(
-                Paragraph(
-                    str(cell),
-                    font="Helvetica",
-                    font_size=Decimal(9),
-                    horizontal_alignment=Alignment.CENTERED,
+            try:
+                table.add(
+                    Paragraph(
+                        str(cell),
+                        font="Helvetica",
+                        font_size=Decimal(8),
+                        horizontal_alignment=Alignment.CENTERED,
+                    )
                 )
-            )
+            except Exception:
+                print(f"bang! `{cell}`")
 
     table.set_padding_on_all_cells(
         Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)
@@ -237,6 +260,7 @@ def generate_table_rows(
                     round(tup2.PGA, 2),
                     round(tup2.Sas, 2),
                     round(tup2.Tc, 1),
+                    round(tup2.Td, 1),
                 ]
         yield row
 
@@ -249,23 +273,26 @@ def chunks(items, chunk_size):
 
 if __name__ == "__main__":
 
-    OUTPUT_FOLDER = Path(RESOURCES_FOLDER).parent / "reports" / "v1"
+    OUTPUT_FOLDER = Path(RESOURCES_FOLDER).parent / "reports" / "v_cbc"
 
     # TODO shift this into the CLI
-    def sat_table():
-        filename = "SaT-variables_v5_corrected-locations.pkl"
-        df = pd.read_pickle(Path(RESOURCES_FOLDER, "input", "v1", filename))
-        return SatTable(df)
 
-    def dm_table():
-        filename = "D_and_M_with_floor.csv"
-        csv_path = Path(RESOURCES_FOLDER, "input", "v1", filename)
-        return DistMagTable(csv_path)
+    def dm_table_v2():
+        filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "d_and_m.json"
+        return pd.read_json(filepath, orient="table")
 
-    sat = sat_table()
-    named_df = sat.named_location_df()
-    grid_df = sat.grid_location_df()
-    d_and_m_df = dm_table().flatten()
+    def sat_named_table_v2():
+        filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "named_locations.json"
+        return pd.read_json(filepath, orient="table")
+
+    def sat_grid_table_v2():
+        filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "grid_locations.json"
+        return pd.read_json(filepath, orient="table")
+
+    # sat = sat_table()
+    named_df = sat_named_table_v2()
+    grid_df = sat_grid_table_v2()
+    d_and_m_df = dm_table_v2()
 
     report_grps = list(zip([0, 1], [named_df, grid_df]))
     report_grp_titles = ["3.4", "3.5"]
@@ -273,6 +300,8 @@ if __name__ == "__main__":
 
     for report_grp, location_df in report_grps:
 
+        print(report_grp)
+        print()
         for apoe in APOE_MAPPINGS:
 
             filename = f"{report_names[report_grp]}_location_report_apoe({apoe[1]})"
@@ -282,16 +311,16 @@ if __name__ == "__main__":
 
             table_rows = list(generate_table_rows(location_df, d_and_m_df, apoe[1]))
 
-            ### CSV
-            with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
-                writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
-                header = ["location", "M", "D"]
-                for sss in SOIL_CLASSES:
-                    for attr in ["PGA", "Sas", "Tc"]:
-                        header.append(f"{sss}-{attr}")
-                writer.writerow(header)
-                for row in table_rows:
-                    writer.writerow(row)
+            # ### CSV
+            # with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
+            #     writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
+            #     header = ["location", "M", "D"]
+            #     for sss in SITE_CLASSES:
+            #         for attr in ["PGA", "Sas", "Tc"]:
+            #             header.append(f"{sss}-{attr}")
+            #     writer.writerow(header)
+            #     for row in table_rows:
+            #         writer.writerow(row)
 
             ### PDF
             for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_ROWS)):
@@ -306,3 +335,5 @@ if __name__ == "__main__":
 
             with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
                 PDF.dumps(out_file_handle, report)
+
+            assert 0

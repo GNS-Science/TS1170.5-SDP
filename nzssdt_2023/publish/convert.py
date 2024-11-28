@@ -10,7 +10,12 @@ from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
-parameters = ["PGA", "Sas", "Tc"]  # Td will be added after this workflow is established
+parameters = [
+    "PGA",
+    "Sas",
+    "Tc",
+    "Td",
+]
 
 
 class SatTable:
@@ -46,7 +51,7 @@ def flatten_sat_df(df: pd.DataFrame):
             .drop(columns=["index"])
         )
 
-    df3 = param_dfs[0].merge(param_dfs[1]).merge(param_dfs[2])
+    df3 = param_dfs[0].merge(param_dfs[1]).merge(param_dfs[2]).merge(param_dfs[3])
     df3.level_2 = df3.level_2.apply(lambda x: x.replace("Site Class ", ""))
     df3.level_3 = df3.level_3.apply(lambda x: int(x.replace("APoE: 1/", "")))
     df3 = df3.rename(
@@ -134,7 +139,7 @@ def d_and_m_table_to_json(
     dandm = DistMagTable(dm_df)
 
     out_path = Path(version_folder, "d_and_m.json")
-    dandm.flatten().to_json(
+    dandm.flatten().infer_objects().to_json(
         out_path,
         index=True,
         orient="table",

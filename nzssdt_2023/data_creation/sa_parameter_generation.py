@@ -761,12 +761,14 @@ def create_sa_table(hf_path: Path, lower_bound_flags: bool = False) -> "pdt.Data
     )
 
     COLUMNS = [
-        ("APoE: 1/2500", f"Site Class {sc}", "PGA") for sc in "VI,V,IV".split(",")
+        ("APoE: 1/2500", f"Site Class {sc}", "Td") for sc in "VI,V,IV".split(",")
     ]
 
     if DIAGNOSTICS:
         print("DIAG #3 post create_mean_sa_table")
         print("=" * 40)
+        print(mean_df.info())
+        print()
         print(mean_df[COLUMNS])  # [mean_df.index=="Auckland"])
         print("=" * 40)
         print()
@@ -796,5 +798,12 @@ def create_sa_table(hf_path: Path, lower_bound_flags: bool = False) -> "pdt.Data
 
     if not lower_bound_flags:
         df = remove_lower_bound_metadata(df)
+
+    if DIAGNOSTICS:
+        print("DIAG #5 post remove_lower_bound_metadata")
+        print("=" * 40)
+        print(df[COLUMNS])
+        print("=" * 40)
+        print()
 
     return df

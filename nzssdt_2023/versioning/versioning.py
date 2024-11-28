@@ -59,7 +59,7 @@ class VersionInfo:
 
     Args:
         version_id: a unique version number.
-        nzshm_model_version: the NSHM mode version string.
+        nzshm_model_version: the NSHM model version string.
         description: a versions description.
         conversions: a list of files converted (from AH to versioned) TODO: maybe deprecatable.
         manifest: the files that make up the version
