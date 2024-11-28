@@ -9,23 +9,18 @@ import pytest
 @pytest.mark.parametrize("sc", ["I", "II", "III", "IV", "V", "VI"])
 @pytest.mark.parametrize("site", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
 @pytest.mark.parametrize("rp", [25, 50, 100, 250, 500, 1000, 2500])
-def test_json_precision(site, sc, rp, fsim_json_table):
+@pytest.mark.parametrize("parameter", ["PGA","Sas", "Tc", "Td"])
+def test_json_precision(site, sc, rp, parameter, fsim_json_table):
 
     fsim = fsim_json_table
     fsim.seek(0)
     df = pd.read_json(fsim, orient="table",precise_float=True)
-    parameters = df[
+    value = df[
         (df["Location"] == site)
         & (df["APoE (1/n)"] == rp)
-        & (df["Site Class"] == sc)][['PGA','Sas','Tc','Td']]
-    print(parameters)
+        & (df["Site Class"] == sc)
+    ][parameter].to_numpy()[0]
 
-    for parameter in parameters:
-        print(parameter)
-        print(type(parameter))
-        assert parameter == round(parameter, 3)
-    # assert pga == round(pga, 3)
-    # assert sas == round(sas, 3)
-    # assert tc == round(tc, 3)
-    # assert td == round(td, 3)
+    assert value == round(value, 3)
+
 
