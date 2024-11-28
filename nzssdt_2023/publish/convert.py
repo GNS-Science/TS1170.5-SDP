@@ -15,7 +15,7 @@ parameters = [
     "Sas",
     "Tc",
     "Td",
-]  # Td will be added after this workflow is established
+]
 
 
 class SatTable:
