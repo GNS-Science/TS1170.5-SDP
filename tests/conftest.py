@@ -74,6 +74,7 @@ def dm_table_v2():
 def mini_hcurves_hdf5_path():
     yield FIXTURES / "mini_hcurves.hdf5"
 
+
 @pytest.fixture(scope="module")
 def fsim_json_table(mini_hcurves_hdf5_path):
     df = sa_gen.create_sa_table(mini_hcurves_hdf5_path, lower_bound_flags=False)
