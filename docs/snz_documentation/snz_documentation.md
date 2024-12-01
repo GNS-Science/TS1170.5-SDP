@@ -28,7 +28,7 @@ The TS 1170.5 provides two sets of SDP tables, one table for named urban and rur
 
 The relevant metadata for each format and links to the files are provided below. The following tools provide additional support for accessing the data:
 
-- a python package for dynamically querying the parameter tables ([insert link]())
+- a python package (provided by GNS Science) for dynamically querying the parameter tables ([insert link]())
 - a webtool (provided by SESOC) for visualising and downloading parameters on a location-by-location basis ([insert link]())
 
  <br>
