@@ -9,11 +9,10 @@ Sas, Tc, Td values vs external fixtures
 import pytest
 
 import pandas as pd
-import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
+
 
 @pytest.mark.parametrize(
-    "site",
-    ["Auckland", "Christchurch", "Dunedin", "Wellington"],  # need to add Hamilton
+    "site", ["Auckland", "Christchurch", "Dunedin", "Hamilton", "Wellington"]
 )
 @pytest.mark.parametrize("return_period", [25, 50, 100, 250, 500, 1000, 2500])
 @pytest.mark.parametrize("sc", ["I", "II", "III", "IV", "V", "VI"])
@@ -36,7 +35,7 @@ def test_parameter_table(
 
     fsim = fsim_json_table
     fsim.seek(0)
-    df = pd.read_json(fsim, orient="table",precise_float=True)
+    df = pd.read_json(fsim, orient="table", precise_float=True)
     df_value = df[
         (df["Location"] == site)
         & (df["APoE (1/n)"] == return_period)
