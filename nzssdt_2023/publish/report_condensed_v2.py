@@ -390,7 +390,7 @@ def generate_location_block(
                     round(sc_tup.Tc, 2),
                     round(sc_tup.Td, 1),
                 ]
-        print('generate_location_block -> row', row)
+        print("generate_location_block -> row", row)
         yield (row)
 
 
@@ -412,7 +412,7 @@ def generate_table_rows(
 ) -> Iterator:
     count = 0
 
-    print('generate_table_rows', sat_table_flat.Location.unique())
+    print("generate_table_rows", sat_table_flat.Location.unique())
     for location in sat_table_flat.Location.unique():
         # location = location.replace("-", " - ")
 
@@ -423,7 +423,7 @@ def generate_table_rows(
         #     continue
         # if count in [47, 86]:  #47 `Waihi Bowentown` BOOM, 85 `Ōakura (New Plymouth District)`
         #     continue
-        print('loc' , location)
+        print("loc", location)
         yield (
             locations_tuple_padded(location, modify_locations),
             generate_location_block(sat_table_flat, dm_table_flat, location),
@@ -453,18 +453,20 @@ def chunks(items, chunk_size):
     while chunk := list(islice(iterator, chunk_size)):
         yield chunk
 
-def build_pdf_report_pages(location_df: pd.DataFrame, d_and_m_df: pd.DataFrame, report_name:str):
-    print('build_pdf_report_pages', report_name, report_name == "named")
+
+def build_pdf_report_pages(
+    location_df: pd.DataFrame, d_and_m_df: pd.DataFrame, report_name: str
+):
+    print("build_pdf_report_pages", report_name, report_name == "named")
     ### PDF
-    table_rows = generate_table_rows(
-        location_df, d_and_m_df, report_name == "named"
-    )
+    table_rows = generate_table_rows(location_df, d_and_m_df, report_name == "named")
     for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_BLOCKS)):
         yield build_report_page(
-                f"{report_name}",
-                list(chunk),
-                table_part=idx + 1,
-            )
+            f"{report_name}",
+            list(chunk),
+            table_part=idx + 1,
+        )
+
 
 if __name__ == "__main__":
 
@@ -519,7 +521,9 @@ if __name__ == "__main__":
                 for row in csv_rows:
                     writer.writerow(row)
 
-        for page in build_pdf_report_pages(location_df, d_and_m_df, report_names[report_grp]):
+        for page in build_pdf_report_pages(
+            location_df, d_and_m_df, report_names[report_grp]
+        ):
             report.add_page(page)
 
         with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
