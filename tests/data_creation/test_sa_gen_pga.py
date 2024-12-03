@@ -51,10 +51,10 @@ def test_calc_R_PGA_at_1pt0(site_class):
 def test_extract_spectra(mini_hcurves_hdf5_path):
     acc_spectra, imtls = sa_gen.extract_spectra(mini_hcurves_hdf5_path)
     print(acc_spectra.shape)
-    assert acc_spectra.shape == (6, 4, 27, 7, 2)
+    assert acc_spectra.shape == (6, 5, 27, 7, 2)
     PGA = acc_spectra[:, :, constants.IMT_LIST.index("PGA"), :, :]
     print(PGA.shape)
-    assert PGA.shape == (6, 4, 7, 2)
+    assert PGA.shape == (6, 5, 7, 2)
 
 
 def test_reduce_PGAs(mini_hcurves_hdf5_path):
