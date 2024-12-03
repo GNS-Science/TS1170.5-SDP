@@ -10,8 +10,10 @@ import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
 def test_inspect_create_sa_table(mini_hcurves_hdf5_path, pga_reduced_rp_2500):
     site_list = list(sa_gen.extract_sites(mini_hcurves_hdf5_path).index)
 
-    print(site_list)  # ['Auckland', 'Christchurch', 'Dunedin', 'Wellington']
-    assert len(site_list) == 4
+    print(
+        site_list
+    )  # ['Auckland', 'Christchurch', 'Dunedin', 'Hamilton', 'Wellington']
+    assert len(site_list) == 5
 
     print("pga_reduced", pga_reduced_rp_2500)
 

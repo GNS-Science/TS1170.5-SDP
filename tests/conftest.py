@@ -1,13 +1,16 @@
 import itertools
 import pathlib
+from io import StringIO
 
 import pandas as pd
 import pytest
 
 import nzssdt_2023.data_creation.dm_parameter_generation as dm_parameter_generation
 import nzssdt_2023.data_creation.mean_magnitudes as mean_magnitudes
+import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
 from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.convert import DistMagTable, SatTable
+from nzssdt_2023.publish import convert
 
 FIXTURES = pathlib.Path(__file__).parent / "fixtures"
 
@@ -65,3 +68,17 @@ def dm_table_v1():
 def dm_table_v2():
     filepath = FIXTURES / "v2_json" / "d_and_m.json"
     return pd.read_json(filepath, orient="table")
+
+
+@pytest.fixture(scope="module")
+def mini_hcurves_hdf5_path():
+    yield FIXTURES / "mini_hcurves.hdf5"
+
+
+@pytest.fixture(scope="module")
+def fsim_json_table(mini_hcurves_hdf5_path):
+    df = sa_gen.create_sa_table(mini_hcurves_hdf5_path, lower_bound_flags=False)
+    flat_df = convert.SatTable(df).flatten().infer_objects()
+    fsim = StringIO()
+    flat_df.to_json(fsim, index=True, orient="table", indent=2, double_precision=3)
+    yield fsim
