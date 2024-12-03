@@ -1,16 +1,16 @@
 import itertools
 import pathlib
+from io import StringIO
 
 import pandas as pd
-from io import StringIO
 import pytest
 
-import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
 import nzssdt_2023.data_creation.dm_parameter_generation as dm_parameter_generation
 import nzssdt_2023.data_creation.mean_magnitudes as mean_magnitudes
-from nzssdt_2023.publish import convert
+import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
 from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.convert import DistMagTable, SatTable
+from nzssdt_2023.publish import convert
 
 FIXTURES = pathlib.Path(__file__).parent / "fixtures"
 

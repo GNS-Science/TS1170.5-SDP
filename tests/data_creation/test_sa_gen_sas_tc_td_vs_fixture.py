@@ -6,9 +6,8 @@ Sas, Tc, Td values vs external fixtures
 
 """
 
-import pytest
-
 import pandas as pd
+import pytest
 
 
 @pytest.mark.parametrize(

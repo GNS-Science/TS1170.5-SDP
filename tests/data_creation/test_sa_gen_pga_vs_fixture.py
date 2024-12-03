@@ -332,7 +332,13 @@ def test_hdf5_vs30_indices(mini_hcurves_hdf5_path):
 
 def test_hdf5_site_indices(mini_hcurves_hdf5_path):
     site_list = list(extract_data.extract_sites(mini_hcurves_hdf5_path).index)
-    assert site_list == ["Auckland", "Christchurch", "Dunedin", "Hamilton", "Wellington"]
+    assert site_list == [
+        "Auckland",
+        "Christchurch",
+        "Dunedin",
+        "Hamilton",
+        "Wellington",
+    ]
 
 
 def getpga(pga_array, siteclass, sitelist, city, return_period):
