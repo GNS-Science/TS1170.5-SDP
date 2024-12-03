@@ -93,7 +93,10 @@ def sat_named_table_v2_mini():
     return pd.read_json(filepath, orient="table")
 
 
-def test_report_pdf_values(sat_named_table_v2_mini, dm_table_v2_mini):
+def test_report_pdf_values(sat_named_table_v2_mini, dm_table_v2_mini, monkeypatch):
+
+    # Watermark fonts are broken on GHA
+    monkeypatch.setattr(report_condensed_v2, "WATERMARK_ENABLED", False)
 
     named_df = sat_named_table_v2_mini
     d_and_m_df = dm_table_v2_mini

@@ -43,7 +43,7 @@ from nzssdt_2023.data_creation import constants
 
 PRODUCE_CSV = True
 LOCATION_LIMIT = 10
-
+WATERMARK_ENABLED = True
 MAX_PAGE_BLOCKS = 4  # each location block row has 7 apoe rows
 SITE_CLASSES = list(constants.SITE_CLASSES.keys())  # check sorting
 APOE_MAPPINGS = list(
@@ -79,15 +79,16 @@ def build_report_page(
     doc.add_page(page)
 
     # add watermark
-    Watermark(
-        text="DRAFT " + time.strftime("%Y-%m-%d %H:%M"),
-        # font="Helvetica-bold",
-        font_size=Decimal(18),
-        angle_in_degrees=27.5,
-        horizontal_alignment=Alignment.CENTERED,
-        vertical_alignment=Alignment.MIDDLE,
-        font_color=HexColor("070707"),
-    ).paint(page, None)
+    if WATERMARK_ENABLED:
+        Watermark(
+            text="DRAFT " + time.strftime("%Y-%m-%d %H:%M"),
+            # font="Helvetica-bold",
+            # font_size=Decimal(18),
+            # angle_in_degrees=27.5,
+            horizontal_alignment=Alignment.CENTERED,
+            vertical_alignment=Alignment.MIDDLE,
+            font_color=HexColor("070707"),
+        ).paint(page, None)
 
     heading = f"TABLE {table_id} part {table_part}: Site demand parameters"
     # heading += f" probability of exceedance of 1/{apoe[1]}"
