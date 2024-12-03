@@ -46,13 +46,13 @@ def test_unreduced_unrounded_PGAs(
 
     RP_IDX = constants.DEFAULT_RPS.index(2500)
     PGA = PGA[:, :, RP_IDX : RP_IDX + 1, :]  # only the RP=2500
-    assert PGA.shape == (6, 4, 1, 2)
+    assert PGA.shape == (6, 5, 1, 2)
     acc_spectra, imtls = sa_gen.extract_spectra(mini_hcurves_hdf5_path)
     acc_spectra_2500 = acc_spectra[:, :, :, RP_IDX : RP_IDX + 1, :]  # only the RP=2500
 
     assert acc_spectra_2500.shape == (
         6,
-        4,
+        5,
         27,
         1,
         2,
@@ -95,7 +95,7 @@ def test_unreduced_unrounded_PGAs(
     print(expected_df)
 
     assert (
-        pytest.approx(float(expected_df[site_class]))
+        pytest.approx(float(expected_df[site_class].iloc[0]))
         == sa_gen_df[("APoE: 1/2500", site_class, "PGA")][city]
     )
 
@@ -119,13 +119,13 @@ def test_reduce_PGAs_main_cities_FAST(
 
     RP_IDX = constants.DEFAULT_RPS.index(2500)
     PGA = PGA[:, :, RP_IDX : RP_IDX + 1, :]  # only the RP=2500
-    assert PGA.shape == (6, 4, 1, 2)
+    assert PGA.shape == (6, 5, 1, 2)
     acc_spectra, imtls = sa_gen.extract_spectra(mini_hcurves_hdf5_path)
     acc_spectra_2500 = acc_spectra[:, :, :, RP_IDX : RP_IDX + 1, :]  # only the RP=2500
 
     assert acc_spectra_2500.shape == (
         6,
-        4,
+        5,
         27,
         1,
         2,
@@ -159,7 +159,7 @@ def test_reduce_PGAs_main_cities_FAST(
 
     print(expected_df)
 
-    assert pytest.approx(round(float(expected_df[site_class]), 2)) == round(
+    assert pytest.approx(round(float(expected_df[site_class].iloc[0]), 2)) == round(
         sa_gen_df[("APoE: 1/2500", site_class, "PGA")][city], 2
     )
 
@@ -193,7 +193,7 @@ def test_create_sa_table_reduced_pga(
     print("expected: ", expected_df[site_class])
     print()
 
-    assert pytest.approx(round(float(expected_df[site_class]), 2)) == float(
+    assert pytest.approx(round(float(expected_df[site_class].iloc[0]), 2)) == float(
         df0[(f"APoE: 1/{return_period}", site_class, "PGA")][city]
     )
 
