@@ -15,6 +15,7 @@ from nzssdt_2023.data_creation.constants import (
     LOWER_BOUND_PARAMETERS,
     PGA_N_DP,
     PGA_REDUCTIONS,
+    PSV_N_DP,
     SAS_N_DP,
     SITE_CLASSES,
     TC_N_SF,
@@ -507,7 +508,7 @@ def update_lower_bound_sa(
 
     APoEs = [f"APoE: 1/{rp}" for rp in hazard_rp_list]
     site_class_list = [f"{SITE_CLASSES[sc].label}" for sc in SITE_CLASSES]
-    parameters = ["PGA Floor", "Sas Floor", "PSV Floor", "Td Floor"]
+    parameters = ["PGA Floor", "Sas Floor", "PSV Floor", "Td Floor", "PSV adjustment"]
     columns = pd.MultiIndex.from_product([APoEs, site_class_list, parameters])
     df = pd.concat([mean_df, pd.DataFrame(index=index, columns=columns)], axis=1)
 
@@ -597,6 +598,14 @@ def update_lower_bound_sa(
                 / (df.loc[:, (APoE, sc_label, "Sas")] * g)
             )
             df.loc[:, (APoE, sc_label, "Tc")] = sig_figs(tc, TC_N_SF)
+
+            # infer new rounded PSV values from rounded Tcs
+            psv_original = df.loc[:, (APoE, sc_label, "PSV")]
+            psv = (df.loc[:, (APoE, sc_label, "Tc")] * df.loc[:, (APoE, sc_label, "Sas")] * g) / (2 * np.pi)
+            df.loc[:, (APoE, sc_label, "PSV")] = np.round(psv, PSV_N_DP)
+            df.loc[:, (APoE, sc_label, "PSV adjustment")] = df.loc[:, (APoE, sc_label, "PSV")] - psv_original
+            # log.info(f"site class {sc}, APoE: {APoE}, max PSV adjustment: {df.loc[:, (APoE, sc_label, 'PSV adjustment')]}")
+            # log.info(df.loc[:, (APoE, sc_label, slice(None))])
 
             # set new Td if PSV is controlled by the lower bound
             df.loc[:, (APoE, sc_label, "Td Floor")] = False
@@ -700,7 +709,7 @@ def remove_lower_bound_metadata(df: "pdt.DataFrame"):
     return df
 
 
-def create_sa_table(hf_path: Path, lower_bound_flags: bool = False) -> "pdt.DataFrame":
+def create_sa_table(hf_path: Path, lower_bound_flags: bool = True) -> "pdt.DataFrame":
     """Creates a pandas dataframe with the sa parameters
 
     Args:

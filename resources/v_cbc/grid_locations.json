@@ -15,19 +15,19 @@
       },
       {
         "name":"PGA",
-        "type":"number"
+        "type":"string"
       },
       {
         "name":"Sas",
-        "type":"number"
+        "type":"string"
       },
       {
         "name":"Tc",
-        "type":"number"
+        "type":"string"
       },
       {
         "name":"Td",
-        "type":"number"
+        "type":"string"
       }
     ],
     "pandas_version":"1.4.0"
