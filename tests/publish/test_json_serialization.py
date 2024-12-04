@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 
+# @pytest.mark.skip("TODO refactor for new JSON form")
 @pytest.mark.parametrize("sc", ["I", "II", "III", "IV", "V", "VI"])
 @pytest.mark.parametrize("site", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
 @pytest.mark.parametrize("rp", [25, 50, 100, 250, 500, 1000, 2500])

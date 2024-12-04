@@ -600,11 +600,18 @@ def update_lower_bound_sa(
             df.loc[:, (APoE, sc_label, "Tc")] = sig_figs(tc, TC_N_SF)
 
             # infer new rounded PSV values from rounded Tcs
-            psv_original = df.loc[:, (APoE, sc_label, "PSV")]
-            psv = (df.loc[:, (APoE, sc_label, "Tc")] * df.loc[:, (APoE, sc_label, "Sas")] * g) / (2 * np.pi)
+            psv = (
+                df.loc[:, (APoE, sc_label, "Tc")]
+                * df.loc[:, (APoE, sc_label, "Sas")]
+                * g
+            ) / (2 * np.pi)
             df.loc[:, (APoE, sc_label, "PSV")] = np.round(psv, PSV_N_DP)
-            df.loc[:, (APoE, sc_label, "PSV adjustment")] = df.loc[:, (APoE, sc_label, "PSV")] - psv_original
-            # log.info(f"site class {sc}, APoE: {APoE}, max PSV adjustment: {df.loc[:, (APoE, sc_label, 'PSV adjustment')]}")
+            # psv_original = df.loc[:, (APoE, sc_label, "PSV")]
+            # df.loc[:, (APoE, sc_label, "PSV adjustment")] = (
+            #     df.loc[:, (APoE, sc_label, "PSV")] - psv_original
+            # )
+            # log.info(f"site class {sc}, APoE: {APoE}, max PSV adjustment:
+            #    {df.loc[:, (APoE, sc_label, 'PSV adjustment')]}")
             # log.info(df.loc[:, (APoE, sc_label, slice(None))])
 
             # set new Td if PSV is controlled by the lower bound
@@ -703,7 +710,14 @@ def remove_lower_bound_metadata(df: "pdt.DataFrame"):
 
     for APoE in APoEs:
         for sc in sc_labels:
-            for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor", "Td Floor", "PSV adjustment"]:
+            for parameter in [
+                "PGA Floor",
+                "PSV",
+                "PSV Floor",
+                "Sas Floor",
+                "Td Floor",
+                "PSV adjustment",
+            ]:
                 df.drop((APoE, sc, parameter), axis=1, inplace=True)
 
     return df

@@ -10,17 +10,31 @@ from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 
-parameters = [
-    "PGA",
-    "Sas",
-    "Tc",
-    "Td",
-]
-
 
 class SatTable:
     def __init__(self, raw_table: pd.DataFrame):
         self.raw_table = raw_table
+
+    def combine_dm_table(self, dm_df: pd.DataFrame):
+        new_index = {f"APoE: 1/{rp}": rp for rp in constants.DEFAULT_RPS}
+        df0 = self.raw_table.stack(0).rename(index=new_index)
+
+        # replace the index ( is this needed ??)
+        df0.index = pd.MultiIndex.from_tuples(
+            df0.index.values, names=["Location", "APoE (1/n)"]
+        )
+
+        # now check the indexes align
+        assert df0.shape[0] == dm_df.shape[0], "indexes must have same length"
+
+        # copy in the D & M series
+        df0["D"] = dm_df.D
+        df0["M"] = dm_df.M
+
+        # reorder the columns to print nicely
+        cols = df0.columns.tolist()
+        new_cols = cols[-2:] + cols[:-2]
+        return df0[new_cols]
 
     @lru_cache
     def flatten(self):
@@ -40,6 +54,14 @@ class SatTable:
 
 
 def flatten_sat_df(df: pd.DataFrame):
+
+    parameters = [
+        "PGA",
+        "Sas",
+        "Tc",
+        "Td",
+    ]
+
     df2 = df.stack().stack().stack().reset_index()
     param_dfs = []
     for param_column in parameters:
@@ -147,62 +169,35 @@ def d_and_m_table_to_json(
     )
 
 
-####################################################
-# functions for combined parameter tables with sa values and d and m values
-
-def combine_sa_and_dm_dfs(sa_df,dm_df):
-
-    ### merge the two, where dm_df values will be duplicated across all the site classes
-
-    return complete_df
-
-
 class AllParameterTable:
     def __init__(self, complete_table: pd.DataFrame):
-        self.table = complete_table
+        self._raw_table = complete_table
 
     # set up whatever needs to set up here...
-
     # when flattening we want the following columns:
     # ["M", "D"]
     # ["PGA", "Sas", "Tc", "Td", ]
     # ["PSV", "PGA Floor", "Sas Floor", "PSV Floor", "Td Floor"]
     ### NOTE that "PSV adjustment" is not included. It was just for diagnostics
 
+    def named_location_df(self):
+        df = self._raw_table.reset_index()
+        sites = list(df.Location.unique())
+        named_sites = [site for site in sites if "~" not in site]
+        return df[df.Location.isin(named_sites)]
 
-def complete_table_to_json():
-    """Creates parameter tables (both sa values and d and m values) and saves to json
+    def grid_location_df(self):
+        df = self._raw_table.reset_index()
+        sites = list(df.Location.unique())
+        grid_sites = [site for site in sites if "~" in site]
+        return df[df.Location.isin(grid_sites)]
 
-    Args:
-        hf_path: hdf5 filename, containing the hazard data
-        version_folder: version folder to save json to
 
-    """
-
-    sa_df = sa_gen.create_sa_table(hf_path)
-    dm_df = dm_gen.create_D_and_M_df(
-        site_list, rp_list=rp_list, no_cache=no_cache, legacy=legacy
-    )
-
-    complete_df = combine_sa_and_dm_dfs(sa_df,dm_df)
-    complete = AllParameterTable(complete_df)
-
-    # complete named locations
-    out_path = Path(version_folder, "named_locations.json")
-    complete.named_location_df().to_json(
-        out_path,
-        index=False,
-        orient="table",
-        indent=2,
-        double_precision=3,  # need to confirm that this is as intended for sigfig rounding
-    )
-
-    # complete grid locations
-    out_path = Path(version_folder, "grid_locations.json")
-    complete.grid_location_df().to_json(
-        out_path,
-        index=False,
-        orient="table",
+def to_standard_json(table: pd.DataFrame, filepath: Path):
+    table.reset_index().to_json(
+        filepath,
+        # index=False,
+        # orient="table",
         indent=2,
         double_precision=3,  # need to confirm that this is as intended for sigfig rounding
     )
