@@ -51,12 +51,13 @@ if (
     | (not (version_folder / "named_locations.json").exists())
     | (not (version_folder / "grid_locations.json").exists())
 ):
-    sat_table_to_json(hf_path, version_folder)
+    # sat_table_to_json(hf_path, version_folder)
+    complete_table_to_json(hf_path, version_folder)
 
-# create m and d table
-if override | (not (version_folder / "d_and_m.json").exists()):
-    if site_list is None:
-        site_list = list(
-            pd.concat([create_sites_df(), create_sites_df(named_sites=False)]).index
-        )
-    d_and_m_table_to_json(version_folder, site_list)
+# # create m and d table
+# if override | (not (version_folder / "d_and_m.json").exists()):
+#     if site_list is None:
+#         site_list = list(
+#             pd.concat([create_sites_df(), create_sites_df(named_sites=False)]).index
+#         )
+#     d_and_m_table_to_json(version_folder, site_list)

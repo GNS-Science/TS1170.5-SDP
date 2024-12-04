@@ -165,11 +165,12 @@ class AllParameterTable:
 
     # when flattening we want the following columns:
     # ["M", "D"]
-    # ["PGA, Sas, Tc, Td]
-    # ["PGA Floor", "Sas Floor", "PSV Floor", "Td Floor"]   ## NOTE that PSV adjustment is not included. it is just for diagnostics
+    # ["PGA", "Sas", "Tc", "Td", ]
+    # ["PSV", "PGA Floor", "Sas Floor", "PSV Floor", "Td Floor"]
+    ### NOTE that "PSV adjustment" is not included. It was just for diagnostics
 
 
-def complete_table_to_json()
+def complete_table_to_json():
     """Creates parameter tables (both sa values and d and m values) and saves to json
 
     Args:
@@ -186,7 +187,7 @@ def complete_table_to_json()
     complete_df = combine_sa_and_dm_dfs(sa_df,dm_df)
     complete = AllParameterTable(complete_df)
 
-    # SAT named locations
+    # complete named locations
     out_path = Path(version_folder, "named_locations.json")
     complete.named_location_df().to_json(
         out_path,
@@ -196,7 +197,7 @@ def complete_table_to_json()
         double_precision=3,  # need to confirm that this is as intended for sigfig rounding
     )
 
-    # SAT grid locations
+    # complete grid locations
     out_path = Path(version_folder, "grid_locations.json")
     complete.grid_location_df().to_json(
         out_path,
