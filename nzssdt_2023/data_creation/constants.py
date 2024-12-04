@@ -171,4 +171,5 @@ PGA_REDUCTIONS: dict[str, PGA_reductions] = {
 # specify number of decimal places or significant figures to round to
 PGA_N_DP = 2
 SAS_N_DP = 2
+PSV_N_DP = 2
 TC_N_SF = 2
