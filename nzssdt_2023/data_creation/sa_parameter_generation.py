@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 
 from nzssdt_2023.data_creation.constants import (
-    DEFAULT_RPS,
     IMT_LIST,
     LOCATION_REPLACEMENTS,
     LOWER_BOUND_PARAMETERS,
@@ -743,58 +742,15 @@ def create_sa_table(hf_path: Path, lower_bound_flags: bool = True) -> "pdt.DataF
 
     acc_spectra, imtls = extract_spectra(hf_path)
 
-    DIAGNOSTICS = True
-    # why is PGA off by ~0.01 for some permutations??
-    # PGA (dimensions: vs30, site, return period, statistic)
-    # Leaving this in only until we get PGA tests working with updated tables
-    # otherwise these would be log.dbug messages.
-    if DIAGNOSTICS:
-        np.set_printoptions(precision=8)
-        pd.set_option("display.precision", 8)
-
-        print("DIAG #1")
-        print("=" * 40)
-        SITE_IDX = 0  # Auckland
-        RP_IDX = DEFAULT_RPS.index(2500)
-        STAT_IDX = 0  # mean
-        PGA1 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
-        print(PGA1)
-        print("=" * 40)
-        print()
-        assert PGA1.shape == (6,)
-
     log.info("begin fit_Td_array for mean Tds")
     mean_Td = fit_Td_array(
         PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list
     )
 
-    if DIAGNOSTICS:
-        print("DIAG #2")
-        print("=" * 40)
-        PGA2 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
-        print(PGA2)
-        print("=" * 40)
-        print()
-        assert PGA2.shape == (6,)
-        assert (PGA1 == PGA2).all()
-
     log.info("begin create_mean_sa_table")
     mean_df = create_mean_sa_table(
         PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list
     )
-
-    COLUMNS = [
-        ("APoE: 1/2500", f"Site Class {sc}", "Td") for sc in "VI,V,IV".split(",")
-    ]
-
-    if DIAGNOSTICS:
-        print("DIAG #3 post create_mean_sa_table")
-        print("=" * 40)
-        print(mean_df.info())
-        print()
-        print(mean_df[COLUMNS])  # [mean_df.index=="Auckland"])
-        print("=" * 40)
-        print()
 
     log.info("begin update_lower_bound_sa")
     df = update_lower_bound_sa(
@@ -810,23 +766,9 @@ def create_sa_table(hf_path: Path, lower_bound_flags: bool = True) -> "pdt.DataF
         quantile_list,
     )
 
-    if DIAGNOSTICS:
-        print("DIAG #4 post update_lower_bound_sa")
-        print("=" * 40)
-        print(df[COLUMNS])
-        print("=" * 40)
-        print()
-
     df = replace_relevant_locations(df)
 
     if not lower_bound_flags:
         df = remove_lower_bound_metadata(df)
-
-    if DIAGNOSTICS:
-        print("DIAG #5 post remove_lower_bound_metadata")
-        print("=" * 40)
-        print(df[COLUMNS])
-        print("=" * 40)
-        print()
 
     return df
