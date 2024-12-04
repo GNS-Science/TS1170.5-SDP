@@ -145,3 +145,63 @@ def d_and_m_table_to_json(
         orient="table",
         indent=2,
     )
+
+
+####################################################
+# functions for combined parameter tables with sa values and d and m values
+
+def combine_sa_and_dm_dfs(sa_df,dm_df):
+
+    ### merge the two, where dm_df values will be duplicated across all the site classes
+
+    return complete_df
+
+
+class AllParameterTable:
+    def __init__(self, complete_table: pd.DataFrame):
+        self.table = complete_table
+
+    # set up whatever needs to set up here...
+
+    # when flattening we want the following columns:
+    # ["M", "D"]
+    # ["PGA, Sas, Tc, Td]
+    # ["PGA Floor", "Sas Floor", "PSV Floor", "Td Floor"]   ## NOTE that PSV adjustment is not included. it is just for diagnostics
+
+
+def complete_table_to_json()
+    """Creates parameter tables (both sa values and d and m values) and saves to json
+
+    Args:
+        hf_path: hdf5 filename, containing the hazard data
+        version_folder: version folder to save json to
+
+    """
+
+    sa_df = sa_gen.create_sa_table(hf_path)
+    dm_df = dm_gen.create_D_and_M_df(
+        site_list, rp_list=rp_list, no_cache=no_cache, legacy=legacy
+    )
+
+    complete_df = combine_sa_and_dm_dfs(sa_df,dm_df)
+    complete = AllParameterTable(complete_df)
+
+    # SAT named locations
+    out_path = Path(version_folder, "named_locations.json")
+    complete.named_location_df().to_json(
+        out_path,
+        index=False,
+        orient="table",
+        indent=2,
+        double_precision=3,  # need to confirm that this is as intended for sigfig rounding
+    )
+
+    # SAT grid locations
+    out_path = Path(version_folder, "grid_locations.json")
+    complete.grid_location_df().to_json(
+        out_path,
+        index=False,
+        orient="table",
+        indent=2,
+        double_precision=3,  # need to confirm that this is as intended for sigfig rounding
+    )
