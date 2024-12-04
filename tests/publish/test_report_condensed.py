@@ -6,6 +6,7 @@ import pytest
 from borb.pdf import PDF, Document
 from borb.toolkit import SimpleTextExtraction
 
+from nzssdt_2023.data_creation import constants
 from nzssdt_2023.publish import report_condensed_v2, report_v2
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
@@ -93,7 +94,7 @@ def sat_named_table_v2_mini():
     return pd.read_json(filepath, orient="table")
 
 
-def test_report_pdf_values(sat_named_table_v2_mini, dm_table_v2_mini, monkeypatch):
+def test_report_pdf_values_named(sat_named_table_v2_mini, dm_table_v2_mini, monkeypatch):
 
     # Watermark fonts are broken on GHA
     monkeypatch.setattr(report_condensed_v2, "WATERMARK_ENABLED", False)
@@ -117,16 +118,34 @@ def test_report_pdf_values(sat_named_table_v2_mini, dm_table_v2_mini, monkeypatc
 
     assert read_doc is not None
 
+    def apoe_value(apoe_str:str):
+        try:
+            return int(apoe_str.split("/")[1])
+        except IndexError:
+            pass
+
     def validate_d_and_m(row, d_and_m_df):
         location = row[0]
-        apoe = int(row[1].split("/")[1])
+        apoe = apoe_value(row[1])
         rec = d_and_m_df.loc[location, apoe]
         assert row[2] == str(rec["M"])
         assert row[3] == report_condensed_v2.format_D(rec["D"], apoe)
 
+
+    def get_block_location(extracted, current_idx, location_names):
+        #  Lookahead in the extracted text to find the locatio name of the table block
+        for idx, line in enumerate(extracted.splitlines()):
+            if idx <= current_idx:
+                continue
+            row = line.split(" ")
+            if not row[0] in location_names:
+                continue
+            return row[0]
+
+
     def validate_sa_values(row, location_df):
         location = row[0]
-        apoe = int(row[1].split("/")[1])
+        apoe = apoe_value(row[1])
         site_classes = location_df["Site Class"].unique().tolist()
         loc_df = location_df[location_df.Location == location]
 
@@ -147,12 +166,31 @@ def test_report_pdf_values(sat_named_table_v2_mini, dm_table_v2_mini, monkeypatc
 
     def validate_page(extracted: str, named_df, d_and_m_df):
         location_names = named_df.Location.unique()
+
+        current_location = get_block_location(extracted, 0, location_names)
+
         for idx, line in enumerate(extracted.splitlines()):
-            print("l", idx)
             row = line.split(" ")
-            if row[0] in location_names:
-                validate_d_and_m(row, d_and_m_df)
-                validate_sa_values(row, named_df)
+
+            # standardise the row
+            if not row[0] in location_names: #prepend the location
+                row = [current_location] + row
+
+            if not apoe_value(row[1]):
+                print('skipping non block row)')
+                continue
+
+            if apoe_value(row[1]) == constants.DEFAULT_RPS[0]: #  the first apoe
+                print('get new current_location')
+                current_location = get_block_location(extracted, idx, location_names)
+                row[0] = current_location
+                print('new current_location', current_location)
+
+            print(row)
+
+            validate_d_and_m(row, d_and_m_df)
+            validate_sa_values(row, named_df)
+            print(current_location, row[1])
 
     for idx in read_pdf.get_text():
         print("PDF page >>>", idx)
