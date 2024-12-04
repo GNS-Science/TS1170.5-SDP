@@ -703,7 +703,7 @@ def remove_lower_bound_metadata(df: "pdt.DataFrame"):
 
     for APoE in APoEs:
         for sc in sc_labels:
-            for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor", "Td Floor"]:
+            for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor", "Td Floor", "PSV adjustment"]:
                 df.drop((APoE, sc, parameter), axis=1, inplace=True)
 
     return df
