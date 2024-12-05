@@ -86,22 +86,46 @@ def flatten_sat_df(df: pd.DataFrame):
     return df3.sort_values(by=["APoE (1/n)", "Site Class"])
 
 
-def sat_table_to_json(hf_path: Path, version_folder: Union[str, Path]):
+def sat_table_json_path(
+    root_folder: Union[Path, str], named_sites: bool = True, site_limit=0, combo=False
+):
+    """get path for json files
+
+    Args:
+      named_sites: if True returns SRG sites, False returns lat/lon sites
+      site_limit: for test fixtures
+    Returns:
+      file_path:
+    """
+    file_name = "_TYPE_locations_combo.json" if combo else "_TYPE_locations.json"
+
+    if site_limit:
+        file_name = f"first_{site_limit}" + file_name
+
+    if named_sites:
+        return Path(root_folder, file_name.replace("TYPE", "named"))
+
+    else:
+        return Path(root_folder, file_name.replace("TYPE", "grid"))
+
+
+def sat_table_to_json(
+    hf_path: Path, version_folder: Union[str, Path], site_limit: int = 0
+):
     """Creates sat table and saves to json
 
     Args:
         hf_path: hdf5 filename, containing the hazard data
         version_folder: version folder to save json to
-
+        site_limit: for test fixtures
     """
 
     df = sa_gen.create_sa_table(hf_path)
     sat = SatTable(df)
 
     # SAT named locations
-    out_path = Path(version_folder, "named_locations.json")
     sat.named_location_df().to_json(
-        out_path,
+        sat_table_json_path(version_folder, named_sites=True, site_limit=site_limit),
         index=False,
         orient="table",
         indent=2,
@@ -109,9 +133,8 @@ def sat_table_to_json(hf_path: Path, version_folder: Union[str, Path]):
     )
 
     # SAT grid locations
-    out_path = Path(version_folder, "grid_locations.json")
     sat.grid_location_df().to_json(
-        out_path,
+        sat_table_json_path(version_folder, named_sites=False, site_limit=site_limit),
         index=False,
         orient="table",
         indent=2,
@@ -144,6 +167,7 @@ def d_and_m_table_to_json(
     rp_list: List[int] = constants.DEFAULT_RPS,
     no_cache: bool = False,
     legacy: bool = False,
+    site_limit: int = 0,
 ):
     """Compiles the D and M parameter tables
 
@@ -153,14 +177,18 @@ def d_and_m_table_to_json(
         rp_list    : list of return periods of interest
         no_cache: if True, ignore the cache file
         legacy: if True double rounds magnitudes to match original mean mags from v1 of the workflow.
-
+        site_limit: for building test fixtures
     """
     dm_df = dm_gen.create_D_and_M_df(
         site_list, rp_list=rp_list, no_cache=no_cache, legacy=legacy
     )
     dandm = DistMagTable(dm_df)
 
-    out_path = Path(version_folder, "d_and_m.json")
+    out_path = (
+        Path(version_folder, "d_and_m.json")
+        if not site_limit
+        else Path(version_folder, f"first_{site_limit}_d_and_m.json")
+    )
     dandm.flatten().infer_objects().to_json(
         out_path,
         index=True,

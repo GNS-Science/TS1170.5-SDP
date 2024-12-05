@@ -248,7 +248,10 @@ def save_hdf(hf_name, data):
 
 
 def query_NSHM_to_hdf5(
-    hf_name: Path, hazard_id: str = "NSHM_v1.0.4", site_list: Optional[list[str]] = None
+    hf_name: Path,
+    hazard_id: str = "NSHM_v1.0.4",
+    site_list: Optional[list[str]] = None,
+    site_limit: int = 0,
 ):
     """Query the NSHM and save the results to an hdf5
 
@@ -256,6 +259,7 @@ def query_NSHM_to_hdf5(
         hf_name: name of hdf5 file with hazard curve data
         hazard_id: NSHM model id
         site_list: list of sites to include in the sa parameter table
+        site_limit: for building test fixtures
 
     Todo:
         - Chris BC, the default hazard_id should actually be part of your version control
@@ -264,7 +268,10 @@ def query_NSHM_to_hdf5(
 
     if site_list is None:
         sites = pd.concat(
-            [q_haz.create_sites_df(), q_haz.create_sites_df(named_sites=False)]
+            [
+                q_haz.create_sites_df(site_limit=site_limit),
+                q_haz.create_sites_df(named_sites=False, site_limit=site_limit),
+            ]
         )
     else:
         sites = q_haz.create_sites_df(site_list=site_list)
