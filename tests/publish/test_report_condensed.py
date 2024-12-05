@@ -177,20 +177,20 @@ def sat_named_table_v2_mini():
 
 @pytest.fixture(scope="module")
 def dm_table_first_10():
-    filepath = Path(config.RESOURCES_FOLDER) / "v_cbc3" / "first_10_d_and_m.json"
+    filepath = FIXTURES / "v2_json" / "first_10_d_and_m.json"
     return pd.read_json(filepath, orient="table")
 
 
 @pytest.fixture(scope="module")
 def sa_table_grid_10():
-    filepath = Path(config.RESOURCES_FOLDER) / "v_cbc3" / "first_10_grid_locations.json"
+    filepath = FIXTURES / "v2_json" / "first_10_grid_locations.json"
     return pd.read_json(filepath, orient="table")
 
 
 @pytest.fixture(scope="module")
 def sa_table_named_10():
     filepath = (
-        Path(config.RESOURCES_FOLDER) / "v_cbc3" / "first_10_named_locations.json"
+        FIXTURES / "v2_json" / "first_10_named_locations.json"
     )
     return pd.read_json(filepath, orient="table")
 
