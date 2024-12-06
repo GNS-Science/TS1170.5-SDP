@@ -39,37 +39,6 @@ from nzssdt_2023.config import DISAGG_HAZARD_ID, RESOURCES_FOLDER, WORKING_FOLDE
 pd.options.mode.copy_on_write = True
 
 
-def calc_distance_to_faults(
-    gdf: "gpdt.DataFrame", faults: "gpdt.DataFrame"
-) -> "pdt.DataFrame":
-    """Calculates the closest distance of polygons or points to a set of fault lines
-
-    Args:
-        gdf: geodataframe of locations (polygons or points)
-        faults: geodataframe of fault lines
-
-    Returns:
-        df: dataframe of distance from each location to the closest fault
-    """
-    meter_epsg = 2193
-    faults.to_crs(epsg=meter_epsg)
-    gdf = gdf.to_crs(epsg=meter_epsg)
-
-    gdf["distance"] = round(
-        gdf.geometry.apply(lambda x: faults.distance(x).min()) / 1000.0
-    )
-
-    gdf["D"] = gdf["distance"].astype("int")
-    gdf.loc[gdf["D"] >= 20, "D"] = None
-
-    wgs_epsg = 4326
-    gdf = gdf.to_crs(epsg=wgs_epsg)
-
-    gdf.index.names = [""]
-
-    return gdf[["D"]]
-
-
 def extract_m_values(
     site_names: List[str],
     freqs: List[str],
