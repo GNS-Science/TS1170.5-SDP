@@ -49,7 +49,7 @@ def flatten_sat_df(df: pd.DataFrame):
             "level_1": "Site Class",
             "level_2": "APoE (1/n)",
         }
-    )
+    ).sort_values(by=["APoE (1/n)", "Site Class"])
 
 
 def sat_table_json_path(
@@ -188,7 +188,7 @@ class AllParameterTable:
 
 
 def to_standard_json(table: pd.DataFrame, filepath: Path):
-    table.to_json(
+    table.infer_objects().to_json(
         filepath,
         index=False,
         orient="table",
