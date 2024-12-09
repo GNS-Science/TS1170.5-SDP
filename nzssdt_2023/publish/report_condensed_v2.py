@@ -97,7 +97,7 @@ def build_report_page(
             heading,
             font="Helvetica-bold",
             font_size=Decimal(10),
-            horizontal_alignment=Alignment.CENTERED,
+            horizontal_alignment=Alignment.LEFT,
         )
     )
 
@@ -147,7 +147,7 @@ def build_report_page(
         table.add(
             TableCell(
                 Paragraph(
-                    "Settlement",
+                    "Location",
                     font="Helvetica-bold",
                     font_size=Decimal(8),
                     horizontal_alignment=Alignment.LEFT,
@@ -156,7 +156,7 @@ def build_report_page(
         ).add(
             TableCell(
                 Paragraph(
-                    "APOE",
+                    "APoE",
                     font="Helvetica-bold",
                     font_size=Decimal(8),
                     horizontal_alignment=Alignment.CENTERED,
@@ -368,17 +368,23 @@ def format_D(value, apoe: int) -> Union[str, int]:
     return str(value)
 
 
-def generate_location_block(
-    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, location: str
-) -> Iterator:
+def generate_location_block(combo_table: pd.DataFrame, location: str) -> Iterator:
     """build a location block, with one row per apoe"""
-    location_df = sat_table_flat[sat_table_flat.Location == location]
+    location_df = combo_table[combo_table.Location == location]
     site_classes = location_df["Site Class"].unique().tolist()
     apoes = location_df["APoE (1/n)"].unique().tolist()
+
+    print(location_df)
+    print(location_df.index)
+
     for apoe in apoes:
-        rec = dm_table_flat.loc[location, apoe]
-        d_str = format_D(rec["D"], apoe)
-        row = [f"1/{apoe}", rec["M"], d_str]
+        rec = location_df[
+            (location_df["Site Class"] == "I") & (location_df["APoE (1/n)"] == apoe)
+        ]  # get site_class I
+        # print(rec[])
+        # assert 0
+        d_str = format_D(rec["D"].to_list()[0], apoe)
+        row = [f"1/{apoe}", rec["M"].to_list()[0], d_str]
         for site_class in site_classes:
             apoe_df = location_df[
                 (location_df["APoE (1/n)"] == apoe)
@@ -406,26 +412,14 @@ def locations_tuple_padded(location: str, modify_locations: bool):
     )
 
 
-def generate_combo_table_rows(
-    combo_table: pd.DataFrame,
-    modify_locations: bool = False,
-) -> Iterator:
-    count = 0  # noqa
-    print("generate_table_rows", combo_table.Location.unique())
-    for location in combo_table.Location.unique():
-        # location = location.replace("-", " - ")
-        yield location
-
-
 def generate_table_rows(
-    sat_table_flat: pd.DataFrame,
-    dm_table_flat: pd.DataFrame,
+    combo_table: pd.DataFrame,
     modify_locations: bool = False,
 ) -> Iterator:
     count = 0
 
-    print("generate_table_rows", sat_table_flat.Location.unique())
-    for location in sat_table_flat.Location.unique():
+    print("generate_table_rows", combo_table.Location.unique())
+    for location in combo_table.Location.unique():
         # location = location.replace("-", " - ")
 
         count += 1
@@ -438,7 +432,7 @@ def generate_table_rows(
         print("loc", location)
         yield (
             locations_tuple_padded(location, modify_locations),
-            generate_location_block(sat_table_flat, dm_table_flat, location),
+            generate_location_block(combo_table, location),
         )
 
         if count % 10 == 0:
@@ -449,13 +443,12 @@ def generate_table_rows(
 
 
 def generate_csv_rows(
-    sat_table_flat: pd.DataFrame,
-    dm_table_flat: pd.DataFrame,
+    combo_table: pd.DataFrame,
     modify_locations: bool = False,
 ) -> Iterator:
     count = 0
-    for location in sat_table_flat.Location.unique():
-        for block in generate_location_block(sat_table_flat, dm_table_flat, location):
+    for location in combo_table.Location.unique():
+        for block in generate_location_block(combo_table, location):
             yield list(locations_tuple_padded(location, modify_locations)) + block
         count += 1
 
@@ -466,12 +459,10 @@ def chunks(items, chunk_size):
         yield chunk
 
 
-def build_pdf_report_pages(
-    location_df: pd.DataFrame, d_and_m_df: pd.DataFrame, report_name: str
-):
+def build_pdf_report_pages(location_df: pd.DataFrame, report_name: str):
     print("build_pdf_report_pages", report_name, report_name == "named")
     ### PDF
-    table_rows = generate_table_rows(location_df, d_and_m_df, report_name == "named")
+    table_rows = generate_table_rows(location_df, report_name == "named")
     for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_BLOCKS)):
         yield build_report_page(
             f"{report_name}",
@@ -486,22 +477,34 @@ if __name__ == "__main__":
 
     # TODO shift this into the CLI
 
-    def dm_table_v2():
-        filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "d_and_m.json"
+    # def dm_table_v2():
+    #     filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "d_and_m.json"
+    #     return pd.read_json(filepath, orient="table")
+
+    # def sat_named_table_v2():
+    #     filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "named_locations.json"
+    #     return pd.read_json(filepath, orient="table")
+
+    # def sat_grid_table_v2():
+    #     filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "grid_locations.json"
+    #     return pd.read_json(filepath, orient="table")
+
+    def combo_named_table():
+        filepath = (
+            Path(RESOURCES_FOLDER) / "v_cbc" / "first_10_named_locations_combo.json"
+        )
         return pd.read_json(filepath, orient="table")
 
-    def sat_named_table_v2():
-        filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "named_locations.json"
-        return pd.read_json(filepath, orient="table")
-
-    def sat_grid_table_v2():
-        filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "grid_locations.json"
+    def combo_grid_table():
+        filepath = (
+            Path(RESOURCES_FOLDER) / "v_cbc" / "first_10_grid_locations_combo.json"
+        )
         return pd.read_json(filepath, orient="table")
 
     # sat = sat_table()
-    named_df = sat_named_table_v2()
-    grid_df = sat_grid_table_v2()
-    d_and_m_df = dm_table_v2()
+    named_df = combo_named_table()  # sat_named_table_v2()
+    grid_df = combo_grid_table()  # sat_grid_table_v2()
+    # d_and_m_df = dm_table_v2()
 
     report_grps = list(zip([0, 1], [named_df, grid_df]))
     report_grp_titles = ["3.4", "3.5"]
@@ -519,7 +522,7 @@ if __name__ == "__main__":
 
         if PRODUCE_CSV:
             csv_rows = generate_csv_rows(
-                location_df, d_and_m_df, report_names[report_grp] == "named"
+                location_df, report_names[report_grp] == "named"
             )
 
             ### CSV
@@ -533,10 +536,10 @@ if __name__ == "__main__":
                 for row in csv_rows:
                     writer.writerow(row)
 
-        for page in build_pdf_report_pages(
-            location_df, d_and_m_df, report_names[report_grp]
-        ):
+        for page in build_pdf_report_pages(location_df, report_names[report_grp]):
             report.add_page(page)
 
         with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
             PDF.dumps(out_file_handle, report)
+
+        assert 0

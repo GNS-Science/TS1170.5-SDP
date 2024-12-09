@@ -18,9 +18,15 @@ def sa_table():
 
 
 @pytest.fixture
-def combo_table():
+def named_combo_table():
     path = FIXTURES / "v2_json" / "first_10_named_locations_combo.json"
-    yield pd.read_json(path)
+    yield pd.read_json(path, orient="table")
+
+
+@pytest.fixture
+def grid_combo_table():
+    path = FIXTURES / "v2_json" / "first_10_grid_locations_combo.json"
+    yield pd.read_json(path, orient="table")
 
 
 @pytest.fixture(scope="module")
