@@ -16,25 +16,7 @@ class SatTable:
         self.raw_table = raw_table
 
     def combine_dm_table(self, dm_df: pd.DataFrame):
-        new_index = {f"APoE: 1/{rp}": rp for rp in constants.DEFAULT_RPS}
-        df0 = self.raw_table.stack(0).rename(index=new_index)
-
-        # replace the index ( is this needed ??)
-        df0.index = pd.MultiIndex.from_tuples(
-            df0.index.values, names=["Location", "APoE (1/n)"]
-        )
-
-        # now check the indexes align
-        assert df0.shape[0] == dm_df.shape[0], "indexes must have same length"
-
-        # copy in the D & M series
-        df0["D"] = dm_df.D
-        df0["M"] = dm_df.M
-
-        # reorder the columns to print nicely
-        cols = df0.columns.tolist()
-        new_cols = cols[-2:] + cols[:-2]
-        return df0[new_cols]
+        return self.flatten().merge(dm_df, how="left", on=["Location", "APoE (1/n)"])
 
     @lru_cache
     def flatten(self):
@@ -55,35 +37,19 @@ class SatTable:
 
 def flatten_sat_df(df: pd.DataFrame):
 
-    parameters = [
-        "PGA",
-        "Sas",
-        "Tc",
-        "Td",
-    ]
+    df2 = df.stack().stack().stack()  # .reset_index()
+    df2 = df2.unstack(level=1).reset_index()
 
-    df2 = df.stack().stack().stack().reset_index()
-    param_dfs = []
-    for param_column in parameters:
-        param_dfs.append(
-            df2[df2.level_1 == param_column]
-            .drop(columns=["level_1"])
-            .rename(columns={0: param_column})
-            .reset_index()
-            .drop(columns=["index"])
-        )
+    df2.level_1 = df2.level_1.apply(lambda x: x.replace("Site Class ", ""))
+    df2.level_2 = df2.level_2.apply(lambda x: int(x.replace("APoE: 1/", "")))
 
-    df3 = param_dfs[0].merge(param_dfs[1]).merge(param_dfs[2]).merge(param_dfs[3])
-    df3.level_2 = df3.level_2.apply(lambda x: x.replace("Site Class ", ""))
-    df3.level_3 = df3.level_3.apply(lambda x: int(x.replace("APoE: 1/", "")))
-    df3 = df3.rename(
+    return df2.rename(
         columns={
             "level_0": "Location",
-            "level_2": "Site Class",
-            "level_3": "APoE (1/n)",
+            "level_1": "Site Class",
+            "level_2": "APoE (1/n)",
         }
     )
-    return df3.sort_values(by=["APoE (1/n)", "Site Class"])
 
 
 def sat_table_json_path(
@@ -209,23 +175,23 @@ class AllParameterTable:
     ### NOTE that "PSV adjustment" is not included. It was just for diagnostics
 
     def named_location_df(self):
-        df = self._raw_table.reset_index()
+        df = self._raw_table
         sites = list(df.Location.unique())
         named_sites = [site for site in sites if "~" not in site]
         return df[df.Location.isin(named_sites)]
 
     def grid_location_df(self):
-        df = self._raw_table.reset_index()
+        df = self._raw_table
         sites = list(df.Location.unique())
         grid_sites = [site for site in sites if "~" in site]
         return df[df.Location.isin(grid_sites)]
 
 
 def to_standard_json(table: pd.DataFrame, filepath: Path):
-    table.reset_index().to_json(
+    table.to_json(
         filepath,
-        # index=False,
-        # orient="table",
+        index=False,
+        orient="table",
         indent=2,
         double_precision=3,  # need to confirm that this is as intended for sigfig rounding
     )

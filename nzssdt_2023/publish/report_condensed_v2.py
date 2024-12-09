@@ -371,7 +371,7 @@ def format_D(value, apoe: int) -> Union[str, int]:
 def generate_location_block(
     sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, location: str
 ) -> Iterator:
-    """build a location block, wiht one row per apoe"""
+    """build a location block, with one row per apoe"""
     location_df = sat_table_flat[sat_table_flat.Location == location]
     site_classes = location_df["Site Class"].unique().tolist()
     apoes = location_df["APoE (1/n)"].unique().tolist()
@@ -404,6 +404,17 @@ def locations_tuple_padded(location: str, modify_locations: bool):
         get_name_with_macrons(location).replace("-", " - "),
         location.replace("-", " - "),
     )
+
+
+def generate_combo_table_rows(
+    combo_table: pd.DataFrame,
+    modify_locations: bool = False,
+) -> Iterator:
+    count = 0  # noqa
+    print("generate_table_rows", combo_table.Location.unique())
+    for location in combo_table.Location.unique():
+        # location = location.replace("-", " - ")
+        yield location
 
 
 def generate_table_rows(

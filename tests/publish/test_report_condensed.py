@@ -6,7 +6,7 @@ import pytest
 from borb.pdf import PDF, Document
 from borb.toolkit import SimpleTextExtraction
 
-from nzssdt_2023 import config
+# from nzssdt_2023 import config
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.publish import report_condensed_v2, report_v2
 
@@ -51,6 +51,12 @@ def test_generate_table_rows(sat_named_table_v2, dm_table_v2):
     assert next(res[1]) == next(
         report_condensed_v2.generate_location_block(named_df, d_and_m_df, "Kaitaia")
     ), "Kaitaia table entries"
+
+
+# def test_generate_combo_table_rows(combo_table):
+#     rows = report_condensed_v2.generate_combo_table_rows(combo_table)
+#     res = next(rows)
+#     assert res[0] == "Kaitaia", "first location is Katiaia"
 
 
 def test_build_page_n():
@@ -189,9 +195,7 @@ def sa_table_grid_10():
 
 @pytest.fixture(scope="module")
 def sa_table_named_10():
-    filepath = (
-        FIXTURES / "v2_json" / "first_10_named_locations.json"
-    )
+    filepath = FIXTURES / "v2_json" / "first_10_named_locations.json"
     return pd.read_json(filepath, orient="table")
 
 

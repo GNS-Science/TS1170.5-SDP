@@ -45,6 +45,6 @@ def test_create_sa_table(mini_hcurves_hdf5_path, pga_reduced_rp_2500):
     print(df1)
     akl = df1[df1["City"] == "Auckland"]
 
-    assert pytest.approx(round(float(akl["SiteClass_IV"]), 2)) == float(
+    assert pytest.approx(round(float(akl["Site Class IV"]), 2)) == float(
         df0[("APoE: 1/2500", "Site Class IV", "PGA")]["Auckland"]
     )
