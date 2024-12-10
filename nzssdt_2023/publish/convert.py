@@ -16,11 +16,12 @@ class SatTable:
         self.raw_table = raw_table
 
     def combine_dm_table(self, dm_df: pd.DataFrame):
-        return self.flatten().merge(dm_df, how="left", on=["Location", "APoE (1/n)"])
+        flat = self.flatten()
+        return flat.join(dm_df, how="left", on=["Location", "APoE (1/n)"])
 
     @lru_cache
     def flatten(self):
-        return flatten_sat_df(self.raw_table)
+        return OG_flatten_sat_df(self.raw_table)
 
     def named_location_df(self):
         df = self.flatten()
@@ -35,21 +36,61 @@ class SatTable:
         return df[df.Location.isin(grid_sites)]
 
 
-def flatten_sat_df(df: pd.DataFrame):
+def OG_flatten_sat_df(df: pd.DataFrame):
+    parameters = list(df.columns.levels[2])
+    parameters.remove("PSV adjustment")
 
-    df2 = df.stack().stack().stack()  # .reset_index()
-    df2 = df2.unstack(level=1).reset_index()
+    df2 = df.stack().stack().stack().reset_index()
+    param_dfs = []
+    for param_column in parameters:
+        param_dfs.append(
+            df2[df2.level_1 == param_column]
+            .drop(columns=["level_1"])
+            .rename(columns={0: param_column})
+            .reset_index()
+            .drop(columns=["index"])
+        )
+
+    df3 = param_dfs[0]
+    for idx in range(1, len(parameters)):
+        df3 = df3.merge(param_dfs[idx])
+
+    df3.level_2 = df3.level_2.apply(lambda x: x.replace("Site Class ", ""))
+    df3.level_3 = df3.level_3.apply(lambda x: int(x.replace("APoE: 1/", "")))
+
+    df3 = df3.rename(
+        columns={
+            "level_0": "Location",
+            "level_2": "Site Class",
+            "level_3": "APoE (1/n)",
+        }
+    ).sort_values(by=["APoE (1/n)", "Site Class"])
+    return df3
+
+
+def flatten_sat_df(df: pd.DataFrame):
+    """
+    Unfortunatley this solution does not retain the oroginal dort order of the dataframe
+    maybe this is resolved in pandas 2.2 but we're stuck with 2.03 for now.
+
+    So for now, we're using OG_flatten_sat_df() instead.
+    """
+    df2 = df.stack().stack().stack()
+    df2 = df2.unstack(
+        level=1, sort=False
+    ).reset_index()  # not supported yet - will it work
 
     df2.level_1 = df2.level_1.apply(lambda x: x.replace("Site Class ", ""))
     df2.level_2 = df2.level_2.apply(lambda x: int(x.replace("APoE: 1/", "")))
 
-    return df2.rename(
+    df2 = df2.rename(
         columns={
             "level_0": "Location",
             "level_1": "Site Class",
             "level_2": "APoE (1/n)",
         }
     ).sort_values(by=["APoE (1/n)", "Site Class"])
+    return df2
 
 
 def sat_table_json_path(
@@ -63,10 +104,10 @@ def sat_table_json_path(
     Returns:
       file_path:
     """
-    file_name = "_TYPE_locations_combo.json" if combo else "_TYPE_locations.json"
+    file_name = "TYPE_locations_combo.json" if combo else "TYPE_locations.json"
 
     if site_limit:
-        file_name = f"first_{site_limit}" + file_name
+        file_name = f"first_{site_limit}_" + file_name
 
     if named_sites:
         return Path(root_folder, file_name.replace("TYPE", "named"))
@@ -167,13 +208,6 @@ class AllParameterTable:
     def __init__(self, complete_table: pd.DataFrame):
         self._raw_table = complete_table
 
-    # set up whatever needs to set up here...
-    # when flattening we want the following columns:
-    # ["M", "D"]
-    # ["PGA", "Sas", "Tc", "Td", ]
-    # ["PSV", "PGA Floor", "Sas Floor", "PSV Floor", "Td Floor"]
-    ### NOTE that "PSV adjustment" is not included. It was just for diagnostics
-
     def named_location_df(self):
         df = self._raw_table
         sites = list(df.Location.unique())
@@ -193,5 +227,5 @@ def to_standard_json(table: pd.DataFrame, filepath: Path):
         index=False,
         orient="table",
         indent=2,
-        double_precision=3,  # need to confirm that this is as intended for sigfig rounding
+        double_precision=3,
     )

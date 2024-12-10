@@ -29,6 +29,8 @@ from nzssdt_2023.data_creation.extract_data import (
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
 
+from .util import set_coded_location_resolution
+
 log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -605,12 +607,12 @@ def update_lower_bound_sa(
                 * g
             ) / (2 * np.pi)
             df.loc[:, (APoE, sc_label, "PSV")] = np.round(psv, PSV_N_DP)
-            # psv_original = df.loc[:, (APoE, sc_label, "PSV")]
-            # df.loc[:, (APoE, sc_label, "PSV adjustment")] = (
-            #     df.loc[:, (APoE, sc_label, "PSV")] - psv_original
-            # )
-            # log.info(f"site class {sc}, APoE: {APoE}, max PSV adjustment:
-            #    {df.loc[:, (APoE, sc_label, 'PSV adjustment')]}")
+            psv_original = df.loc[:, (APoE, sc_label, "PSV")]
+            df.loc[:, (APoE, sc_label, "PSV adjustment")] = (
+                df.loc[:, (APoE, sc_label, "PSV")] - psv_original
+            )
+            # log.info(f"site class {sc}, APoE: {APoE}, max PSV adjustment: "
+            #    "{df.loc[:, (APoE, sc_label, 'PSV adjustment')]}")
             # log.info(df.loc[:, (APoE, sc_label, slice(None))])
 
             # set new Td if PSV is controlled by the lower bound
@@ -692,34 +694,34 @@ def replace_relevant_locations(
     return df
 
 
-def remove_lower_bound_metadata(df: "pdt.DataFrame"):
-    """Removes the metadata flags related to the lower bound hazard
+# def remove_lower_bound_metadata(df: "pdt.DataFrame"):
+#     """Removes the metadata flags related to the lower bound hazard
 
-    Args:
-        df: mutli-index dataframe of sa parameters for all locations, APoEs, and site classes
+#     Args:
+#         df: mutli-index dataframe of sa parameters for all locations, APoEs, and site classes
 
-    Returns:
-        df: same df with fewer columns
-    """
+#     Returns:
+#         df: same df with fewer columns
+#     """
 
-    df = df.copy(deep=True)
+#     df = df.copy(deep=True)
 
-    APoEs = list(df.columns.levels[0])
-    sc_labels = list(df.columns.levels[1])
+#     APoEs = list(df.columns.levels[0])
+#     sc_labels = list(df.columns.levels[1])
 
-    for APoE in APoEs:
-        for sc in sc_labels:
-            for parameter in [
-                "PGA Floor",
-                "PSV",
-                "PSV Floor",
-                "Sas Floor",
-                "Td Floor",
-                "PSV adjustment",
-            ]:
-                df.drop((APoE, sc, parameter), axis=1, inplace=True)
+#     for APoE in APoEs:
+#         for sc in sc_labels:
+#             for parameter in [
+#                 "PGA Floor",
+#                 "PSV",
+#                 "PSV Floor",
+#                 "Sas Floor",
+#                 "Td Floor",
+#                 "PSV adjustment",
+#             ]:
+#                 df.drop((APoE, sc, parameter), axis=1, inplace=True)
 
-    return df
+#     return df
 
 
 def create_sa_table(hf_path: Path, lower_bound_flags: bool = True) -> "pdt.DataFrame":
@@ -768,7 +770,11 @@ def create_sa_table(hf_path: Path, lower_bound_flags: bool = True) -> "pdt.DataF
 
     df = replace_relevant_locations(df)
 
-    if not lower_bound_flags:
-        df = remove_lower_bound_metadata(df)
+    # if not lower_bound_flags:
+    #     print('before', df)
+    #     print()
+    #     df = remove_lower_bound_metadata(df)
+    #     print('after', df)
 
+    df = set_coded_location_resolution(df)
     return df

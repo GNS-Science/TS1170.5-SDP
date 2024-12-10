@@ -24,11 +24,6 @@ from nzssdt_2023.publish.convert import (
     to_standard_json,
 )
 
-# import pandas as pd
-
-# from nzssdt_2023.publish.convert import d_and_m_table_to_json, sat_table_to_json
-
-
 # configure logging
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("toshi_hazard_store").setLevel("ERROR")
@@ -58,6 +53,7 @@ else:
         else working_folder / "all_hcurves.hdf5"
     )
     site_list: Optional[list[str]] = None
+
 
 # query NSHM
 if override | (not hf_path.exists()):
@@ -90,6 +86,7 @@ if override | (not named_path.exists()) | (not gridded_path.exists()):
     ).flatten()
 
     combined_df = SatTable(sat_df).combine_dm_table(dm_df)
+
     complete = AllParameterTable(combined_df)
 
     # write the files

@@ -42,7 +42,7 @@ from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.data_creation import constants
 
 PRODUCE_CSV = True
-LOCATION_LIMIT = 10
+LOCATION_LIMIT = 0
 WATERMARK_ENABLED = True
 MAX_PAGE_BLOCKS = 4  # each location block row has 7 apoe rows
 SITE_CLASSES = list(constants.SITE_CLASSES.keys())  # check sorting
@@ -102,7 +102,7 @@ def build_report_page(
     )
 
     # create a FixedColumnWidthTable
-    print(f"len(rowdata): {len(rowdata)}")
+    # print(f"len(rowdata): {len(rowdata)}")
     table = FixedColumnWidthTable(
         number_of_columns=4 + (6 * 4),  # 4 intro, + 4 parameters per siteclass = 28
         number_of_rows=2 + (len(rowdata) * len(constants.DEFAULT_RPS)),
@@ -140,7 +140,7 @@ def build_report_page(
                 continue
             else:
                 res.append(non_macronised_words[idx])
-        print("searchable name:", " ".join(res))
+        # print("searchable name:", " ".join(res))
         return " ".join(res)
 
     def add_row_1(table: FixedColumnWidthTable):
@@ -248,7 +248,7 @@ def build_report_page(
     # data rows
     for row in rowdata:
         # row[0] is location
-        print("@@@ row:", row)
+        # print("@@@ row:", row)
 
         if row[0][1] == row[0][0]:
             location_str = row[0][0]
@@ -315,10 +315,10 @@ def build_report_page(
         #     #     )
         #     # )
 
-        print(row[1])
+        # print(row[1])
 
         for subrow in row[1]:
-            print(f"**** {len(subrow)} {subrow}")
+            # print(f"**** {len(subrow)} {subrow}")
             for cell in subrow:
                 try:
                     table.add(
@@ -374,8 +374,8 @@ def generate_location_block(combo_table: pd.DataFrame, location: str) -> Iterato
     site_classes = location_df["Site Class"].unique().tolist()
     apoes = location_df["APoE (1/n)"].unique().tolist()
 
-    print(location_df)
-    print(location_df.index)
+    # print(location_df)
+    # print(location_df.index)
 
     for apoe in apoes:
         rec = location_df[
@@ -397,7 +397,7 @@ def generate_location_block(combo_table: pd.DataFrame, location: str) -> Iterato
                     round(sc_tup.Tc, 2),
                     round(sc_tup.Td, 1),
                 ]
-        print("generate_location_block -> row", row)
+        # print("generate_location_block -> row", row)
         yield (row)
 
 
@@ -418,7 +418,7 @@ def generate_table_rows(
 ) -> Iterator:
     count = 0
 
-    print("generate_table_rows", combo_table.Location.unique())
+    # print("generate_table_rows", combo_table.Location.unique())
     for location in combo_table.Location.unique():
         # location = location.replace("-", " - ")
 
@@ -429,7 +429,7 @@ def generate_table_rows(
         #     continue
         # if count in [47, 86]:  #47 `Waihi Bowentown` BOOM, 85 `Ōakura (New Plymouth District)`
         #     continue
-        print("loc", location)
+        # print("loc", location)
         yield (
             locations_tuple_padded(location, modify_locations),
             generate_location_block(combo_table, location),
@@ -476,19 +476,6 @@ if __name__ == "__main__":
     OUTPUT_FOLDER = Path(RESOURCES_FOLDER).parent / "reports" / "v_cbc"
 
     # TODO shift this into the CLI
-
-    # def dm_table_v2():
-    #     filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "d_and_m.json"
-    #     return pd.read_json(filepath, orient="table")
-
-    # def sat_named_table_v2():
-    #     filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "named_locations.json"
-    #     return pd.read_json(filepath, orient="table")
-
-    # def sat_grid_table_v2():
-    #     filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "grid_locations.json"
-    #     return pd.read_json(filepath, orient="table")
-
     def combo_named_table():
         filepath = (
             Path(RESOURCES_FOLDER) / "v_cbc" / "first_10_named_locations_combo.json"
@@ -501,19 +488,14 @@ if __name__ == "__main__":
         )
         return pd.read_json(filepath, orient="table")
 
-    # sat = sat_table()
-    named_df = combo_named_table()  # sat_named_table_v2()
-    grid_df = combo_grid_table()  # sat_grid_table_v2()
-    # d_and_m_df = dm_table_v2()
+    named_df = combo_named_table()
+    grid_df = combo_grid_table()
 
     report_grps = list(zip([0, 1], [named_df, grid_df]))
     report_grp_titles = ["3.4", "3.5"]
     report_names = ["named", "gridded"]
 
     for report_grp, location_df in report_grps:
-
-        print(report_grp)
-        print()
 
         filename = f"{report_names[report_grp]}_location_report_v2-DRAFT"
         print(f"report: {filename}")
@@ -541,5 +523,3 @@ if __name__ == "__main__":
 
         with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
             PDF.dumps(out_file_handle, report)
-
-        assert 0

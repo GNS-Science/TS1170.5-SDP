@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 
+# @pytest.mark.skip('update fixture')
 @pytest.mark.parametrize(
     "site", ["Auckland", "Christchurch", "Dunedin", "Hamilton", "Wellington"]
 )
@@ -35,6 +36,9 @@ def test_parameter_table(
     fsim = fsim_json_table
     fsim.seek(0)
     df = pd.read_json(fsim, orient="table", precise_float=True)
+
+    print(df)
+
     df_value = df[
         (df["Location"] == site)
         & (df["APoE (1/n)"] == return_period)

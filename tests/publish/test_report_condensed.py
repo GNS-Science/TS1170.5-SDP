@@ -34,10 +34,10 @@ def test_generate_table_rows(named_combo_table):
     rows = report_condensed_v2.generate_table_rows(named_combo_table)
     res = next(rows)
 
-    assert res[0][0] == "Auckland", "first location is Auckland"
+    assert res[0][0] == "Kaitaia", "first location is Kaitaia"
     assert next(res[1]) == next(
-        report_condensed_v2.generate_location_block(named_combo_table, "Auckland")
-    ), "Auckland table entries"
+        report_condensed_v2.generate_location_block(named_combo_table, "Kaitaia")
+    ), "Kaitaia table entries"
 
 
 # helper functions

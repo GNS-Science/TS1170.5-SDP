@@ -77,7 +77,7 @@ def mini_hcurves_hdf5_path():
 
 @pytest.fixture(scope="module")
 def fsim_json_table(mini_hcurves_hdf5_path):
-    df = sa_gen.create_sa_table(mini_hcurves_hdf5_path, lower_bound_flags=False)
+    df = sa_gen.create_sa_table(mini_hcurves_hdf5_path)
     flat_df = convert.SatTable(df).flatten().infer_objects()
     fsim = StringIO()
     flat_df.to_json(fsim, index=True, orient="table", indent=2, double_precision=3)

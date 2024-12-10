@@ -54,9 +54,10 @@ def create_sites_df(
                 site_list = site_list[:site_limit]
 
         controlling_site = LOWER_BOUND_PARAMETERS["controlling_site"]
-
         if controlling_site not in site_list:
-            site_list.append(controlling_site)
+            site_list = [
+                controlling_site
+            ] + site_list  # ensure the controlling site is included
 
         # collect the ids for the relevant sites
         id_list = [
@@ -82,7 +83,7 @@ def create_sites_df(
     # create a dataframe with latlon sites
     else:
         site_list_id = "NZ_0_1_NB_1_1"
-        resample = 0.1
+        # resample = 0.1
         grid = RegionGrid[site_list_id]
         grid_locs = grid.load()
 
@@ -93,9 +94,9 @@ def create_sites_df(
         site_list = []
         for gloc in grid_locs:
             loc = CodedLocation(*gloc, resolution=0.001)
-            loc = loc.resample(float(resample)) if resample else loc
-            site_list.append(loc.resample(0.001).code)
+            site_list.append(loc.code)
 
+        # print(site_list)
         # create the df of gridded locations
         sites = pd.DataFrame(index=site_list, dtype="str")
         for latlon in site_list:
@@ -114,12 +115,10 @@ def create_sites_df(
                 (sites["float_lon"] >= min_lon) & (sites["float_lon"] <= max_lon)
             ].drop(["float_lon"], axis=1)
 
-        sites.sort_values(["lat", "lon"], inplace=True)
-
         if site_limit:
             sites = sites[:site_limit]
 
-    return sites
+    return sites.sort_values(by=["lat", "lon"])
 
 
 def retrieve_hazard_curves(
