@@ -266,15 +266,16 @@ def query_NSHM_to_hdf5(
 
     """
 
-    if site_list is None:
-        sites = pd.concat(
-            [
-                q_haz.create_sites_df(site_limit=site_limit),
-                q_haz.create_sites_df(named_sites=False, site_limit=site_limit),
-            ]
-        )
-    else:
-        sites = q_haz.create_sites_df(site_list=site_list)
+    sites = pd.concat(
+        [
+            q_haz.create_sites_df(
+                named_sites=True, site_list=site_list, site_limit=site_limit
+            ),
+            q_haz.create_sites_df(
+                named_sites=False, site_list=site_list, site_limit=site_limit
+            ),
+        ]
+    )
 
     # query NSHM
     hcurves, _ = q_haz.retrieve_hazard_curves(
