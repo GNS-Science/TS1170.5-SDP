@@ -27,6 +27,8 @@ from nzssdt_2023.data_creation.mean_magnitudes import (
 )
 from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_locations
 
+from .util import set_coded_location_resolution
+
 if TYPE_CHECKING:
     import geopandas.typing as gpdt
     import pandas.typing as pdt
@@ -89,11 +91,11 @@ def extract_m_values(
 
     The format of the frequencies entries is e.g. "APoE: 1/25"
 
-    If no_chache is False then the mean magnitudes will be looked up in a cache file. If not found
+    If no_cache is False then the mean magnitudes will be looked up in a cache file. If not found
     there, they will be calculated and added to the cache. The cache file is in the WORKING_FOLDER
     named mags_{agg}.csv where {agg} is the hazard curve aggregate.
 
-    site names are location names or lat~lon coeds e.g. "Pukekohe" or "-45.500~166.600"
+    site names are location names or lat~lon codes e.g. "Pukekohe" or "-45.500~166.600"
     """
 
     locations = [site_name_to_coded_location(name) for name in site_names]
@@ -170,4 +172,5 @@ def create_D_and_M_df(
         )
 
     D_and_M = replace_relevant_locations(D_and_M)
+    D_and_M = set_coded_location_resolution(D_and_M)
     return D_and_M

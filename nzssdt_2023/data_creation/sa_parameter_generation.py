@@ -9,12 +9,12 @@ import numpy as np
 import pandas as pd
 
 from nzssdt_2023.data_creation.constants import (
-    DEFAULT_RPS,
     IMT_LIST,
     LOCATION_REPLACEMENTS,
     LOWER_BOUND_PARAMETERS,
     PGA_N_DP,
     PGA_REDUCTIONS,
+    PSV_N_DP,
     SAS_N_DP,
     SITE_CLASSES,
     TC_N_SF,
@@ -28,6 +28,8 @@ from nzssdt_2023.data_creation.extract_data import (
     extract_spectra,
 )
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import acc_to_vel, g, period_from_imt
+
+from .util import set_coded_location_resolution
 
 log = logging.getLogger(__name__)
 
@@ -507,7 +509,7 @@ def update_lower_bound_sa(
 
     APoEs = [f"APoE: 1/{rp}" for rp in hazard_rp_list]
     site_class_list = [f"{SITE_CLASSES[sc].label}" for sc in SITE_CLASSES]
-    parameters = ["PGA Floor", "Sas Floor", "PSV Floor", "Td Floor"]
+    parameters = ["PGA Floor", "Sas Floor", "PSV Floor", "Td Floor", "PSV adjustment"]
     columns = pd.MultiIndex.from_product([APoEs, site_class_list, parameters])
     df = pd.concat([mean_df, pd.DataFrame(index=index, columns=columns)], axis=1)
 
@@ -598,6 +600,21 @@ def update_lower_bound_sa(
             )
             df.loc[:, (APoE, sc_label, "Tc")] = sig_figs(tc, TC_N_SF)
 
+            # infer new rounded PSV values from rounded Tcs
+            psv = (
+                df.loc[:, (APoE, sc_label, "Tc")]
+                * df.loc[:, (APoE, sc_label, "Sas")]
+                * g
+            ) / (2 * np.pi)
+            df.loc[:, (APoE, sc_label, "PSV")] = np.round(psv, PSV_N_DP)
+            psv_original = df.loc[:, (APoE, sc_label, "PSV")]
+            df.loc[:, (APoE, sc_label, "PSV adjustment")] = (
+                df.loc[:, (APoE, sc_label, "PSV")] - psv_original
+            )
+            # log.info(f"site class {sc}, APoE: {APoE}, max PSV adjustment: "
+            #    "{df.loc[:, (APoE, sc_label, 'PSV adjustment')]}")
+            # log.info(df.loc[:, (APoE, sc_label, slice(None))])
+
             # set new Td if PSV is controlled by the lower bound
             df.loc[:, (APoE, sc_label, "Td Floor")] = False
             for site in site_list:
@@ -677,30 +694,37 @@ def replace_relevant_locations(
     return df
 
 
-def remove_lower_bound_metadata(df: "pdt.DataFrame"):
-    """Removes the metadata flags related to the lower bound hazard
+# def remove_lower_bound_metadata(df: "pdt.DataFrame"):
+#     """Removes the metadata flags related to the lower bound hazard
 
-    Args:
-        df: mutli-index dataframe of sa parameters for all locations, APoEs, and site classes
+#     Args:
+#         df: mutli-index dataframe of sa parameters for all locations, APoEs, and site classes
 
-    Returns:
-        df: same df with fewer columns
-    """
+#     Returns:
+#         df: same df with fewer columns
+#     """
 
-    df = df.copy(deep=True)
+#     df = df.copy(deep=True)
 
-    APoEs = list(df.columns.levels[0])
-    sc_labels = list(df.columns.levels[1])
+#     APoEs = list(df.columns.levels[0])
+#     sc_labels = list(df.columns.levels[1])
 
-    for APoE in APoEs:
-        for sc in sc_labels:
-            for parameter in ["PGA Floor", "PSV", "PSV Floor", "Sas Floor", "Td Floor"]:
-                df.drop((APoE, sc, parameter), axis=1, inplace=True)
+#     for APoE in APoEs:
+#         for sc in sc_labels:
+#             for parameter in [
+#                 "PGA Floor",
+#                 "PSV",
+#                 "PSV Floor",
+#                 "Sas Floor",
+#                 "Td Floor",
+#                 "PSV adjustment",
+#             ]:
+#                 df.drop((APoE, sc, parameter), axis=1, inplace=True)
 
-    return df
+#     return df
 
 
-def create_sa_table(hf_path: Path, lower_bound_flags: bool = False) -> "pdt.DataFrame":
+def create_sa_table(hf_path: Path, lower_bound_flags: bool = True) -> "pdt.DataFrame":
     """Creates a pandas dataframe with the sa parameters
 
     Args:
@@ -720,58 +744,15 @@ def create_sa_table(hf_path: Path, lower_bound_flags: bool = False) -> "pdt.Data
 
     acc_spectra, imtls = extract_spectra(hf_path)
 
-    DIAGNOSTICS = True
-    # why is PGA off by ~0.01 for some permutations??
-    # PGA (dimensions: vs30, site, return period, statistic)
-    # Leaving this in only until we get PGA tests working with updated tables
-    # otherwise these would be log.dbug messages.
-    if DIAGNOSTICS:
-        np.set_printoptions(precision=8)
-        pd.set_option("display.precision", 8)
-
-        print("DIAG #1")
-        print("=" * 40)
-        SITE_IDX = 0  # Auckland
-        RP_IDX = DEFAULT_RPS.index(2500)
-        STAT_IDX = 0  # mean
-        PGA1 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
-        print(PGA1)
-        print("=" * 40)
-        print()
-        assert PGA1.shape == (6,)
-
     log.info("begin fit_Td_array for mean Tds")
     mean_Td = fit_Td_array(
         PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list
     )
 
-    if DIAGNOSTICS:
-        print("DIAG #2")
-        print("=" * 40)
-        PGA2 = PGA[:, SITE_IDX, RP_IDX, STAT_IDX]
-        print(PGA2)
-        print("=" * 40)
-        print()
-        assert PGA2.shape == (6,)
-        assert (PGA1 == PGA2).all()
-
     log.info("begin create_mean_sa_table")
     mean_df = create_mean_sa_table(
         PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list
     )
-
-    COLUMNS = [
-        ("APoE: 1/2500", f"Site Class {sc}", "Td") for sc in "VI,V,IV".split(",")
-    ]
-
-    if DIAGNOSTICS:
-        print("DIAG #3 post create_mean_sa_table")
-        print("=" * 40)
-        print(mean_df.info())
-        print()
-        print(mean_df[COLUMNS])  # [mean_df.index=="Auckland"])
-        print("=" * 40)
-        print()
 
     log.info("begin update_lower_bound_sa")
     df = update_lower_bound_sa(
@@ -787,23 +768,13 @@ def create_sa_table(hf_path: Path, lower_bound_flags: bool = False) -> "pdt.Data
         quantile_list,
     )
 
-    if DIAGNOSTICS:
-        print("DIAG #4 post update_lower_bound_sa")
-        print("=" * 40)
-        print(df[COLUMNS])
-        print("=" * 40)
-        print()
-
     df = replace_relevant_locations(df)
 
-    if not lower_bound_flags:
-        df = remove_lower_bound_metadata(df)
+    # if not lower_bound_flags:
+    #     print('before', df)
+    #     print()
+    #     df = remove_lower_bound_metadata(df)
+    #     print('after', df)
 
-    if DIAGNOSTICS:
-        print("DIAG #5 post remove_lower_bound_metadata")
-        print("=" * 40)
-        print(df[COLUMNS])
-        print("=" * 40)
-        print()
-
+    df = set_coded_location_resolution(df)
     return df

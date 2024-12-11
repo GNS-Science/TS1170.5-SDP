@@ -15,6 +15,7 @@ def test_json_precision(site, sc, rp, parameter, fsim_json_table):
     fsim = fsim_json_table
     fsim.seek(0)
     df = pd.read_json(fsim, orient="table", precise_float=True)
+
     value = df[
         (df["Location"] == site) & (df["APoE (1/n)"] == rp) & (df["Site Class"] == sc)
     ][parameter].to_numpy()[0]

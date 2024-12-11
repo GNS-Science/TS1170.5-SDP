@@ -1,0 +1,911 @@
+{
+  "schema":{
+    "fields":[
+      {
+        "name":"Location",
+        "type":"string"
+      },
+      {
+        "name":"APoE (1\/n)",
+        "type":"integer"
+      },
+      {
+        "name":"D",
+        "type":"number"
+      },
+      {
+        "name":"M",
+        "type":"number"
+      }
+    ],
+    "primaryKey":[
+      "Location",
+      "APoE (1\/n)"
+    ],
+    "pandas_version":"1.4.0"
+  },
+  "data":[
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kaitaia",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kerikeri",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Haruru",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Paihia",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Paihia",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Paihia",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Paihia",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Paihia",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Paihia",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Paihia",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Opua",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Opua",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Opua",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Opua",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Opua",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Opua",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Opua",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Kawakawa",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kawakawa",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kawakawa",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kawakawa",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kawakawa",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kawakawa",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kawakawa",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Moerewa",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Moerewa",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Moerewa",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Moerewa",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Moerewa",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Moerewa",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Moerewa",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Kaikohe",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaikohe",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaikohe",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaikohe",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Kaikohe",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kaikohe",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Kaikohe",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Hikurangi",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Hikurangi",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Hikurangi",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Hikurangi",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Hikurangi",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Hikurangi",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Hikurangi",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Ngunguru",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Ngunguru",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Ngunguru",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Ngunguru",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Ngunguru",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Ngunguru",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Ngunguru",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"Auckland",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.300~172.900",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~172.900",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~172.900",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~172.900",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~172.900",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.300~172.900",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.300~172.900",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.300~173.000",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~173.000",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~173.000",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~173.000",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~173.000",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.300~173.000",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.300~173.000",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.300~173.100",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~173.100",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~173.100",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~173.100",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.300~173.100",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.300~173.100",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.300~173.100",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.400~172.600",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.600",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.600",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.600",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.600",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~172.600",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~172.600",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.400~172.700",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.700",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.700",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.700",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.700",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~172.700",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~172.700",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.400~172.800",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.800",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.800",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.800",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.800",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~172.800",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~172.800",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.400~172.900",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.900",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.900",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.900",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~172.900",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~172.900",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~172.900",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.400~173.000",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~173.000",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~173.000",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~173.000",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~173.000",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~173.000",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~173.000",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.400~173.100",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~173.100",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~173.100",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~173.100",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.400~173.100",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~173.100",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.400~173.100",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    },
+    {
+      "Location":"-34.500~172.600",
+      "APoE (1\/n)":25,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.500~172.600",
+      "APoE (1\/n)":50,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.500~172.600",
+      "APoE (1\/n)":100,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.500~172.600",
+      "APoE (1\/n)":250,
+      "D":null,
+      "M":6.2
+    },
+    {
+      "Location":"-34.500~172.600",
+      "APoE (1\/n)":500,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.500~172.600",
+      "APoE (1\/n)":1000,
+      "D":null,
+      "M":6.3
+    },
+    {
+      "Location":"-34.500~172.600",
+      "APoE (1\/n)":2500,
+      "D":null,
+      "M":6.4
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 """
-Complete pipline from NSHM to pdf (using last year's formatting)
+Complete pipline from NSHM to pdf (using new formatting)
 
 """
 
@@ -11,12 +11,17 @@ from typing import Optional
 import pandas as pd
 
 from nzssdt_2023.config import WORKING_FOLDER
+from nzssdt_2023.data_creation import constants
+from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
+from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import query_NSHM_to_hdf5
 from nzssdt_2023.data_creation.query_NSHM import create_sites_df
 from nzssdt_2023.publish.convert import (
-    d_and_m_table_to_json,
+    AllParameterTable,
+    DistMagTable,
+    SatTable,
     sat_table_json_path,
-    sat_table_to_json,
+    to_standard_json,
 )
 
 # configure logging
@@ -25,7 +30,7 @@ logging.getLogger("toshi_hazard_store").setLevel("ERROR")
 
 working_folder = Path(WORKING_FOLDER)
 version_folder = Path(
-    PurePath(os.path.realpath(__file__)).parent.parent.parent, "resources", "v_cbc3"
+    PurePath(os.path.realpath(__file__)).parent.parent.parent, "resources", "v_cbc"
 )
 
 mini = False
@@ -49,28 +54,21 @@ else:
     )
     site_list: Optional[list[str]] = None
 
+
 # query NSHM
 if override | (not hf_path.exists()):
     query_NSHM_to_hdf5(hf_path, site_list=site_list, site_limit=site_limit)
 
-# create sa tables
-if (
-    override
-    | (
-        not sat_table_json_path(
-            version_folder, named_sites=True, site_limit=site_limit
-        ).exists()
-    )
-    | (
-        not sat_table_json_path(
-            version_folder, named_sites=False, site_limit=site_limit
-        ).exists()
-    )
-):
-    sat_table_to_json(hf_path, version_folder, site_limit=site_limit)
+# output paths
+named_path = sat_table_json_path(
+    version_folder, named_sites=True, site_limit=site_limit, combo=True
+)
+gridded_path = sat_table_json_path(
+    version_folder, named_sites=False, site_limit=site_limit, combo=True
+)
 
-# create m and d table
-if override | (not (version_folder / "d_and_m.json").exists()):
+if override | (not named_path.exists()) | (not gridded_path.exists()):
+
     if site_list is None:
         site_list = list(
             pd.concat(
@@ -80,4 +78,17 @@ if override | (not (version_folder / "d_and_m.json").exists()):
                 ]
             ).index
         )
-    d_and_m_table_to_json(version_folder, site_list, site_limit=site_limit)
+
+    # build and combine the tables
+    sat_df = sa_gen.create_sa_table(hf_path)
+    dm_df = DistMagTable(
+        dm_gen.create_D_and_M_df(site_list, rp_list=constants.DEFAULT_RPS)
+    ).flatten()
+
+    combined_df = SatTable(sat_df).combine_dm_table(dm_df)
+
+    complete = AllParameterTable(combined_df)
+
+    # write the files
+    to_standard_json(complete.named_location_df(), named_path)
+    to_standard_json(complete.grid_location_df(), gridded_path)

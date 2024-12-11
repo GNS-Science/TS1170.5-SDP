@@ -150,7 +150,7 @@ SITE_CLASSES: dict[str, SiteClass] = {
 #  - HDF5 is built such that this list matches the vs30 in HDF5, value AND order (descending)
 VS30_LIST = [SITE_CLASSES[sc].representative_vs30 for sc in SITE_CLASSES.keys()]
 
-LOWER_BOUND_PARAMETERS: dict[str, str | float] = {
+LOWER_BOUND_PARAMETERS: dict[str, Any] = {
     "controlling_site": "Auckland",
     "controlling_percentile": 0.9,
 }
@@ -171,4 +171,5 @@ PGA_REDUCTIONS: dict[str, PGA_reductions] = {
 # specify number of decimal places or significant figures to round to
 PGA_N_DP = 2
 SAS_N_DP = 2
+PSV_N_DP = 2
 TC_N_SF = 2
