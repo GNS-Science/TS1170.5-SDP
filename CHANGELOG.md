@@ -10,6 +10,12 @@
  - test coverage on `data_creation` package
  - PGA reduction feature (committee update)
  - Td calcs and Tc sig figs (committee update)
+ - new test using  external test fixtures for committe adjustments (thanks Chris de la Torre & Tom Francis)
+ - named report includes macronised maori place names, with ascii altenate for better search support
+ - script/publish_cli now implements report and publish commands used to build artefacts
+ - new json artefacts in `resources/v2`
+ - new report artefacts in `reports/v2`
+ - PDF report value tests to ensure layout display the data correctly.
 
 ### Changed
  - migrated report.py into new `publish` package
@@ -26,6 +32,12 @@
  - mean magnitude csv files are on demand cache
  - `extract_m_values` function will generate mean magnitude csv files if needed or requested
  - default `config.WORKING_FOLDER` uses platform independent tmp folder
+ - we no longer use pkl files for intermediate storage, but hdf5
+ - minor v2 report layout changes
+ - use latest `nzshm-common` from pypi
+ - v2 json form includes D,M with other parameters in one file, so `d_and_m.json` is no longer published
+ - removed redundant decimal places in artefacts
+
 
 ## [0.4.0] 2024-09-11
 
