@@ -8,6 +8,9 @@ import numpy as np
 from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store.model import ProbabilityEnum
 
+from pathlib import Path
+from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
+
 
 class SiteClass(NamedTuple):
     site_class: str
@@ -173,3 +176,9 @@ PGA_N_DP = 2
 SAS_N_DP = 2
 PSV_N_DP = 2
 TC_N_SF = 2
+
+# url for zipped Community Fault Model
+CFM_URL = r"https://www.gns.cri.nz/assets/Data-and-Resources/Download-files/Community-Hazard-Model/NZ_CFM_v1_0_shapefile.zip"
+
+# path to polygon file from Nick
+POLYGON_PATH = Path(RESOURCES_FOLDER) / "pipeline/v1/input_data/original_gis" / "polygons_locations.geojson"

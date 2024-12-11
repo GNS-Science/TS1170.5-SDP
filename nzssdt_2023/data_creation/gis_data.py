@@ -1,11 +1,6 @@
 """
 This module creates .geojson version of all gis data and calculates D (distance) values between polygons and faults
 
-Required data:
- - faults defined in a CFM shapefile.
- - polygons defined in geojson fle
-
-The are found in the `{RESOURCES}/pipeline/v2/input_data/original_gis` folder.
 """
 
 
@@ -17,12 +12,25 @@ import pandas as pd
 
 from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 from nzssdt_2023.data_creation.query_NSHM import create_sites_df
-from nzssdt_2023.data_creation.constants import LOCATION_REPLACEMENTS
+from nzssdt_2023.data_creation.constants import LOCATION_REPLACEMENTS, CFM_URL, POLYGON_PATH
 
 if TYPE_CHECKING:
     import pandas.typing as pdt
+    import geopandas.typing as gpdt
 
-version = 'v_gisdata'  # for development only. eventually this will be v2
+
+def save_gdf_to_geojson(gdf: "gpdt.DataFrame", path, include_idx=False):
+    """
+
+    TODO: set up typing for the path input
+
+    Args:
+        gdf: geodataframe to save as .geosjon
+        path: path of new geojson
+        include_idx: False drops the index from the gpd (e.g. if index is just a range, 0 -> n)
+    """
+
+    gdf.to_file(path, driver="GeoJSON", index=include_idx)
 
 
 def polygon_location_list() -> List[str]:
@@ -31,24 +39,53 @@ def polygon_location_list() -> List[str]:
     Returns:
         polygon_list: ordered list of polygon names
     """
+    ts_urban_locations_list = list(create_sites_df().index)
 
     replaced_locations = []
     for location in LOCATION_REPLACEMENTS:
         for replaced_location in LOCATION_REPLACEMENTS[location].replaced_locations:
             replaced_locations.append(replaced_location)
 
-    polygon_list = [loc for loc in list(create_sites_df().index) if loc not in replaced_locations]
+    polygon_list = [loc for loc in ts_urban_locations_list if loc not in replaced_locations]
 
     return polygon_list
 
 
-def polygons_to_clean_geojson(version):
-    """Creats a new file without the extra columns in the polygon.geojson from Nick Horpool
+# def polygons_to_clean_geojson(version):
+#     """Creates a new file without the extra columns in the polygon.geojson from Nick Horspool
+#
+#     File is save in the {RESOURCES}/{version}
+#     """
+#     # read original file
+#     in_path = Path(RESOURCES_FOLDER) / "pipeline" / version / "input_data/original_gis"
+#     filename = in_path / "polygons_locations.geojson"
+#     gdf = gpd.read_file(filename).set_index('UR2022_V_2')[['geometry']]
+#     gdf['Name'] = gdf.index
+#
+#     # sort the order
+#     polygon_list = polygon_location_list()
+#     gdf = gdf.loc[polygon_list, :]
+#
+#     # convert to WGS84
+#     wgs_epsg = 4326
+#     gdf = gdf.to_crs(epsg=wgs_epsg)
+#
+#     # save new file
+#     out_path = Path(RESOURCES_FOLDER) / version
+#     filename = out_path / "urban_area_polygons.geojson"
+#     gdf.to_file(filename, driver="GeoJSON", index=False)
 
+def cleanup_polygon_gpd(polygon_path) -> "gpdt.DataFrame":
+    """Removes extra columns from input polygon file
+
+    Args:
+        polygon_path: path to the original polygon file
+
+    Returns:
+        gdf: geodataframe with only relevant columns
     """
+
     # read original file
-    in_path = Path(RESOURCES_FOLDER) / "pipeline" / version / "input_data/original_gis"
-    filename = in_path / "polygons_locations.geojson"
     gdf = gpd.read_file(filename).set_index('UR2022_V_2')[['geometry']]
     gdf['Name'] = gdf.index
 
@@ -60,20 +97,39 @@ def polygons_to_clean_geojson(version):
     wgs_epsg = 4326
     gdf = gdf.to_crs(epsg=wgs_epsg)
 
-    # save new file
-    out_path = Path(RESOURCES_FOLDER) / version
-    filename = out_path / "urban_area_polygons.geojson"
-    gdf.to_file(filename, driver="GeoJSON", index=False)
+    return gdf
 
 
+def filter_cfm_by_sliprate(cfm_url, slip_rate: float = 5.) -> "gpdt.DataFrame":
+    """Filters the original Community Fault Model (CFM) .shp file
 
+    The faults are filtered by the (Slip Rate Preferred >=5 mmyr) criterion.
 
-def cfm_to_geojson():
-    """Converts the Community Fault Model (CFM) .shp file from Nick Horspool into a .geojson file
+    Args:
+        slip_rate: slip rate for filter criterion, >= slip_rate
 
-    Nick derived this .shp from the original CFM, using the >X (slip rate) criterion
-    TODO need further documentation on this
+    Returns:
+        gdf: geodataframe of filtered faults
     """
+
+    gdf = gpd.read_file(cfm_url)
+
+    idx = gdf['SR_pref'] >= slip_rate
+    gdf = gdf[idx].sort_values('Name').reset_index()
+    gdf.drop('index', axis=1, inplace=True)
+
+    wgs_epsg = 4326
+    gdf = gdf.to_crs(epsg=wgs_epsg)
+
+    gdf['Slip rate preferred value'] = gdf['SR_pref']
+    gdf['Slip rate filter'] = f'≥{slip_rate} mm/yr'
+    gdf['Source for linework and slip rate assessment'] = 'NZ CFM v1.0 (Seebeck et al. 2022, 2023)'
+    gdf = gdf[['Name', 'Slip rate preferred value',
+               'Slip rate filter',
+               'Source for linework and slip rate assessment',
+               'geometry']]
+
+    return gdf
 
 
 
@@ -110,13 +166,10 @@ def calc_distance_to_faults(
 
 
 def build_d_value_dataframe() -> "pdt.DataFrame":
-    in_path = Path(RESOURCES_FOLDER) / "pipeline/v2/input_data/original_gis"
 
-    filename = in_path / "CFM_5mmyr" / "NZ_CFM_v1_0_SR_Pref_5mmyr+.shp"
-    faults = gpd.read_file(filename)
+    faults = filter_cfm_by_sliprate(CFM_URL)
 
-    filename = in_path / "polygons_locations.geojson"
-    polygons = gpd.read_file(filename).set_index("UR2022_V_2")
+    polygons = cleanup_polygon_gpd(POLYGON_PATH)
 
     D_polygons = calc_distance_to_faults(polygons, faults)
 
