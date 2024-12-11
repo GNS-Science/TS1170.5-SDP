@@ -21,7 +21,7 @@ h5py = "^3.11.0"
 geopandas = "^1.0.1"
 openpyxl = "^3.1.5"
 toshi-hazard-store = {git = "https://github.com/GNS-Science/toshi-hazard-store.git"}
-nzshm-common = {git = "https://github.com/GNS-Science/nzshm-common-py.git", rev = "pre-release"}
+nzshm-common = "^0.8.4"
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}
