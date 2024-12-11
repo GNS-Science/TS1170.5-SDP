@@ -181,4 +181,4 @@ TC_N_SF = 2
 CFM_URL = r"https://www.gns.cri.nz/assets/Data-and-Resources/Download-files/Community-Hazard-Model/NZ_CFM_v1_0_shapefile.zip"
 
 # path to polygon file from Nick
-POLYGON_PATH = Path(RESOURCES_FOLDER) / "pipeline/v1/input_data/original_gis" / "polygons_locations.geojson"
+POLYGON_PATH = Path(RESOURCES_FOLDER) / "pipeline/v1/input_data" / "polygons_locations.geojson"

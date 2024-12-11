@@ -23,6 +23,9 @@ from nzssdt_2023.publish.convert import (
     sat_table_json_path,
     to_standard_json,
 )
+from nzssdt_2023.data_creation.gis_data import (
+    save_gdf_to_geojson,
+)
 
 # configure logging
 logging.basicConfig(level=logging.INFO)
@@ -66,6 +69,8 @@ named_path = sat_table_json_path(
 gridded_path = sat_table_json_path(
     version_folder, named_sites=False, site_limit=site_limit, combo=True
 )
+polygons_path = Path(version_folder,'urban_area_polygons.geojson')
+faults_path = Path(version_folder,'major_faults.geojson')
 
 if override | (not named_path.exists()) | (not gridded_path.exists()):
 
@@ -92,3 +97,5 @@ if override | (not named_path.exists()) | (not gridded_path.exists()):
     # write the files
     to_standard_json(complete.named_location_df(), named_path)
     to_standard_json(complete.grid_location_df(), gridded_path)
+
+if override | (not polygons_path.exists()) | (not faults_path.exists()):

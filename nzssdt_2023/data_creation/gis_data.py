@@ -5,7 +5,7 @@ This module creates .geojson version of all gis data and calculates D (distance)
 
 
 from pathlib import Path
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Tuple
 
 import geopandas as gpd
 import pandas as pd
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 def save_gdf_to_geojson(gdf: "gpdt.DataFrame", path, include_idx=False):
-    """
+    """ Saves a geodataframe to a .geojson file
 
     TODO: set up typing for the path input
 
@@ -86,8 +86,9 @@ def cleanup_polygon_gpd(polygon_path) -> "gpdt.DataFrame":
     """
 
     # read original file
-    gdf = gpd.read_file(filename).set_index('UR2022_V_2')[['geometry']]
+    gdf = gpd.read_file(polygon_path).set_index('UR2022_V_2')[['geometry']]
     gdf['Name'] = gdf.index
+    gdf.set_index('Name',inplace=True)
 
     # sort the order
     polygon_list = polygon_location_list()
@@ -147,8 +148,8 @@ def calc_distance_to_faults(
         df: dataframe of distance from each location to the closest fault
     """
     meter_epsg = 2193
-    faults.to_crs(epsg=meter_epsg)
-    gdf = gdf.to_crs(epsg=meter_epsg)
+    faults.to_crs(epsg=meter_epsg,inplace=True)
+    gdf.to_crs(epsg=meter_epsg,inplace=True)
 
     gdf["distance"] = round(
         gdf.geometry.apply(lambda x: faults.distance(x).min()) / 1000.0
@@ -158,18 +159,29 @@ def calc_distance_to_faults(
     gdf.loc[gdf["D"] >= 20, "D"] = None
 
     wgs_epsg = 4326
-    gdf = gdf.to_crs(epsg=wgs_epsg)
+    gdf.to_crs(epsg=wgs_epsg,inplace=True)
 
     gdf.index.names = [""]
 
     return gdf[["D"]]
 
 
-def build_d_value_dataframe() -> "pdt.DataFrame":
+def create_fault_and_polygon_gpds() -> Tuple["gpdt.DataFrame","gpdt.DataFrame"]:
+    """ Creates the two geodataframes for resource output
 
-    faults = filter_cfm_by_sliprate(CFM_URL)
+    Returns:
+        faults: geodataframe of major faults
+        polygons: geodataframe of urban area polygons
+    """
 
     polygons = cleanup_polygon_gpd(POLYGON_PATH)
+    faults = filter_cfm_by_sliprate(CFM_URL)
+
+    return faults, polygons
+
+def build_d_value_dataframe() -> "pdt.DataFrame":
+
+    faults, polygons = create_fault_and_polygon_gpds()
 
     D_polygons = calc_distance_to_faults(polygons, faults)
 
@@ -181,13 +193,3 @@ def build_d_value_dataframe() -> "pdt.DataFrame":
     D_grid = calc_distance_to_faults(grid, faults)
     return pd.concat([D_polygons, D_grid])
 
-
-# if __name__ == "__main__":
-#
-#     d_values_df = build_d_value_dataframe()
-#     print(d_values_df)
-#     out_path = Path(WORKING_FOLDER)
-#     assert (
-#         out_path.exists() and out_path.is_dir()
-#     ), f"Path {out_path} was not found or is not a folder."
-#     d_values_df.to_json(out_path / "D_values.json")
