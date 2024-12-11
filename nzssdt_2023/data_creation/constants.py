@@ -2,14 +2,14 @@
 This module contains constants.
 """
 
+from pathlib import Path
 from typing import Any, Dict, NamedTuple
 
 import numpy as np
 from nzshm_common.location.location import LOCATION_LISTS, location_by_id
 from toshi_hazard_store.model import ProbabilityEnum
 
-from pathlib import Path
-from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER
 
 
 class SiteClass(NamedTuple):
@@ -178,7 +178,9 @@ PSV_N_DP = 2
 TC_N_SF = 2
 
 # url for zipped Community Fault Model
-CFM_URL = r"https://www.gns.cri.nz/assets/Data-and-Resources/Download-files/Community-Hazard-Model/NZ_CFM_v1_0_shapefile.zip"
+CFM_URL = r"https://www.gns.cri.nz/assets/Data-and-Resources/Download-files/Community-Hazard-Model/NZ_CFM_v1_0_shapefile.zip"  # noqa
 
 # path to polygon file from Nick
-POLYGON_PATH = Path(RESOURCES_FOLDER) / "pipeline/v1/input_data" / "polygons_locations.geojson"
+POLYGON_PATH = (
+    Path(RESOURCES_FOLDER) / "pipeline/v1/input_data" / "polygons_locations.geojson"
+)

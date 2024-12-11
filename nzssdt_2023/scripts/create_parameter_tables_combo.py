@@ -14,6 +14,11 @@ from nzssdt_2023.config import WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
+from nzssdt_2023.data_creation.gis_data import (
+    build_d_value_dataframe,
+    create_fault_and_polygon_gpds,
+    save_gdf_to_geojson,
+)
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import query_NSHM_to_hdf5
 from nzssdt_2023.data_creation.query_NSHM import create_sites_df
 from nzssdt_2023.publish.convert import (
@@ -22,11 +27,6 @@ from nzssdt_2023.publish.convert import (
     SatTable,
     sat_table_json_path,
     to_standard_json,
-)
-from nzssdt_2023.data_creation.gis_data import (
-    save_gdf_to_geojson,
-    create_fault_and_polygon_gpds,
-    build_d_value_dataframe
 )
 
 # configure logging
@@ -71,11 +71,16 @@ named_path = sat_table_json_path(
 gridded_path = sat_table_json_path(
     version_folder, named_sites=False, site_limit=site_limit, combo=True
 )
-polygons_path = Path(version_folder,'urban_area_polygons.geojson')
-faults_path = Path(version_folder,'major_faults.geojson')
-d_values_path = Path(WORKING_FOLDER,'D_values.json')
+polygons_path = Path(version_folder, "urban_area_polygons.geojson")
+faults_path = Path(version_folder, "major_faults.geojson")
+d_values_path = Path(WORKING_FOLDER, "D_values.json")
 
-if override | (not polygons_path.exists()) | (not faults_path.exists()) | (not d_values_path.exists()):
+if (
+    override
+    | (not polygons_path.exists())
+    | (not faults_path.exists())
+    | (not d_values_path.exists())
+):
     faults, polygons = create_fault_and_polygon_gpds()
     d_values = build_d_value_dataframe()
 
@@ -108,4 +113,3 @@ if override | (not named_path.exists()) | (not gridded_path.exists()):
     # write the files
     to_standard_json(complete.named_location_df(), named_path)
     to_standard_json(complete.grid_location_df(), gridded_path)
-

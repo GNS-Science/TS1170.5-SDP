@@ -4,23 +4,25 @@ This module creates .geojson version of all gis data and calculates D (distance)
 """
 
 
-from pathlib import Path
 from typing import TYPE_CHECKING, List, Tuple
 
 import geopandas as gpd
 import pandas as pd
 
-from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
+from nzssdt_2023.data_creation.constants import (
+    CFM_URL,
+    LOCATION_REPLACEMENTS,
+    POLYGON_PATH,
+)
 from nzssdt_2023.data_creation.query_NSHM import create_sites_df
-from nzssdt_2023.data_creation.constants import LOCATION_REPLACEMENTS, CFM_URL, POLYGON_PATH
 
 if TYPE_CHECKING:
-    import pandas.typing as pdt
     import geopandas.typing as gpdt
+    import pandas.typing as pdt
 
 
 def save_gdf_to_geojson(gdf: "gpdt.DataFrame", path, include_idx=False):
-    """ Saves a geodataframe to a .geojson file
+    """Saves a geodataframe to a .geojson file
 
     TODO: set up typing for the path input
 
@@ -34,7 +36,7 @@ def save_gdf_to_geojson(gdf: "gpdt.DataFrame", path, include_idx=False):
 
 
 def polygon_location_list() -> List[str]:
-    """ Returns the urban and rural settlement names, excluding those that do not have their own polygon
+    """Returns the urban and rural settlement names, excluding those that do not have their own polygon
 
     Returns:
         polygon_list: ordered list of polygon names
@@ -46,34 +48,12 @@ def polygon_location_list() -> List[str]:
         for replaced_location in LOCATION_REPLACEMENTS[location].replaced_locations:
             replaced_locations.append(replaced_location)
 
-    polygon_list = [loc for loc in ts_urban_locations_list if loc not in replaced_locations]
+    polygon_list = [
+        loc for loc in ts_urban_locations_list if loc not in replaced_locations
+    ]
 
     return polygon_list
 
-
-# def polygons_to_clean_geojson(version):
-#     """Creates a new file without the extra columns in the polygon.geojson from Nick Horspool
-#
-#     File is save in the {RESOURCES}/{version}
-#     """
-#     # read original file
-#     in_path = Path(RESOURCES_FOLDER) / "pipeline" / version / "input_data/original_gis"
-#     filename = in_path / "polygons_locations.geojson"
-#     gdf = gpd.read_file(filename).set_index('UR2022_V_2')[['geometry']]
-#     gdf['Name'] = gdf.index
-#
-#     # sort the order
-#     polygon_list = polygon_location_list()
-#     gdf = gdf.loc[polygon_list, :]
-#
-#     # convert to WGS84
-#     wgs_epsg = 4326
-#     gdf = gdf.to_crs(epsg=wgs_epsg)
-#
-#     # save new file
-#     out_path = Path(RESOURCES_FOLDER) / version
-#     filename = out_path / "urban_area_polygons.geojson"
-#     gdf.to_file(filename, driver="GeoJSON", index=False)
 
 def cleanup_polygon_gpd(polygon_path) -> "gpdt.DataFrame":
     """Removes extra columns from input polygon file
@@ -86,9 +66,9 @@ def cleanup_polygon_gpd(polygon_path) -> "gpdt.DataFrame":
     """
 
     # read original file
-    gdf = gpd.read_file(polygon_path).set_index('UR2022_V_2')[['geometry']]
-    gdf['Name'] = gdf.index
-    gdf.set_index('Name',inplace=True)
+    gdf = gpd.read_file(polygon_path).set_index("UR2022_V_2")[["geometry"]]
+    gdf["Name"] = gdf.index
+    gdf.set_index("Name", inplace=True)
 
     # sort the order
     polygon_list = polygon_location_list()
@@ -101,7 +81,7 @@ def cleanup_polygon_gpd(polygon_path) -> "gpdt.DataFrame":
     return gdf
 
 
-def filter_cfm_by_sliprate(cfm_url, slip_rate: float = 5.) -> "gpdt.DataFrame":
+def filter_cfm_by_sliprate(cfm_url, slip_rate: float = 5.0) -> "gpdt.DataFrame":
     """Filters the original Community Fault Model (CFM) .shp file
 
     The faults are filtered by the (Slip Rate Preferred >=5 mmyr) criterion.
@@ -115,24 +95,29 @@ def filter_cfm_by_sliprate(cfm_url, slip_rate: float = 5.) -> "gpdt.DataFrame":
 
     gdf = gpd.read_file(cfm_url)
 
-    idx = gdf['SR_pref'] >= slip_rate
-    gdf = gdf[idx].sort_values('Name').reset_index()
-    gdf.drop('index', axis=1, inplace=True)
+    idx = gdf["SR_pref"] >= slip_rate
+    gdf = gdf[idx].sort_values("Name").reset_index()
+    gdf.drop("index", axis=1, inplace=True)
 
     wgs_epsg = 4326
     gdf = gdf.to_crs(epsg=wgs_epsg)
 
-    gdf['Slip rate preferred value'] = gdf['SR_pref']
-    gdf['Slip rate filter'] = f'≥{slip_rate} mm/yr'
-    gdf['Source for linework and slip rate assessment'] = 'NZ CFM v1.0 (Seebeck et al. 2022, 2023)'
-    gdf = gdf[['Name', 'Slip rate preferred value',
-               'Slip rate filter',
-               'Source for linework and slip rate assessment',
-               'geometry']]
+    gdf["Slip rate preferred value"] = gdf["SR_pref"]
+    gdf["Slip rate filter"] = f"≥{slip_rate} mm/yr"
+    gdf[
+        "Source for linework and slip rate assessment"
+    ] = "NZ CFM v1.0 (Seebeck et al. 2022, 2023)"
+    gdf = gdf[
+        [
+            "Name",
+            "Slip rate preferred value",
+            "Slip rate filter",
+            "Source for linework and slip rate assessment",
+            "geometry",
+        ]
+    ]
 
     return gdf
-
-
 
 
 def calc_distance_to_faults(
@@ -148,8 +133,8 @@ def calc_distance_to_faults(
         df: dataframe of distance from each location to the closest fault
     """
     meter_epsg = 2193
-    faults.to_crs(epsg=meter_epsg,inplace=True)
-    gdf.to_crs(epsg=meter_epsg,inplace=True)
+    faults.to_crs(epsg=meter_epsg, inplace=True)
+    gdf.to_crs(epsg=meter_epsg, inplace=True)
 
     gdf["distance"] = round(
         gdf.geometry.apply(lambda x: faults.distance(x).min()) / 1000.0
@@ -159,15 +144,15 @@ def calc_distance_to_faults(
     gdf.loc[gdf["D"] >= 20, "D"] = None
 
     wgs_epsg = 4326
-    gdf.to_crs(epsg=wgs_epsg,inplace=True)
+    gdf.to_crs(epsg=wgs_epsg, inplace=True)
 
     gdf.index.names = [""]
 
     return gdf[["D"]]
 
 
-def create_fault_and_polygon_gpds() -> Tuple["gpdt.DataFrame","gpdt.DataFrame"]:
-    """ Creates the two geodataframes for resource output
+def create_fault_and_polygon_gpds() -> Tuple["gpdt.DataFrame", "gpdt.DataFrame"]:
+    """Creates the two geodataframes for resource output
 
     Returns:
         faults: geodataframe of major faults
@@ -178,6 +163,7 @@ def create_fault_and_polygon_gpds() -> Tuple["gpdt.DataFrame","gpdt.DataFrame"]:
     faults = filter_cfm_by_sliprate(CFM_URL)
 
     return faults, polygons
+
 
 def build_d_value_dataframe() -> "pdt.DataFrame":
 
@@ -192,4 +178,3 @@ def build_d_value_dataframe() -> "pdt.DataFrame":
     )
     D_grid = calc_distance_to_faults(grid, faults)
     return pd.concat([D_polygons, D_grid])
-

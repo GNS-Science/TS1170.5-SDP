@@ -8,7 +8,6 @@ TODO:
         not available can be looked up and added to the cache.
 """
 import itertools
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, List
 
@@ -30,10 +29,9 @@ from nzssdt_2023.data_creation.sa_parameter_generation import replace_relevant_l
 from .util import set_coded_location_resolution
 
 if TYPE_CHECKING:
-    import geopandas.typing as gpdt
     import pandas.typing as pdt
 
-from nzssdt_2023.config import DISAGG_HAZARD_ID, RESOURCES_FOLDER, WORKING_FOLDER
+from nzssdt_2023.config import DISAGG_HAZARD_ID, WORKING_FOLDER
 
 # prevent SettingWithCopyWarning
 pd.options.mode.copy_on_write = True
