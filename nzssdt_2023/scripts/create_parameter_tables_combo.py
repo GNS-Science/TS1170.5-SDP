@@ -40,7 +40,7 @@ def create_parameter_tables(
     version_folder = Path(
         PurePath(os.path.realpath(__file__)).parent.parent.parent,
         "resources",
-        f"v_{version}",
+        f"v{version}",
     )
 
     hf_path = (

@@ -8,7 +8,7 @@ import pandas as pd
 
 from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.publish.convert import sat_table_json_path
-from nzssdt_2023.publish.report_condensed_v2 import publish_reports
+from nzssdt_2023.publish.report_condensed_v2 import publish_gridded, publish_named
 
 # from nzssdt_2023.build import build_version_one  # noqa: typing
 from nzssdt_2023.versioning import VersionManager
@@ -81,13 +81,21 @@ def build_version_artefacts(version_id, verbose, no_cache, site_limit):
 @click.option("--verbose", "-V", is_flag=True, default=False)
 @click.option("--json-limit", type=int, default=0)
 @click.option("--report-limit", type=int, default=0)
-def build_reports(version_id, final, verbose, json_limit, report_limit):
+@click.option(
+    "--table",
+    "-f",
+    type=click.Choice(["named", "gridded"]),
+    default=["named", "gridded"],
+    multiple=True,
+)
+def build_reports(version_id, final, verbose, json_limit, report_limit, table):
     """build reports and csv from json tables"""
     if verbose:
         click.echo("report for version: %s" % version_id)
+        click.echo(f"table(s): {table}")
 
-    output_folder = Path(RESOURCES_FOLDER).parent / "reports" / f"v_{version_id}"
-    version_folder = Path(RESOURCES_FOLDER).parent / "resources" / f"v_{version_id}"
+    output_folder = Path(RESOURCES_FOLDER).parent / "reports" / f"v{version_id}"
+    version_folder = Path(RESOURCES_FOLDER).parent / "resources" / f"v{version_id}"
 
     # data paths
     named_path = sat_table_json_path(
@@ -97,17 +105,25 @@ def build_reports(version_id, final, verbose, json_limit, report_limit):
         version_folder, named_sites=False, site_limit=json_limit, combo=True
     )
 
-    named_df = pd.read_json(named_path, orient="table")
-    grid_df = pd.read_json(gridded_path, orient="table")
+    if "named" in table:
+        named_df = pd.read_json(named_path, orient="table")
+        publish_named(
+            named_df,
+            output_folder,
+            True,  # CSV
+            location_limit=report_limit,
+            is_final=final,
+        )
 
-    publish_reports(
-        named_df,
-        grid_df,
-        output_folder,
-        True,
-        location_limit=report_limit,
-        is_final=final,
-    )
+    if "gridded" in table:
+        grid_df = pd.read_json(gridded_path, orient="table")
+        publish_gridded(
+            grid_df,
+            output_folder,
+            True,  # CSV
+            location_limit=report_limit,
+            is_final=final,
+        )
 
 
 if __name__ == "__main__":
