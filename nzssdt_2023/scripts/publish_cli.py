@@ -1,9 +1,14 @@
 """A simple Command Line Interface to manage the resources files."""
 
 # import os
-# from pathlib import Path
+from pathlib import Path
 
 import click
+import pandas as pd
+
+from nzssdt_2023.config import RESOURCES_FOLDER
+from nzssdt_2023.publish.convert import sat_table_json_path
+from nzssdt_2023.publish.report_condensed_v2 import publish_reports
 
 # from nzssdt_2023.build import build_version_one  # noqa: typing
 from nzssdt_2023.versioning import VersionManager
@@ -67,6 +72,41 @@ def build_version_artefacts(version_id, verbose, no_cache, site_limit):
         site_limit=site_limit,
         no_cache=no_cache,
         overwrite_json=True,
+    )
+
+
+@cli.command("report")
+@click.argument("version_id")
+@click.option("--final", is_flag=True, default=False)
+@click.option("--verbose", "-V", is_flag=True, default=False)
+@click.option("--json-limit", type=int, default=0)
+@click.option("--report-limit", type=int, default=0)
+def build_reports(version_id, final, verbose, json_limit, report_limit):
+    """build reports and csv from json tables"""
+    if verbose:
+        click.echo("report for version: %s" % version_id)
+
+    output_folder = Path(RESOURCES_FOLDER).parent / "reports" / f"v_{version_id}"
+    version_folder = Path(RESOURCES_FOLDER).parent / "resources" / f"v_{version_id}"
+
+    # data paths
+    named_path = sat_table_json_path(
+        version_folder, named_sites=True, site_limit=json_limit, combo=True
+    )
+    gridded_path = sat_table_json_path(
+        version_folder, named_sites=False, site_limit=json_limit, combo=True
+    )
+
+    named_df = pd.read_json(named_path, orient="table")
+    grid_df = pd.read_json(gridded_path, orient="table")
+
+    publish_reports(
+        named_df,
+        grid_df,
+        output_folder,
+        True,
+        location_limit=report_limit,
+        is_final=final,
     )
 
 

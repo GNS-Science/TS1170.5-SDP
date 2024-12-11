@@ -49,7 +49,6 @@ def create_parameter_tables(
         else working_folder / "all_hcurves.hdf5"
     )
 
-    # site_list: Optional[list[str]] = None
     site_list = list(
         pd.concat(
             [

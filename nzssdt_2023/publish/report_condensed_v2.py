@@ -59,9 +59,7 @@ medium_font = TrueTypeFont.true_type_font_from_file(
 
 
 def build_report_page(
-    table_id: str,
-    rowdata=List[List],
-    table_part: int = 1,
+    table_id: str, rowdata=List[List], table_part: int = 1, is_final: bool = False
 ):
 
     # create Document (needed for borbs page layout engine )
@@ -79,7 +77,7 @@ def build_report_page(
     doc.add_page(page)
 
     # add watermark
-    if WATERMARK_ENABLED:
+    if not is_final and WATERMARK_ENABLED:
         Watermark(
             text="DRAFT " + time.strftime("%Y-%m-%d %H:%M"),
             # font="Helvetica-bold",
@@ -413,8 +411,7 @@ def locations_tuple_padded(location: str, modify_locations: bool):
 
 
 def generate_table_rows(
-    combo_table: pd.DataFrame,
-    modify_locations: bool = False,
+    combo_table: pd.DataFrame, modify_locations: bool = False, location_limit: int = 0
 ) -> Iterator:
     count = 0
 
@@ -438,7 +435,7 @@ def generate_table_rows(
         if count % 10 == 0:
             print(f"row count: {count}")
 
-        if LOCATION_LIMIT and (count >= LOCATION_LIMIT):
+        if location_limit and (count >= location_limit):
             break
 
 
@@ -459,16 +456,67 @@ def chunks(items, chunk_size):
         yield chunk
 
 
-def build_pdf_report_pages(location_df: pd.DataFrame, report_name: str):
+def build_pdf_report_pages(
+    location_df: pd.DataFrame,
+    report_name: str,
+    is_final: bool = False,
+    location_limit: int = 0,
+):
     print("build_pdf_report_pages", report_name, report_name == "named")
     ### PDF
-    table_rows = generate_table_rows(location_df, report_name == "named")
+    table_rows = generate_table_rows(
+        location_df, report_name == "named", location_limit
+    )
     for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_BLOCKS)):
         yield build_report_page(
-            f"{report_name}",
-            list(chunk),
-            table_part=idx + 1,
+            f"{report_name}", list(chunk), table_part=idx + 1, is_final=is_final
         )
+
+
+def publish_reports(
+    named_df: pd.DataFrame,
+    grid_df: pd.DataFrame,
+    output_folder: Path,
+    produce_csv: bool = True,
+    is_final: bool = False,
+    location_limit: int = 0,
+):
+
+    report_grps = list(zip([0, 1], [named_df, grid_df]))
+    report_grp_titles = ["3.4", "3.5"]
+    report_names = ["named", "gridded"]
+
+    for report_grp, location_df in report_grps:
+
+        filename = f"{report_names[report_grp]}_location_report_v2-DRAFT"
+        print(f"report: {filename}")
+
+        report: Document = Document()
+
+        if produce_csv:
+            csv_rows = generate_csv_rows(
+                location_df, report_names[report_grp] == "named"
+            )
+
+            ### CSV
+            with open(Path(output_folder, filename + ".csv"), "w") as out_csv:
+                writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
+                header = ["location", "location_ascii", "apoe", "M", "D"]
+                for sss in SITE_CLASSES:
+                    for attr in ["PGA", "Sas", "Tc", "Td"]:
+                        header.append(f"{sss}-{attr}")
+                writer.writerow(header)
+                for row in csv_rows:
+                    writer.writerow(row)
+
+        # PDF
+        for page in build_pdf_report_pages(
+            location_df, report_grp_titles[report_grp], is_final, location_limit
+        ):
+            report.add_page(page)
+
+        with open(Path(output_folder, filename + ".pdf"), "wb") as out_file_handle:
+            PDF.dumps(out_file_handle, report)
 
 
 if __name__ == "__main__":
@@ -491,35 +539,4 @@ if __name__ == "__main__":
     named_df = combo_named_table()
     grid_df = combo_grid_table()
 
-    report_grps = list(zip([0, 1], [named_df, grid_df]))
-    report_grp_titles = ["3.4", "3.5"]
-    report_names = ["named", "gridded"]
-
-    for report_grp, location_df in report_grps:
-
-        filename = f"{report_names[report_grp]}_location_report_v2-DRAFT"
-        print(f"report: {filename}")
-
-        report: Document = Document()
-
-        if PRODUCE_CSV:
-            csv_rows = generate_csv_rows(
-                location_df, report_names[report_grp] == "named"
-            )
-
-            ### CSV
-            with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
-                writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
-                header = ["location", "location_ascii", "apoe", "M", "D"]
-                for sss in SITE_CLASSES:
-                    for attr in ["PGA", "Sas", "Tc", "Td"]:
-                        header.append(f"{sss}-{attr}")
-                writer.writerow(header)
-                for row in csv_rows:
-                    writer.writerow(row)
-
-        for page in build_pdf_report_pages(location_df, report_names[report_grp]):
-            report.add_page(page)
-
-        with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
-            PDF.dumps(out_file_handle, report)
+    publish_reports(named_df, grid_df, OUTPUT_FOLDER, PRODUCE_CSV, location_limit=5)
