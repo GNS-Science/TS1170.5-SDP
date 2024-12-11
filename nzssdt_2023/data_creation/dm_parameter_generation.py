@@ -117,10 +117,7 @@ def create_D_and_M_df(
         D_and_M: dataframe of the d and m tables
     """
 
-    folder = Path(RESOURCES_FOLDER, "pipeline", "v1", "input_data")
-    assert os.path.isdir(folder)
-
-    D_values = pd.read_json(Path(folder, "D_values.json"))
+    D_values = pd.read_json(Path(WORKING_FOLDER, "D_values.json"))
     D_sites = [site for site in list(D_values.index) if site in site_list]
 
     APoEs = [f"APoE: 1/{rp}" for rp in rp_list]

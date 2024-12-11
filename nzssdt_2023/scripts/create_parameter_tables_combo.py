@@ -25,6 +25,8 @@ from nzssdt_2023.publish.convert import (
 )
 from nzssdt_2023.data_creation.gis_data import (
     save_gdf_to_geojson,
+    create_fault_and_polygon_gpds,
+    build_d_value_dataframe
 )
 
 # configure logging
@@ -71,6 +73,15 @@ gridded_path = sat_table_json_path(
 )
 polygons_path = Path(version_folder,'urban_area_polygons.geojson')
 faults_path = Path(version_folder,'major_faults.geojson')
+d_values_path = Path(WORKING_FOLDER,'D_values.json')
+
+if override | (not polygons_path.exists()) | (not faults_path.exists()) | (not d_values_path.exists()):
+    faults, polygons = create_fault_and_polygon_gpds()
+    d_values = build_d_value_dataframe()
+
+    save_gdf_to_geojson(faults, faults_path)
+    save_gdf_to_geojson(polygons, polygons_path, include_idx=True)
+    d_values.to_json(d_values_path)
 
 if override | (not named_path.exists()) | (not gridded_path.exists()):
 
@@ -98,4 +109,3 @@ if override | (not named_path.exists()) | (not gridded_path.exists()):
     to_standard_json(complete.named_location_df(), named_path)
     to_standard_json(complete.grid_location_df(), gridded_path)
 
-if override | (not polygons_path.exists()) | (not faults_path.exists()):
