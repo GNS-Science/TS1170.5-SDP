@@ -7,5 +7,6 @@ from .versioning import (
     IncludedFile,
     VersionInfo,
     VersionManager,
+    ensure_resource_folder,
     standard_output_filename,
 )

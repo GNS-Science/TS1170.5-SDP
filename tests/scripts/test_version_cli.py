@@ -6,26 +6,33 @@ from nzssdt_2023.scripts.version_cli import cli as version
 from nzssdt_2023.versioning import VersionInfo
 
 
-def test_ls():
+@pytest.mark.parametrize("options", [None, "--verbose"])
+def test_ls(options):
     runner = CliRunner()
-    result = runner.invoke(version, ["ls"])
+    cmdline = ["ls"]
+    if options:
+        cmdline += options.split(" ")
+    result = runner.invoke(version, cmdline)
     assert result.exit_code == 0
     assert "1" in result.output
 
-
-def test_ls_verbose():
-    runner = CliRunner()
-    result = runner.invoke(version, ["ls", "--verbose"])
-    assert result.exit_code == 0
-    assert "1, NSHM_v1.0.4" in result.output
+    if options and "--verbose" in options:
+        assert "1, NSHM_v1.0.4" in result.output
 
 
-def test_init_verbose(mocker):
+@pytest.mark.parametrize("options", [None, "--verbose"])
+def test_publish(mocker, options):
     version_manager = version_cli.version_manager
+
     # patch the underlying functions
     vi_og = VersionInfo("MY_NEW_VER", "NSHM_v99")
-    vi_new = VersionInfo("MY_NEW_ONE", "NSHM_v00")
+    vi_new = VersionInfo(
+        "MY_NEW_ONE", "NSHM_v00", description="Read all about the new one"
+    )
 
+    mocked_vi_collect = mocker.patch.object(
+        VersionInfo, "collect_manifest", return_value=[]
+    )
     mocked_read_version_list = mocker.patch.object(
         version_manager, "read_version_list", return_value={vi_og.version_id: vi_og}
     )
@@ -34,24 +41,55 @@ def test_init_verbose(mocker):
     )
 
     runner = CliRunner()
-    result = runner.invoke(
-        version, ["init", "MY_NEW_ONE", "-N", "NSHM_v00", "--verbose"]
-    )
+
+    cmdline = ["publish", "MY_NEW_ONE", "NSHM_v00", "Read all about the new one"]
+    if options:
+        cmdline += options.split(" ")
+    result = runner.invoke(version, cmdline)
+
+    print(result.output)
+    assert result.exit_code == 0
 
     mocked_read_version_list.assert_called_once()
+    mocked_vi_collect.assert_called_once()
     mocked_write_version_list.assert_called_once_with([vi_og, vi_new])
 
     print(result.output)
 
+    if options and "--verbose" in options:
+        assert vi_new.version_id in result.output
+        assert vi_new.nzshm_model_version in result.output
+        assert vi_new.description in result.output
+
+    if options and "--verbose" in options and "--merge" not in options:
+        assert "Wrote new version" in result.output
+
+
+@pytest.mark.parametrize("options", [None, "--verbose"])
+def test_init_verbose(mocker, options):
+    mock_ensure_resource_folder = mocker.patch.object(
+        version_cli, "ensure_resource_folder"
+    )
+
+    runner = CliRunner()
+    cmdline = ["init", "MY_NEW_ONE"]
+    if options:
+        cmdline += options.split(" ")
+    result = runner.invoke(version, cmdline)
+
+    print(result.output)
     assert result.exit_code == 0
-    assert f"VersionInfo(version_id='{vi_new.version_id}'" in result.output
-    assert f"nzshm_model_version='{vi_new.nzshm_model_version}'" in result.output
+
+    mock_ensure_resource_folder.assert_called_once_with("MY_NEW_ONE")
+
+    if options and "--verbose" in options:
+        assert "init resource for version_id: MY_NEW_ONE" in result.output
 
 
 def test_info(mocker):
     version_manager = version_cli.version_manager
     # patch the underlying functions
-    vi_og = version_cli.VersionInfo("MY_NEW_VER", "NSHM_v99")
+    vi_og = version_cli.VersionInfo("MY_NEW_VER", "NSHM_v99", description="about me")
 
     mocked_read_version_list = mocker.patch.object(
         version_manager, "read_version_list", return_value={vi_og.version_id: vi_og}
@@ -64,3 +102,6 @@ def test_info(mocker):
     print(result.output)
     assert result.exit_code == 0
     assert str(vi_og) in result.output
+    assert vi_og.version_id in result.output
+    assert vi_og.nzshm_model_version in result.output
+    assert vi_og.description in result.output
