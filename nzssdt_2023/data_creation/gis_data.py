@@ -3,12 +3,15 @@ This module creates .geojson version of all gis data and calculates D (distance)
 
 """
 
-
-from typing import TYPE_CHECKING, List, Tuple
+import logging
+import os
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 import geopandas as gpd
 import pandas as pd
 
+from nzssdt_2023.config import WORKING_FOLDER
 from nzssdt_2023.data_creation.constants import (
     CFM_URL,
     LOCATION_REPLACEMENTS,
@@ -19,6 +22,8 @@ from nzssdt_2023.data_creation.query_NSHM import create_sites_df
 if TYPE_CHECKING:
     import geopandas.typing as gpdt
     import pandas.typing as pdt
+
+log = logging.getLogger(__name__)
 
 
 def save_gdf_to_geojson(gdf: "gpdt.DataFrame", path, include_idx=False):
@@ -165,7 +170,41 @@ def create_fault_and_polygon_gpds() -> Tuple["gpdt.DataFrame", "gpdt.DataFrame"]
     return faults, polygons
 
 
+def create_geojson_files(
+    polygons_path: Union[str | Path],
+    faults_path: Union[str | Path],
+    override: bool = False,
+):
+    """Create the .geojsons for the version resources
+
+    Args:
+        polygons_path: path to polygon .geojson
+        faults_path: path to faults .geojson
+        override: if True, rewrite all files
+
+    """
+
+    if override | (not Path(polygons_path).exists()) | (not Path(faults_path).exists()):
+
+        faults, polygons = create_fault_and_polygon_gpds()
+
+        save_gdf_to_geojson(faults, faults_path)
+        save_gdf_to_geojson(polygons, polygons_path, include_idx=True)
+
+    if override:
+        d_values_path = Path(WORKING_FOLDER, "D_values.json")
+        if d_values_path.exists():
+            os.remove(d_values_path)
+
+
 def build_d_value_dataframe() -> "pdt.DataFrame":
+    """Calculates the distance from faults to each named location and grid point
+
+    The number of sites considered is always the full amount, regardless of whether
+    the site_list has been reduced for the rest of the table generation
+
+    """
+    log.info("build_d_value_dataframe() processesing distance to fault for each site")
 
     faults, polygons = create_fault_and_polygon_gpds()
 

@@ -16,6 +16,7 @@ import pandas as pd
 from toshi_hazard_store.model import AggregationEnum
 
 from nzssdt_2023.data_creation.constants import DEFAULT_RPS
+from nzssdt_2023.data_creation.gis_data import build_d_value_dataframe
 from nzssdt_2023.data_creation.mean_magnitudes import (
     empty_mean_mag_df,
     frequency_to_poe,
@@ -115,7 +116,13 @@ def create_D_and_M_df(
         D_and_M: dataframe of the d and m tables
     """
 
-    D_values = pd.read_json(Path(WORKING_FOLDER, "D_values.json"))
+    d_values_path = Path(WORKING_FOLDER, "D_values.json")
+    if not d_values_path.exists():
+        D_values = build_d_value_dataframe()
+        D_values.to_json(d_values_path)
+    else:
+        D_values = pd.read_json(d_values_path)
+
     D_sites = [site for site in list(D_values.index) if site in site_list]
 
     APoEs = [f"APoE: 1/{rp}" for rp in rp_list]
