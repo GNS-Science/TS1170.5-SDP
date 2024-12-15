@@ -71,3 +71,9 @@ def sa_table_original(monkeymodule, mini_hcurves_hdf5_path):
 @pytest.fixture(scope="module")
 def sa_table_reduced(mini_hcurves_hdf5_path):
     yield sa_gen.create_sa_table(mini_hcurves_hdf5_path)
+
+
+@pytest.fixture(scope="module")
+def dandm_v1():
+    path = FIXTURES / "gis_data/D_and_M_with_floor.csv"
+    yield pd.read_csv(path,index_col="Location")

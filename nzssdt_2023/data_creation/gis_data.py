@@ -203,6 +203,9 @@ def build_d_value_dataframe() -> "pdt.DataFrame":
     The number of sites considered is always the full amount, regardless of whether
     the site_list has been reduced for the rest of the table generation
 
+    Returns:
+
+
     """
     log.info("build_d_value_dataframe() processesing distance to fault for each site")
 
@@ -216,4 +219,8 @@ def build_d_value_dataframe() -> "pdt.DataFrame":
         data=grid_df,
     )
     D_grid = calc_distance_to_faults(grid, faults)
-    return pd.concat([D_polygons, D_grid])
+
+    D_values = pd.concat([D_polygons, D_grid])
+    D_values.index.name = 'Location'
+
+    return D_values

@@ -5,6 +5,8 @@ import pandas.testing
 from toshi_hazard_store.model import AggregationEnum
 
 import nzssdt_2023.data_creation.dm_parameter_generation as dm_parameter_generation
+from nzssdt_2023.data_creation.gis_data import build_d_value_dataframe
+from nzssdt_2023.data_creation.constants import LOCATION_REPLACEMENTS
 
 SITE_NAMES = ["Paihia", "Opua", "-46.200~166.600"]
 FREQUENCIES = [
@@ -64,7 +66,7 @@ def test_extract_m_values_poes1(mean_mags_fixture, workingfolder_fixture):
     print(df_cache)
 
 
-# new locatinos and new poes
+# new locations and new poes
 def test_extract_m_values_poes2(mean_mags_fixture, workingfolder_fixture):
 
     _ = dm_parameter_generation.extract_m_values(SITE_NAMES, FREQUENCIES, AGG)
@@ -77,7 +79,7 @@ def test_extract_m_values_poes2(mean_mags_fixture, workingfolder_fixture):
     assert (df1.columns == frequencies).all()
 
 
-# subset of loations and new poes
+# subset of locations and new poes
 def test_extract_m_values_poes3(mean_mags_fixture, workingfolder_fixture):
 
     _ = dm_parameter_generation.extract_m_values(SITE_NAMES, FREQUENCIES, AGG)
@@ -99,3 +101,25 @@ def test_extract_m_values_poes3(mean_mags_fixture, workingfolder_fixture):
     )
     assert (df.columns == frequencies).all()
     assert not df.isnull().values.any()
+
+
+# test generated D values against v1 fixture
+def test_D_values_against_v1(dandm_v1):
+
+    # remove v1 locations that don't have their own polygon
+    replaced_locations = []
+    for location in LOCATION_REPLACEMENTS:
+        for replaced_location in LOCATION_REPLACEMENTS[location].replaced_locations:
+            replaced_locations.append(replaced_location)
+    dandm_v1.drop(replaced_locations, axis=0, inplace=True)
+
+    # generate new D values
+    D_values = build_d_value_dataframe()
+
+    # Hamilton and Te Puke are flipped. Confirm that there is no difference in the index sets
+    assert list(dandm_v1.index.difference(D_values.index)) == []
+    assert list(D_values.index.difference(dandm_v1.index)) == []
+
+    # confirm that the reordered D values are the same
+    assert D_values.loc[dandm_v1.index,'D'].equals(dandm_v1['D'])
+
