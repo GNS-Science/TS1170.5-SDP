@@ -9,7 +9,9 @@ version_manager = VersionManager()
 
 @click.group()
 def cli():
-    """A CLI for managing versions of the NZ Seismic Site Demand Tables for TS1170.5"""
+    """A CLI for managing version metadata for the resource artefacts
+    of the NZ Seismic Site Demand Tables for TS1170.5
+    """
 
 
 @cli.command("init")
@@ -31,11 +33,15 @@ def init(version_id, verbose):
 @click.argument("nzshm-model", type=str)
 @click.argument("description", type=str)
 @click.option("--verbose", "-V", is_flag=True, default=False)
-def publish(version_id, nzshm_model, description, verbose):
-    """Write version info to version list"""
+@click.option("--update", "-U", is_flag=True, default=False)
+def publish(version_id, nzshm_model, description, verbose, update):
+    """Write version info to the version list"""
     vi = VersionInfo(version_id, nzshm_model, description)
     vi.collect_manifest()
-    version_manager.add(vi)
+    if update:
+        version_manager.update(vi)
+    else:
+        version_manager.add(vi)
     if verbose:
         click.echo(f"Wrote new version: {vi}")
 

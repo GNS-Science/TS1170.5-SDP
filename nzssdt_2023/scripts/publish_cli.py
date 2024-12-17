@@ -20,31 +20,7 @@ version_manager = VersionManager()
 
 @click.group()
 def cli():
-    """Main CLI for the NZ Seismic Site Demand Table 2023 (NZSSDT 2023)"""
-
-
-# @cli.command("add")
-# @click.argument("version_id")
-# @click.option("--nzshm_model_version", "-N", default="NSHM_v1.0.4")
-# @click.option("--verbose", "-V", is_flag=True, default=False)
-# def build_and_append_version(version_id, nzshm_model_version, verbose):
-#     """Add a new published version of NZSSDT 2023"""
-#     if verbose:
-#         click.echo("nzshm_model_version: %s" % nzshm_model_version)
-#         click.echo("build version: %s" % version_id)
-
-#     # TODO: more than just v1 !!
-#     if version_id == 1:
-#         vi = build_version_one()
-
-#         # update the version list
-#         current_versions = version_manager.read_version_list()
-#         current_versions.append(vi)
-#         version_manager.write_version_list(current_versions)
-#         click.echo(f"Wrote our new version {vi}")
-#         return
-
-#     click.echo("did nothing, sorry")
+    """The main CLI for the building the table components"""
 
 
 @cli.command("build")
@@ -53,9 +29,16 @@ def cli():
 @click.option("--no-cache", is_flag=True, default=False)
 @click.option("--site-limit", type=int, default=0)
 def build_version_artefacts(version_id, verbose, no_cache, site_limit):
-    """build json tables
+    """Build the resource/v{n}/json tables from a given model version
 
-    Notes:
+    TODO: pass/handle the NSHM model version.
+    TODO: split into component part for more convenient testing
+        part 1) geojson + D&M
+        part 2) retrive hazard curves from the model and build HDF5 cache
+        part 3) create json combo tables
+        part 4) run reports (see report below)
+
+    Usage:
         requires env configuration
 
         NZSHM22_HAZARD_STORE_LOCAL_CACHE=~/.cache/toshi_hazard_store
