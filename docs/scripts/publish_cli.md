@@ -1,4 +1,8 @@
+::: nzssdt_2023.scripts.pipeline_cli
+    options:
+        members: no
+
 ::: mkdocs-click
-    :module: nzssdt_2023.scripts.publish_cli
+    :module: nzssdt_2023.scripts.pipeline_cli
     :command: cli
-    :prog_name: publish
+    :prog_name: pipeline
