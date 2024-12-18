@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import geopandas as gpd
 import pandas as pd
 import pytest
 
@@ -77,3 +78,16 @@ def sa_table_reduced(mini_hcurves_hdf5_path):
 def dandm_v1():
     path = FIXTURES / "gis_data/D_and_M_with_floor.csv"
     yield pd.read_csv(path,index_col="Location")
+
+
+@pytest.fixture(scope="module")
+def polygons_v1():
+    path = FIXTURES / "gis_data/urban_area_polygons.geojson"
+    yield gpd.read_file(path)
+
+
+@pytest.fixture(scope="module")
+def faults_v1():
+    path = FIXTURES / "gis_data/major_faults.geojson"
+    yield gpd.read_file(path)
+
