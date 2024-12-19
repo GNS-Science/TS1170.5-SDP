@@ -6,7 +6,6 @@ Complete pipeline from NSHM to pdf (using new formatting)
 import logging
 import os
 from pathlib import Path, PurePath
-
 from typing import List
 
 import pandas as pd
@@ -15,6 +14,7 @@ from nzssdt_2023.config import WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
+
 # from nzssdt_2023.data_creation.gis_data import create_geojson_files
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import query_NSHM_to_hdf5
 from nzssdt_2023.data_creation.query_NSHM import create_sites_df
@@ -34,6 +34,7 @@ log = logging.getLogger(__name__)
 
 working_folder = Path(WORKING_FOLDER)
 
+
 def hf_filepath(site_limit: int = 0, working_folder: Path = working_folder):
     return (
         working_folder / f"first_{site_limit * 2}_hcurves.hdf5"
@@ -42,12 +43,15 @@ def hf_filepath(site_limit: int = 0, working_folder: Path = working_folder):
     )
 
 
-def get_hazard_curves(site_list: List[str], site_limit: int = 0, hazard_id: str = "NSHM_v1.0.4"):
-    """Retrieve the NSHM hazard curves into an HDF5 file into the working folder
-    """
+def get_hazard_curves(
+    site_list: List[str], site_limit: int = 0, hazard_id: str = "NSHM_v1.0.4"
+):
+    """Retrieve the NSHM hazard curves into an HDF5 file into the working folder"""
     hf_path = hf_filepath(site_limit=site_limit)
     log.info(f"building hdf5 for {hazard_id} with {site_limit} sites")
-    query_NSHM_to_hdf5(hf_path, hazard_id=hazard_id, site_list=site_list, site_limit=site_limit)
+    query_NSHM_to_hdf5(
+        hf_path, hazard_id=hazard_id, site_list=site_list, site_limit=site_limit
+    )
 
 
 def get_site_list(site_limit: int = 0):
@@ -60,7 +64,14 @@ def get_site_list(site_limit: int = 0):
         ).index
     )
 
-def build_json_tables(hf_path:Path, site_list: List[str], version: str, site_limit: int = 0, overwrite_json: bool=True):
+
+def build_json_tables(
+    hf_path: Path,
+    site_list: List[str],
+    version: str,
+    site_limit: int = 0,
+    overwrite_json: bool = True,
+):
 
     version_folder = Path(
         PurePath(os.path.realpath(__file__)).parent.parent.parent,
@@ -92,8 +103,13 @@ def build_json_tables(hf_path:Path, site_list: List[str], version: str, site_lim
         to_standard_json(complete.grid_location_df(), gridded_path)
         log.info(f"wrote json files to {named_path.parent}")
 
+
 def create_parameter_tables(
-    version: str, hazard_id: str, site_limit: int = 0, no_cache: bool = False, overwrite_json:bool = True
+    version: str,
+    hazard_id: str,
+    site_limit: int = 0,
+    no_cache: bool = False,
+    overwrite_json: bool = True,
 ):
 
     hf_path = hf_filepath(site_limit=site_limit)
@@ -102,14 +118,16 @@ def create_parameter_tables(
 
     # query NSHM,
     if no_cache | (not hf_path.exists()):
-        get_hazard_curves(site_list=site_list, site_limit=site_limit, hazard_id=hazard_id)
+        get_hazard_curves(
+            site_list=site_list, site_limit=site_limit, hazard_id=hazard_id
+        )
 
     # build the tables
     build_json_tables(hf_path, site_list, version, site_limit, overwrite_json)
+
 
 if __name__ == "__main__":
 
     create_parameter_tables(
         version="cbc", site_limit=5, no_cache=True, overwrite_json=True
     )
-

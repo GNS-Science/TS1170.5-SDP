@@ -29,11 +29,14 @@ from nzssdt_2023.publish.convert import sat_table_json_path
 from nzssdt_2023.publish.report_condensed_v2 import publish_gridded, publish_named
 
 # from nzssdt_2023.build import build_version_one  # noqa: typing
-from nzssdt_2023.versioning import VersionManager, ensure_resource_folder
+from nzssdt_2023.versioning import VersionInfo, VersionManager, ensure_resource_folder
 
 from .create_parameter_tables_combo import (
-    create_parameter_tables, get_hazard_curves, get_site_list,
-    hf_filepath, build_json_tables
+    build_json_tables,
+    create_parameter_tables,
+    get_hazard_curves,
+    get_site_list,
+    hf_filepath,
 )
 
 version_manager = VersionManager()
@@ -76,10 +79,12 @@ def build_nshm(nzshm_model, verbose, site_limit):
         AWS_PROFILE=toshi_batch_devops
     """
     if verbose:
-        click.echo(f"Build the HDF5 from a given model : {nzshm_model} with  {site_limit} sites")
+        click.echo(
+            f"Build the HDF5 from a given model : {nzshm_model} with  {site_limit} sites"
+        )
 
     site_list = get_site_list(site_limit)
-    get_hazard_curves(site_list=site_list, site_limit= site_limit, hazard_id=nzshm_model)
+    get_hazard_curves(site_list=site_list, site_limit=site_limit, hazard_id=nzshm_model)
 
 
 @cli.command("json")
@@ -132,7 +137,7 @@ def build_version_artefacts(version_id, nzshm_model, verbose, no_cache, site_lim
         hazard_id=nzshm_model,
         site_limit=site_limit,
         no_cache=no_cache,
-        overwrite_json=True
+        overwrite_json=True,
     )
 
 
@@ -230,7 +235,6 @@ def version_info(version_id, verbose):
     """Get detailed info for a given version_id"""
     vi = version_manager.get(version_id)
     click.echo(str(vi))
-
 
 
 if __name__ == "__main__":

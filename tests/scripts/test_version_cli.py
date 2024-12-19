@@ -1,8 +1,10 @@
 import pytest  # noqa
 from click.testing import CliRunner
 
-from nzssdt_2023.scripts import version_cli  # module reference for patching
-from nzssdt_2023.scripts.version_cli import cli as version
+from nzssdt_2023.scripts import (
+    pipeline_cli as version_cli,
+)  # module reference for patching
+from nzssdt_2023.scripts.pipeline_cli import cli as version
 from nzssdt_2023.versioning import VersionInfo
 
 

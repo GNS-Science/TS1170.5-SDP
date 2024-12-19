@@ -14,8 +14,7 @@ nav:
   - Process:
     - process.md
     - Scripts:
-      - publish script: scripts/publish_cli.md
-      - version script: scripts/version_cli.md
+      - pipeline script: scripts/pipeline_cli.md
   - Development and Contributing:
     - contributing.md
     - Installation: installation.md
