@@ -108,15 +108,22 @@ def test_M_values_against_v1(dandm_v1):
     legacy = True
 
     site_list = ['Auckland','Christchurch','Dunedin','Hamilton','Kerikeri','Wellington']
+    site_list = list(dandm_v1.index)
     m_values = dm_parameter_generation.extract_m_values(site_list, APoEs, AGG, legacy=legacy)
     Auckland_m_values = dm_parameter_generation.extract_m_values(["Auckland"], APoEs, AggregationEnum._90, legacy=legacy)
 
     for site in site_list:
         for apoe in APoEs:
-            assert (m_values.loc[site,apoe] == dandm_v1.loc[site,apoe]) | \
-                   (Auckland_m_values.loc['Auckland', apoe] == dandm_v1.loc[site, apoe]), \
-                f'{site}, {apoe}: {dandm_v1.loc[site, apoe]}, {m_values.loc[site, apoe]}'
+            # assert (m_values.loc[site,apoe] == dandm_v1.loc[site,apoe]) | \
+            #        (Auckland_m_values.loc['Auckland', apoe] == dandm_v1.loc[site, apoe]), \
+            #     f'{site}, {apoe}: {dandm_v1.loc[site, apoe]}, {m_values.loc[site, apoe]}'
 
+            if not ((m_values.loc[site,apoe] == dandm_v1.loc[site,apoe]) | \
+                   (Auckland_m_values.loc['Auckland', apoe] == dandm_v1.loc[site, apoe])):
+
+                print(f'{site}, {apoe}: {dandm_v1.loc[site, apoe]}, {m_values.loc[site, apoe]}')
+
+    assert 0
 
 
 
