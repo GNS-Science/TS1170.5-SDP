@@ -221,6 +221,6 @@ def build_d_value_dataframe() -> "pdt.DataFrame":
     D_grid = calc_distance_to_faults(grid, faults)
 
     D_values = pd.concat([D_polygons, D_grid])
-    D_values.index.name = 'Location'
+    D_values.index.name = "Location"
 
     return D_values
