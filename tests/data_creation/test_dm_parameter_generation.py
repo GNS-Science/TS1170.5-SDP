@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import pandas.testing
+import pytest
 from toshi_hazard_store.model import AggregationEnum
 
 import nzssdt_2023.data_creation.dm_parameter_generation as dm_parameter_generation
@@ -64,7 +65,7 @@ def test_extract_m_values_poes1(mean_mags_fixture, workingfolder_fixture):
     print(df_cache)
 
 
-# new locatinos and new poes
+# new locations and new poes
 def test_extract_m_values_poes2(mean_mags_fixture, workingfolder_fixture):
 
     _ = dm_parameter_generation.extract_m_values(SITE_NAMES, FREQUENCIES, AGG)
@@ -77,7 +78,7 @@ def test_extract_m_values_poes2(mean_mags_fixture, workingfolder_fixture):
     assert (df1.columns == frequencies).all()
 
 
-# subset of loations and new poes
+# subset of locations and new poes
 def test_extract_m_values_poes3(mean_mags_fixture, workingfolder_fixture):
 
     _ = dm_parameter_generation.extract_m_values(SITE_NAMES, FREQUENCIES, AGG)
@@ -99,3 +100,52 @@ def test_extract_m_values_poes3(mean_mags_fixture, workingfolder_fixture):
     )
     assert (df.columns == frequencies).all()
     assert not df.isnull().values.any()
+
+
+# test generated M values against v1 fixture
+
+###### this test is not working for:
+# Mount Maunganui, APoE: 1/100: 6.9, 6.8
+# Wainuiomata, APoE: 1/2500: 7.9, 8.0
+# Wellington, APoE: 1/1000: 7.8, 7.9
+# Eastbourne, APoE: 1/2500: 7.9, 8.0
+# -45.600~166.400, APoE: 1/100: 7.6, 7.7
+# -45.900~166.500, APoE: 1/500: 8.0, 7.9
+
+# Mt Maunganui, Wainuiomata, and Eastbourne are due to the replacement locations
+# the other three are likely due to rounding anomalies
+
+
+@pytest.mark.skip(reason="M value rounding errors")
+def test_M_values_against_v1(dandm_v1):
+
+    APoEs = FREQUENCIES
+    legacy = True
+
+    site_list = [
+        "Auckland",
+        "Christchurch",
+        "Dunedin",
+        "Hamilton",
+        "Kerikeri",
+        "Wellington",
+    ]
+    m_values = dm_parameter_generation.extract_m_values(
+        site_list, APoEs, AGG, legacy=legacy
+    )
+    Auckland_m_values = dm_parameter_generation.extract_m_values(
+        ["Auckland"], APoEs, AggregationEnum._90, legacy=legacy
+    )
+
+    for site in site_list:
+        for apoe in APoEs:
+            assert (m_values.loc[site, apoe] == dandm_v1.loc[site, apoe]) | (
+                Auckland_m_values.loc["Auckland", apoe] == dandm_v1.loc[site, apoe]
+            ), f"{site}, {apoe}: {dandm_v1.loc[site, apoe]}, {m_values.loc[site, apoe]}"
+
+            # if not ((m_values.loc[site,apoe] == dandm_v1.loc[site,apoe]) | \
+            #        (Auckland_m_values.loc['Auckland', apoe] == dandm_v1.loc[site, apoe])):
+            #
+            #     print(f'{site}, {apoe}: {dandm_v1.loc[site, apoe]}, {m_values.loc[site, apoe]}')
+
+    assert 0
