@@ -22,7 +22,7 @@ Additional parameters include:
 
 <br>
 
-The TS 1170.5 provides two sets of SDP tables, one table for named urban and rural settlements (Table 3.4) and another table for a 0.1 x 0.1 degree grid of latitudes and longitudes (Table 3.5). The tables are provided in three file formats (PDF, JSON, and CSV), along with geospatial data used in deriving the parameter values.
+The TS 1170.5 provides two sets of SDP tables, one table for named urban and rural settlements (Table 3.4) and another table for a 0.1 x 0.1 degree grid of latitudes and longitudes (Table 3.5). The tables are provided in three file formats (PDF, JSON, and CSV), along with geospatial data files used in deriving the parameter values.
 
 <br>
 
@@ -30,6 +30,7 @@ The relevant metadata for each format and links to the files are provided below.
 
 - a python package (provided by GNS Science) for dynamically querying the parameter tables ([insert link]())
 - a webtool (provided by SESOC) for visualising and downloading parameters on a location-by-location basis ([insert link]())
+- the geospatial data can be imported into any software that recognizes the GEOJSON format, including Google Earth Pro (free desktop version)
 
  <br>
 
