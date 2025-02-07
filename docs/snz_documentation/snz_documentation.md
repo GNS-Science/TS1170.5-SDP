@@ -30,13 +30,14 @@ The relevant metadata for each format and links to the files are provided below.
 
 - a python package (provided by GNS Science) for dynamically querying the parameter tables ([insert link]())
 - a webtool (provided by SESOC) for visualising and downloading parameters on a location-by-location basis ([insert link]())
-- the geospatial data can be imported into any software that recognizes the GEOJSON format, including Google Earth Pro (free desktop version)
 
  <br>
 
 <br>
 
 ## File format metadata
+
+<br>
 
 ### SDP tables 
 
@@ -47,11 +48,15 @@ Table | Location type | Example
 **3.4** | &nbsp; named settlement | _Wellington_ 
 **3.5** | lat/lon grid point | _-42.3~174.8_ (with 0.1 degree precision) 
 
+<br>
+
 #### PDF files
 
 Formatted, searchable files, as included in the TS 1170.5 document. Settlement names with macrons are supplemented with a plain text version, for flexible searchability.
 
 ![pdf_table](pdf_table.png)
+
+<br>
 
 #### CSV files
 
@@ -59,22 +64,43 @@ Unformatted, comma separated text files.
 
 ![csv_table](csv_table.png)
 
+<br>
+
 #### JSON files
 
 Python dictionaries including the SDP values and a schema defining the metadata. The dictionary can be read as a pandas table using:
 
-        pandas.read_json(filepath, orient="table",precise_float=True)
+        pandas.read_json(filepath, orient="table", precise_float=True)
 
-![pd_table](placeholder_pd_table.png)
+![json_table](json_table.png)
+
+Note that the format of the JSON table is different from that of the PDF and the CSV, due to its intended use in python environments, rather than as a visual lookup table. The *Location*, *Site Class*, and *APoE (1/n)* columns identify the relevant set of parameters, while the values of those parameters are provided in the *PGA* through *M* columns. Python functions for dynamically querying the table are available at ([insert link]()). Note that the location names use plain text characters rather than macrons.
+
+There are five parameter columns that are not included in the other formats, *PSV* and four parameters labeled *Floor*. These additional parameters were derived during the development of the formal parameters referenced TS Section 3.1.2. The *Tc* values are derived from the *Sa,s* and *PSV* (peak spectral velocity) values. The four *Floor* parameters indicate whether their corresponding parameter was affected by the lower bound hazard (e.g., if *PGA Floor* is True, the *PGA* value was increased from the local mean hazard to the lower bound hazard). While *Tc* does not have a corresponding *Floor* parameter, it is affected by those of *Sa,s* and *PSV*.
 
 <br>
 
 <br>
 
+### Geospatial data
 
-### Geospatial files
+![map](geospatial_map.png)
 
-*Todo: finalise the file format and metadata of the .geojson files.*
+#### Urban area polygons
+
+The urban area polygons define the geographical boundaries of the named settlements in Table 3.4. Any site that is located in one of these named polygons should be assigned the corresponding parameter values. Any site that is not located in a polygon should be assigned the values corresponding to the nearest grid point in Table 3.5. 
+
+Python functions are available at ([insert link]()) for querying the SDP values from the appropriate table for any pair of latitudes and longitudes. The SESOC webtool ([insert link]()) incorporates these functions in a graphical user interface to identify the location on a map, as well as visualise and download the acceleration spectra produced by the SDP values. 
+
+Alternatively, the datafile can be imported into any software that recognizes the GEOJSON file format, including Google Earth Pro (the free desktop version), to visually identify the relevant polygon or grid point from which to read the SDP values.
+
+<br>
+
+#### Major faults
+
+The major faults file defines the geographical location of the faults included in TS Table 3.2. The *D* value is defined in TS 3.1.4 as the shortest distance from the site to a major fault. This distance can be measured based on the geographical locations or it can be assigned from the conservative values provided in Tables 3.4 and 3.5.
+
+The python functions and the webtool mentioned above provide the measured *D* values. Alternatively, the distances can be estimated using other geospatial software, such as the visual point-and-click measurements in Google Earth Pro.
 
 <br>
 
