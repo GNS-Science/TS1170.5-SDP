@@ -7,12 +7,12 @@ Classes:
 
 """
 
-import dacite
 import dataclasses
 import json
 from pathlib import Path
 from typing import Dict, Iterable, Optional, Union
 
+import dacite
 
 from ..config import RESOURCES_FOLDER
 from .dataclass import VersionInfo
