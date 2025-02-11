@@ -14,8 +14,7 @@ from nzssdt_2023.config import WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
-
-# from nzssdt_2023.data_creation.gis_data import create_geojson_files
+from nzssdt_2023.data_creation.gis_data import create_geojson_files
 from nzssdt_2023.data_creation.NSHM_to_hdf5 import query_NSHM_to_hdf5
 from nzssdt_2023.data_creation.query_NSHM import create_sites_df
 from nzssdt_2023.publish.convert import (
@@ -43,18 +42,13 @@ def hf_filepath(site_limit: int = 0, working_folder: Path = working_folder):
     )
 
 
-def get_hazard_curves(
-    site_list: List[str], site_limit: int = 0, hazard_id: str = "NSHM_v1.0.4"
-):
-    """Retrieve the NSHM hazard curves into an HDF5 file into the working folder"""
-    hf_path = hf_filepath(site_limit=site_limit)
-    log.info(f"building hdf5 for {hazard_id} with {site_limit} sites")
-    query_NSHM_to_hdf5(
-        hf_path, hazard_id=hazard_id, site_list=site_list, site_limit=site_limit
-    )
-
-
+# TODO: is this redundant, see NSHM_to_hdf5.query_NSHM_to_hdf5
+# we want index but also the complete df, so split this and then we can pass sites_df to get_hazard_curves etc
 def get_site_list(site_limit: int = 0):
+    """
+    extract relevant sites from nzshm_common sites and named and gridded.
+    constrained by site-limit set
+    """
     return list(
         pd.concat(
             [
@@ -65,6 +59,37 @@ def get_site_list(site_limit: int = 0):
     )
 
 
+def get_hazard_curves(
+    site_list: List[str], site_limit: int = 0, hazard_id: str = "NSHM_v1.0.4"
+):
+    """Retrieve the NSHM hazard curves into an HDF5 file into the working folder.
+
+    Args:
+        site_list: the list of site names.
+        site_limit: the maximum number of sites to retriece.
+        hazard_id: the hazard_id.
+    """
+    hf_path = hf_filepath(site_limit=site_limit)
+    log.info(f"building hdf5 for {hazard_id} with {site_limit} sites")
+    query_NSHM_to_hdf5(
+        hf_path, hazard_id=hazard_id, site_list=site_list, site_limit=site_limit
+    )
+
+
+def get_resources_version_path(version: str):
+    """
+    Get the version folder for the given version.
+
+    Args:
+        version: the version string
+    """
+    return Path(
+        PurePath(os.path.realpath(__file__)).parent.parent.parent,
+        "resources",
+        f"v{version}",
+    )
+
+
 def build_json_tables(
     hf_path: Path,
     site_list: List[str],
@@ -72,12 +97,18 @@ def build_json_tables(
     site_limit: int = 0,
     overwrite_json: bool = True,
 ):
+    """
+    Build the SA and D_and_M tables and write them to json files.
 
-    version_folder = Path(
-        PurePath(os.path.realpath(__file__)).parent.parent.parent,
-        "resources",
-        f"v{version}",
-    )
+    Args:
+        hf_path: the path to the hdf5 file
+        site_list: the list of site names
+        version: the version string
+        site_limit: the number of sites to limit to
+        overwrite_json: whether to overwrite existing json files
+    """
+    version_folder = get_resources_version_path(version)
+
     # output paths
     named_path = sat_table_json_path(
         version_folder, named_sites=True, site_limit=site_limit, combo=True
@@ -104,6 +135,22 @@ def build_json_tables(
         log.info(f"wrote json files to {named_path.parent}")
 
 
+def create_geojsons(version: str, overwrite: bool = False):
+    """
+    Create the geojson files for the urban area polygons and major faults.
+
+    Args:
+        version: the version string
+        override: whether to override existing files
+    """
+    version_folder = get_resources_version_path(version)
+    polygons_path = version_folder / "urban_area_polygons.geojson"
+    faults_path = version_folder / "major_faults.geojson"
+
+    # write geojson files to resources
+    create_geojson_files(polygons_path, faults_path, override=overwrite)
+
+
 def create_parameter_tables(
     version: str,
     hazard_id: str,
@@ -111,6 +158,16 @@ def create_parameter_tables(
     no_cache: bool = False,
     overwrite_json: bool = True,
 ):
+    """
+    Create and save the parameter tables for the given version and hazard_id.
+
+    Args:
+        version: the version string
+        hazard_id: the hazard_id string
+        site_limit: the number of sites to limit to
+        no_cache: whether to ignore the cache
+        overwrite_json: whether to overwrite existing json files
+    """
 
     hf_path = hf_filepath(site_limit=site_limit)
 

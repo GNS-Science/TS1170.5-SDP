@@ -44,7 +44,7 @@ def test_publish(mocker, options):
 
     runner = CliRunner()
 
-    cmdline = ["publish", "MY_NEW_ONE", "NSHM_v00", "Read all about the new one"]
+    cmdline = ["06-publish", "MY_NEW_ONE", "NSHM_v00", "Read all about the new one"]
     if options:
         cmdline += options.split(" ")
     result = runner.invoke(version, cmdline)
@@ -74,7 +74,7 @@ def test_init_verbose(mocker, options):
     )
 
     runner = CliRunner()
-    cmdline = ["init", "MY_NEW_ONE"]
+    cmdline = ["01-init", "MY_NEW_ONE"]
     if options:
         cmdline += options.split(" ")
     result = runner.invoke(version, cmdline)

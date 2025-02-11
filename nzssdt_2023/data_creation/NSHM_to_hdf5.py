@@ -266,6 +266,7 @@ def query_NSHM_to_hdf5(
 
     """
 
+    # TODO: is needed again ??
     sites = pd.concat(
         [
             q_haz.create_sites_df(
