@@ -7,16 +7,6 @@ Version commands:
 
 Pipeline commands:
 
-    # init: step 1 - create the version folder structure
-    # geom: step 2 - extract the crustal fault geometry, with D values from CFM
-    # nshm-json: step 3 - get nshm hazard curves and build json artefacts, OR
-    # nshm: step 3a  - get the NSHM model hazard curves, store HDF5 in working folder
-    # json: step 3b - build json artefacts from HDF5 and store to resources
-    # report: step 4 - build the reports, store csv and PDF to reports folder
-    # publish: step 5 - create or update a version manifest
-
-    # NOT setup: define sites (which maybe reduced for testing)
-
     01-initialise: setup the new version folders
     02-hazard: get NSHM hazard curves (as above, using chosen sites)
     03-tables: build sat & D_M dataframes & convert to *-combo.json for both named and
@@ -102,13 +92,7 @@ def build_nshm(nzshm_model, verbose, site_limit):
 @click.option("--no-cache", is_flag=True, default=False)
 @click.option("--site-limit", type=int, default=0)
 def build_tables(version_id, nzshm_model, verbose, no_cache, site_limit):
-    """Build the resource/v{n}/json tables from a given model version
-
-    Usage:
-        requires env configuration
-
-        WORKING_FOLDER=WORKING
-    """
+    """Build the resource/v{n}/json tables from a given model version."""
     if verbose:
         click.echo(f"build version: {version_id} for model {nzshm_model}")
 
@@ -127,7 +111,7 @@ def build_tables(version_id, nzshm_model, verbose, no_cache, site_limit):
 @click.argument("version_id")
 @click.option("--verbose", "-V", is_flag=True, default=False)
 def build_geometry(version_id, verbose):
-    """Build the geojson artefacts"""
+    """Build the geojson artefacts."""
     if verbose:
         click.echo("geojsons for version: %s" % version_id)
 
@@ -140,7 +124,12 @@ def build_geometry(version_id, verbose):
     "--final", is_flag=True, default=False, help="Final version has no DRAFT watermark"
 )
 @click.option("--verbose", "-V", is_flag=True, default=False)
-@click.option("--json-limit", type=int, default=0)
+@click.option(
+    "--site-limit",
+    type=int,
+    default=0,
+    help="For use when testing, uses input json with the same `site_limit`.",
+)
 @click.option(
     "--report-limit",
     type=int,
@@ -155,7 +144,7 @@ def build_geometry(version_id, verbose):
     multiple=True,
     help="Choose the tables to build",
 )
-def build_reports(version_id, final, verbose, json_limit, report_limit, table):
+def build_reports(version_id, final, verbose, site_limit, report_limit, table):
     """Build PDF reports and csv files from json tables."""
     if verbose:
         click.echo("report for version: %s" % version_id)
@@ -166,10 +155,10 @@ def build_reports(version_id, final, verbose, json_limit, report_limit, table):
 
     # data paths
     named_path = sat_table_json_path(
-        version_folder, named_sites=True, site_limit=json_limit, combo=True
+        version_folder, named_sites=True, site_limit=site_limit, combo=True
     )
     gridded_path = sat_table_json_path(
-        version_folder, named_sites=False, site_limit=json_limit, combo=True
+        version_folder, named_sites=False, site_limit=site_limit, combo=True
     )
 
     if "named" in table:
