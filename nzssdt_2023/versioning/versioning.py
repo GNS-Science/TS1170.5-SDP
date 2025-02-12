@@ -20,16 +20,13 @@ from .dataclass import VersionInfo
 VERSION_LIST_FILENAME = "version_list.json"
 
 
-def ensure_resource_folder(version_id: str, exist_ok: bool = False) -> Path:
-
+def ensure_resource_folders(version_id: str, exist_ok: bool = False):
     version_folder = Path(RESOURCES_FOLDER).parent / "resources" / f"v{version_id}"
-    try:
-        version_folder.mkdir(exist_ok=exist_ok)
-    except (FileExistsError):
-        raise FileExistsError(
-            f"`{version_folder}` for version_id {version_id} already exists."
-        )
-    return version_folder
+    pipeline_folder = (
+        Path(RESOURCES_FOLDER).parent / "resources" / "pipeline" / f"v{version_id}"
+    )
+    version_folder.mkdir(exist_ok=exist_ok)
+    pipeline_folder.mkdir(exist_ok=exist_ok)
 
 
 def standard_output_filename(version: Union[str, "VersionInfo"]):

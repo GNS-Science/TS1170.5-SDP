@@ -4,13 +4,12 @@ Complete pipeline from NSHM to pdf (using new formatting)
 """
 
 import logging
-import os
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import List
 
 import pandas as pd
 
-from nzssdt_2023.config import WORKING_FOLDER
+from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
@@ -49,13 +48,11 @@ def get_site_list(site_limit: int = 0):
     extract relevant sites from nzshm_common sites and named and gridded.
     constrained by site-limit set
     """
-    return list(
-        pd.concat(
-            [
-                create_sites_df(site_limit=site_limit),
-                create_sites_df(named_sites=False, site_limit=site_limit),
-            ]
-        ).index
+    return pd.concat(
+        [
+            create_sites_df(site_limit=site_limit),
+            create_sites_df(named_sites=False, site_limit=site_limit),
+        ]
     )
 
 
@@ -83,11 +80,7 @@ def get_resources_version_path(version: str):
     Args:
         version: the version string
     """
-    return Path(
-        PurePath(os.path.realpath(__file__)).parent.parent.parent,
-        "resources",
-        f"v{version}",
-    )
+    return Path(RESOURCES_FOLDER, f"v{version}")
 
 
 def build_json_tables(
@@ -121,6 +114,7 @@ def build_json_tables(
 
         log.info("build the SA and D_and_M tables")
         sat_df = sa_gen.create_sa_table(hf_path)
+
         dm_df = DistMagTable(
             dm_gen.create_D_and_M_df(site_list, rp_list=constants.DEFAULT_RPS)
         ).flatten()
@@ -143,9 +137,10 @@ def create_geojsons(version: str, overwrite: bool = False):
         version: the version string
         override: whether to override existing files
     """
-    version_folder = get_resources_version_path(version)
-    polygons_path = version_folder / "urban_area_polygons.geojson"
-    faults_path = version_folder / "major_faults.geojson"
+    output_folder = get_resources_version_path(version)
+    # pipeline_folder = Path(RESOURCES_FOLDER, "pipeline" ,  f"v{version}")
+    polygons_path = output_folder / "urban_area_polygons.geojson"
+    faults_path = output_folder / "major_faults.geojson"
 
     # write geojson files to resources
     create_geojson_files(polygons_path, faults_path, override=overwrite)
@@ -161,6 +156,8 @@ def create_parameter_tables(
     """
     Create and save the parameter tables for the given version and hazard_id.
 
+    This will also fetch the hazard curves if needed.
+
     Args:
         version: the version string
         hazard_id: the hazard_id string
@@ -171,16 +168,17 @@ def create_parameter_tables(
 
     hf_path = hf_filepath(site_limit=site_limit)
 
-    site_list = get_site_list(site_limit=site_limit)
+    sites_df = get_site_list(site_limit=site_limit)
 
     # query NSHM,
     if no_cache | (not hf_path.exists()):
         get_hazard_curves(
-            site_list=site_list, site_limit=site_limit, hazard_id=hazard_id
+            site_list=sites_df, site_limit=site_limit, hazard_id=hazard_id
         )
 
     # build the tables
-    build_json_tables(hf_path, site_list, version, site_limit, overwrite_json)
+    sites = sites_df.index.tolist()
+    build_json_tables(hf_path, sites, version, site_limit, overwrite_json)
 
 
 if __name__ == "__main__":

@@ -249,8 +249,8 @@ def save_hdf(hf_name, data):
 
 def query_NSHM_to_hdf5(
     hf_name: Path,
-    hazard_id: str = "NSHM_v1.0.4",
-    site_list: Optional[list[str]] = None,
+    hazard_id: str,
+    site_list: pd.DataFrame,
     site_limit: int = 0,
 ):
     """Query the NSHM and save the results to an hdf5
@@ -258,7 +258,7 @@ def query_NSHM_to_hdf5(
     Args:
         hf_name: name of hdf5 file with hazard curve data
         hazard_id: NSHM model id
-        site_list: list of sites to include in the sa parameter table
+        site_list: sites to include in the sa parameter table
         site_limit: for building test fixtures
 
     Todo:
@@ -266,26 +266,14 @@ def query_NSHM_to_hdf5(
 
     """
 
-    # TODO: is needed again ??
-    sites = pd.concat(
-        [
-            q_haz.create_sites_df(
-                named_sites=True, site_list=site_list, site_limit=site_limit
-            ),
-            q_haz.create_sites_df(
-                named_sites=False, site_list=site_list, site_limit=site_limit
-            ),
-        ]
-    )
-
     # query NSHM
     hcurves, _ = q_haz.retrieve_hazard_curves(
-        sites, VS30_LIST, IMT_LIST, AGG_LIST, hazard_id
+        site_list, VS30_LIST, IMT_LIST, AGG_LIST, hazard_id
     )
 
     # prep hcurves dictionary
     data = create_hcurve_dictionary(
-        sites, VS30_LIST, IMT_LIST, IMTL_LIST, AGG_LIST, hcurves
+        site_list, VS30_LIST, IMT_LIST, IMTL_LIST, AGG_LIST, hcurves
     )
 
     # add uhs spectra

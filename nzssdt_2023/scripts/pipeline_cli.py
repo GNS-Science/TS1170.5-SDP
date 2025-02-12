@@ -40,7 +40,7 @@ from nzssdt_2023.publish.convert import sat_table_json_path
 from nzssdt_2023.publish.report_condensed_v2 import publish_gridded, publish_named
 
 # from nzssdt_2023.build import build_version_one  # noqa: typing
-from nzssdt_2023.versioning import VersionInfo, VersionManager, ensure_resource_folder
+from nzssdt_2023.versioning import VersionInfo, VersionManager, ensure_resource_folders
 
 from .pipeline_steps import (
     create_geojsons,
@@ -61,14 +61,14 @@ def cli():
 @click.argument("version_id", type=str)
 @click.option("--verbose", "-V", is_flag=True, default=False)
 def init(version_id, verbose):
-    """Create the target resource folder for a new version
+    """Create the target resource folders for a new version
 
     STEP #1 -> This should be used before pipeline build steps are run.
     """
     if verbose:
         click.echo(f"init resource for version_id: {version_id}")
 
-    ensure_resource_folder(version_id)
+    ensure_resource_folders(version_id)
 
 
 @cli.command("02-hazard")
@@ -104,15 +104,9 @@ def build_nshm(nzshm_model, verbose, site_limit):
 def build_tables(version_id, nzshm_model, verbose, no_cache, site_limit):
     """Build the resource/v{n}/json tables from a given model version
 
-    TODO: pass/handle the NSHM model version.
-
     Usage:
         requires env configuration
 
-        NZSHM22_HAZARD_STORE_LOCAL_CACHE=~/.cache/toshi_hazard_store
-        NZSHM22_HAZARD_STORE_REGION=ap-southeast-2
-        NZSHM22_HAZARD_STORE_STAGE=PROD
-        AWS_PROFILE=toshi_batch_devops
         WORKING_FOLDER=WORKING
     """
     if verbose:

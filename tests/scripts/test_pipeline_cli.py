@@ -4,7 +4,7 @@ from click.testing import CliRunner
 from nzssdt_2023.scripts import (
     pipeline_cli as version_cli,
 )  # module reference for patching
-from nzssdt_2023.scripts.pipeline_cli import cli as version
+from nzssdt_2023.scripts.pipeline_cli import cli
 from nzssdt_2023.versioning import VersionInfo
 
 
@@ -14,7 +14,7 @@ def test_ls(options):
     cmdline = ["ls"]
     if options:
         cmdline += options.split(" ")
-    result = runner.invoke(version, cmdline)
+    result = runner.invoke(cli, cmdline)
     assert result.exit_code == 0
     assert "1" in result.output
 
@@ -47,7 +47,7 @@ def test_publish(mocker, options):
     cmdline = ["06-publish", "MY_NEW_ONE", "NSHM_v00", "Read all about the new one"]
     if options:
         cmdline += options.split(" ")
-    result = runner.invoke(version, cmdline)
+    result = runner.invoke(cli, cmdline)
 
     print(result.output)
     assert result.exit_code == 0
@@ -68,21 +68,42 @@ def test_publish(mocker, options):
 
 
 @pytest.mark.parametrize("options", [None, "--verbose"])
-def test_init_verbose(mocker, options):
-    mock_ensure_resource_folder = mocker.patch.object(
-        version_cli, "ensure_resource_folder"
+def test_01_init(mocker, options):
+    mock_ensure_resource_folders = mocker.patch.object(
+        version_cli, "ensure_resource_folders"
     )
 
     runner = CliRunner()
     cmdline = ["01-init", "MY_NEW_ONE"]
     if options:
         cmdline += options.split(" ")
-    result = runner.invoke(version, cmdline)
+    result = runner.invoke(cli, cmdline)
 
     print(result.output)
     assert result.exit_code == 0
 
-    mock_ensure_resource_folder.assert_called_once_with("MY_NEW_ONE")
+    mock_ensure_resource_folders.assert_called_once_with("MY_NEW_ONE")
+
+    if options and "--verbose" in options:
+        assert "init resource for version_id: MY_NEW_ONE" in result.output
+
+
+@pytest.mark.parametrize("options", [None, "--verbose"])
+def test_02_hazard(mocker, options):
+    mock_ensure_resource_folders = mocker.patch.object(
+        version_cli, "ensure_resource_folders"
+    )
+
+    runner = CliRunner()
+    cmdline = ["01-init", "MY_NEW_ONE"]
+    if options:
+        cmdline += options.split(" ")
+    result = runner.invoke(cli, cmdline)
+
+    print(result.output)
+    assert result.exit_code == 0
+
+    mock_ensure_resource_folders.assert_called_once_with("MY_NEW_ONE")
 
     if options and "--verbose" in options:
         assert "init resource for version_id: MY_NEW_ONE" in result.output
@@ -98,7 +119,7 @@ def test_info(mocker):
     )
 
     runner = CliRunner()
-    result = runner.invoke(version, ["info", "MY_NEW_VER"])
+    result = runner.invoke(cli, ["info", "MY_NEW_VER"])
 
     mocked_read_version_list.assert_called_once()
     print(result.output)
