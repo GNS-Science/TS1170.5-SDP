@@ -2,7 +2,8 @@
 
 Note:
   - All the time-consuming steps all accept a `site_limit` argument. This is used to run the step using
-    a small chunk of the data - useful for sanity checking. Using the same value (e.g 50) and everything should 'just work'. 
+    a small chunk of the data - useful for sanity checking. Using the same value (e.g 50) and everything
+    should 'just work'.
   - the pipeline_cli script can be run using `poetry run pipeline`.
 Version commands:
 
