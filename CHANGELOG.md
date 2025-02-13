@@ -16,6 +16,7 @@
  - new json artefacts in `resources/v2`
  - new report artefacts in `reports/v2`
  - PDF report value tests to ensure layout display the data correctly.
+ - reports included in VersionInfo json
 
 ### Changed
  - migrated report.py into new `publish` package
@@ -37,7 +38,8 @@
  - use latest `nzshm-common` from pypi
  - v2 json form includes D,M with other parameters in one file, so `d_and_m.json` is no longer published
  - removed redundant decimal places in artefacts
-
+ - `pipeline_cli` commands get numeric prefix
+ -  minor pipeline improvements
 
 ## [0.4.0] 2024-09-11
 

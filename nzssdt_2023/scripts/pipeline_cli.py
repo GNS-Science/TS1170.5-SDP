@@ -1,5 +1,9 @@
-"""One CLI to run the sequential pipeline steps and manage versions.
+"""A CLI to run the sequential pipeline steps and manage versions.
 
+Note:
+  - All the time-consuming steps all accept a `site_limit` argument. This is used to run the step using
+    a small chunk of the data - useful for sanity checking. Using the same value (e.g 50) and everything should 'just work'. 
+  - the pipeline_cli script can be run using `poetry run pipeline`.
 Version commands:
 
     ls: list the published versions
@@ -53,7 +57,7 @@ def cli():
 def init(version_id, verbose):
     """Create the target resource folders for a new version
 
-    STEP #1 -> This should be used before pipeline build steps are run.
+    This should be used before pipeline build steps are run.
     """
     if verbose:
         click.echo(f"init resource for version_id: {version_id}")
@@ -95,8 +99,6 @@ def build_tables(version_id, nzshm_model, verbose, no_cache, site_limit):
     """Build the resource/v{n}/json tables from a given model version."""
     if verbose:
         click.echo(f"build version: {version_id} for model {nzshm_model}")
-
-    # TODO: check bail if output target not available
 
     create_parameter_tables(
         version=version_id,

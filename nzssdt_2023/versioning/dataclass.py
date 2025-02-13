@@ -1,6 +1,6 @@
 #! versioning.py
 """
-This module defines data structures for the resource versions.
+Dataclasses defining structures for versioning.
 """
 
 from dataclasses import dataclass, field
