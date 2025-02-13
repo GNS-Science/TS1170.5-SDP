@@ -37,6 +37,7 @@
         "filepath": "v1/urban_area_polygons.geojson"
       }
     ],
+    "reports": [],
     "nzshm_common_lib_version": "0.6.0"
   }
 ]
