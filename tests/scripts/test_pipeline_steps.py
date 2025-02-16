@@ -36,61 +36,12 @@ def test_get_resources_version_path():
     assert respath.name == "vcbc"
 
 
-@pytest.mark.skip("WIP")
-def test_build_json_tables():
-    # Mocking the necessary functions
-    def mock_create_sa_table(hf_path):
-        return pd.DataFrame({"sa": [1, 2]})
-
-    def mock_D_and_M_df(site_list, rp_list):
-        return pd.DataFrame({"dm": [1, 2]})
-
-    pipeline_steps.sa_gen.create_sa_table = mock_create_sa_table
-    pipeline_steps.dm_gen.create_D_and_M_df = mock_D_and_M_df
-
-    # Mocking the to_standard_json function
-    def mock_to_standard_json(df, path):
-        pass
-
-    pipeline_steps.to_standard_json = mock_to_standard_json
-
-    pipeline_steps.build_json_tables(
-        hf_path="path/to/hdf5",
-        site_list=["site1"],
-        version="cbc",
-        site_limit=2,
-        overwrite_json=True,
-    )
-
-
 def test_create_geojsons():
     # Mocking the create_geojson_files function
     def mock_create_geojson_files(polygons_path, faults_path, override):
         pass
 
     pipeline_steps.create_geojson_files = mock_create_geojson_files
-
     pipeline_steps.create_geojsons(version="cbc", overwrite=True)
 
 
-@pytest.mark.skip("WIP")
-def test_create_parameter_tables():
-    # Mocking the necessary functions
-    def mock_get_hazard_curves(site_list, site_limit, hazard_id):
-        pass
-
-    def mock_build_json_tables(hf_path, site_list, version, site_limit, overwrite_json):
-        pass
-
-    pipeline_steps.get_hazard_curves = mock_get_hazard_curves
-    pipeline_steps.build_json_tables = mock_build_json_tables
-
-    # Mocking the to_standard_json function
-    def mock_to_standard_json(df, path):
-        pass
-
-    pipeline_steps.to_standard_json = mock_to_standard_json
-
-    pipeline_steps.create_parameter_tables(
-        version="cbc", site_limit=5, no_cache=True, overwrite_json=True
-    )
