@@ -1,5 +1,5 @@
 """
-Build PDF and equivalent CSV table structures for version 2+ using the OLD format.
+Build PDF and equivalent CSV table structures for version 2+ using the new table format.
 
 This module uses the `borb` library to produce the PDF document.
 

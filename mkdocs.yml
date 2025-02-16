@@ -11,22 +11,19 @@ nav:
   - Usage:
     - usage.md
     - Versions: versions.md
-  - Process:
-    - process.md
-    - Scripts:
-      - pipeline script: scripts/pipeline_cli.md
+  - Process: scripts/pipeline_cli.md
+  - API:
+    - nzssdt: api/index.md
+    - nzssdt.build: api/build.md
+    - nzssdt.config: api/config.md
+    - nzssdt.versioning: api/versioning.md
+    - nzssdt.data_creation: api/data_creation.md
+    - nzssdt.convert: api/convert.md
+    - nzssdt.publish: api/publish.md
   - Development and Contributing:
     - contributing.md
     - Installation: installation.md
     - Testing: testing.md
-    - API:
-      - nzssdt: api/index.md
-      - nzssdt.build: api/build.md
-      - nzssdt.config: api/config.md
-      - nzssdt.versioning: api/versioning.md
-      - nzssdt.data_creation: api/data_creation.md
-      - nzssdt.convert: api/convert.md
-      - nzssdt.publish: api/publish.md
   - Changelog: changelog.md
 theme:
   name: material

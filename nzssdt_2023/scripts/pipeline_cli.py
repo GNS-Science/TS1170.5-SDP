@@ -1,28 +1,28 @@
 """A CLI to run the sequential pipeline steps and manage versions.
 
-Note:
-  - All the time-consuming steps all accept a `site_limit` argument. This is used to run the step using
-    a small chunk of the data - useful for sanity checking. Using the same value (e.g 50) and everything
-    should 'just work'.
+**General**
+
+  - All the time-consuming steps all accept a `site_limit` argument. This is used to run the steps using
+    a small chunk of the data - useful for sanity checking. Use the same value (e.g 50) for each step.
   - the pipeline_cli script can be run using `poetry run pipeline`.
-Version commands:
+  - check command `--help` for detailed advice.
 
-    ls: list the published versions
-    info: get metadata about a given version
+**Pipeline commands:**
 
-Pipeline commands:
+  - **01-initialise**: creates new version folders in `resources` & `reports` folders.
+  - **02-hazard**: get NSHM hazard curves.
+  - **03-tables**: build sat & D_M tables and save as `*-combo.json` for both named and
+        gridded sites.
+  - **04-geometry**: build geojson artefacts:
+       -  from CFM get major faults geojson.
+       -  from nicks file `resources\\pipeline\\v2\\polygons_locations.geojson`.
+  - **05-report**: create reports in PDF & CSV format.
+  - **06-publish**: seal the version, recording details in `resources\\version_list.json`.
 
-    01-initialise: setup the new version folders
-    02-hazard: get NSHM hazard curves (as above, using chosen sites)
-    03-tables: build sat & D_M dataframes & convert to *-combo.json for both named and
-                gridded (again using chosen sites) **needs a geopandas_df (like geometry)**
-    04-geometry:
-       -  from CFM get major faults to geojson
-       -  from nicks file and polygons into geojson form
-    05-report: create reports & csv
-       - NOTE here we'll usually validate with NZS/stakeholders e.g. making minor adjustments to formatting.
-    06-publish: seal the new version
+**Version commands:**
 
+  - **ls**: list the published versions
+  - **info**: get metadata about a given version
 """
 
 from pathlib import Path

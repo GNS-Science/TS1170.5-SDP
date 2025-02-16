@@ -39,7 +39,10 @@
  - v2 json form includes D,M with other parameters in one file, so `d_and_m.json` is no longer published
  - removed redundant decimal places in artefacts
  - `pipeline_cli` commands get numeric prefix
- -  minor pipeline improvements
+ - minor pipeline improvements
+ - revised pipeline_cli docs
+ - simplified mkdocs index structure
+
 
 ## [0.4.0] 2024-09-11
 
