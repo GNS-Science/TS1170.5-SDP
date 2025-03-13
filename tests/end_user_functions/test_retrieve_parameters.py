@@ -13,7 +13,10 @@ from end_user_functions.query_parameters import (
     retrieve_md_parameters,
     parameters_by_location_id,
 )
-
+from end_user_functions.geospatial_analysis import (
+    identify_location_id,
+    calculate_distance_to_point,
+)
 
 @pytest.mark.parametrize(
     "location_id, apoe_n, site_class, expected_parameters",
@@ -46,3 +49,20 @@ def test_parameters_by_location_id(location_id,expected_parameters_by_location_i
     expected_df = pd.DataFrame(expected_parameters_by_location_id[location_id]).fillna('NULL')
 
     assert df.equals(expected_df)
+
+
+@pytest.mark.parametrize(
+    "latlon, expected_location_id",
+    [((-41.25,174.775),"Wellington"),
+     ((-41.25,174.65),"-41.2~174.6"),
+     ((-41.35,174.65),"outside NZ"),
+     ],
+)
+def test_identify_location_id(latlon, expected_location_id):
+
+    latitude, longitude = latlon
+
+    print(expected_location_id)
+    print(identify_location_id(longitude, latitude))
+
+    assert expected_location_id == identify_location_id(longitude, latitude)

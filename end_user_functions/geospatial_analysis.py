@@ -9,8 +9,20 @@ from shapely.geometry import Point
 from end_user_functions.constants import (
     POLYGONS,
     FAULTS,
-    GRID_PTS
+    GRID_PTS,
+    NZ_MAP
 )
+
+def check_location_in_nz(longitude, latitude):
+    """ Checks whether the latitude and longitude falls within New Zealand
+
+    Args:
+        longitude:
+        latitude:
+
+    Returns:
+
+    """
 
 def identify_location_id(longitude, latitude):
     """ Identifies the TS location assigned to a latitute and longitude
@@ -22,24 +34,31 @@ def identify_location_id(longitude, latitude):
     Returns:
         location_id: name of the relevant TS location
     """
-    # identify polygons that the point falls within
-    point_location = Point(longitude, latitude)
-    within_idx = POLYGONS.contains(point_location)
 
-    # if point falls in a polygon
-    if sum(within_idx) > 0:
-        # confirm that it only falls in one polygon
-        assert sum(within_idx) == 1, 'Point falls within more than one polygon'
-        location_id = POLYGONS[within_idx].index[0]
+    # check whether point falls within New Zealand
+    if sum(NZ_MAP.contains(Point(longitude, latitude)))>0:
 
-    # if point does not fall in a polygon
+        # identify polygons that the point falls within
+        point_location = Point(longitude, latitude)
+        within_idx = POLYGONS.contains(point_location)
+
+        # if point falls in a polygon
+        if sum(within_idx) > 0:
+            # confirm that it only falls in one polygon
+            assert sum(within_idx) == 1, 'Point falls within more than one polygon'
+            location_id = POLYGONS[within_idx].index[0]
+
+        # if point does not fall in a polygon
+        else:
+            # calculate distance to all grid points
+            grid_dist = GRID_PTS.geometry.apply(lambda x: point_location.distance(x)).round(4)
+            # find the closest locations (ordered by northwest, NE, SW, SE)
+            closest_idx = np.where(grid_dist == grid_dist.min())[0]
+            # for equidistant points, take the first
+            location_id = GRID_PTS.index[closest_idx[0]]
+
     else:
-        # calculate distance to all grid points
-        grid_dist = GRID_PTS.geometry.apply(lambda x: point_location.distance(x)).round(4)
-        # find the closest locations (ordered by northwest, NE, SW, SE)
-        closest_idx = np.where(grid_dist == grid_dist.min())[0]
-        # for equidistant points, take the first
-        location_id = GRID_PTS.index[closest_idx[0]]
+        location_id = "outside NZ"
 
     return location_id
 
