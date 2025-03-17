@@ -13,16 +13,6 @@ from end_user_functions.constants import (
     NZ_MAP
 )
 
-def check_location_in_nz(longitude, latitude):
-    """ Checks whether the latitude and longitude falls within New Zealand
-
-    Args:
-        longitude:
-        latitude:
-
-    Returns:
-
-    """
 
 def identify_location_id(longitude, latitude):
     """ Identifies the TS location assigned to a latitute and longitude
@@ -63,13 +53,13 @@ def identify_location_id(longitude, latitude):
     return location_id
 
 
-def calculate_distance_to_point(longitude, latitude, round_down=False):
+def calculate_distance_to_fault(longitude, latitude, round_down=True):
     """ Calculates the distance from a point to the nearest fault
 
     Args:
         longitude: longitude of the point of interest
         latitude: latitude of the point of interest
-        round_down: true rounding to nearest integer (default) or to lower integer
+        round_down: true rounding to nearest integer or to lower integer (default)
 
     Returns:
         d: distance to fault, reported to nearest kilometre
@@ -84,9 +74,12 @@ def calculate_distance_to_point(longitude, latitude, round_down=False):
     # calculate minimum distance to fault
     d = latlon_nztm.geometry.apply(lambda x: faults_nztm.distance(x).min()) / 1000.
 
-    # round down to lower integer (NOT DEFAULT BEHAVIOR)
+    print(d)
+
+    # round down to lower integer (DEFAULT BEHAVIOR)
     if round_down:
         d = np.floor(d[0])
+    # round to nearest integer
     else:
         d = np.round(d[0])
 

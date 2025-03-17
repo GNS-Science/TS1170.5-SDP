@@ -15,7 +15,7 @@ from end_user_functions.query_parameters import (
 )
 from end_user_functions.geospatial_analysis import (
     identify_location_id,
-    calculate_distance_to_point,
+    calculate_distance_to_fault,
 )
 
 @pytest.mark.parametrize(
@@ -62,7 +62,18 @@ def test_identify_location_id(latlon, expected_location_id):
 
     latitude, longitude = latlon
 
-    print(expected_location_id)
-    print(identify_location_id(longitude, latitude))
-
     assert expected_location_id == identify_location_id(longitude, latitude)
+
+
+@pytest.mark.parametrize(
+    "latlon, round_down, expected_d",
+    [((-41.25,174.65),True,9),
+     ((-41.25,174.65),False,10),
+     ((-41.32,174.65),True,4),
+     ],
+)
+def test_distance_to_fault(latlon, round_down, expected_d):
+
+    latitude, longitude = latlon
+
+    assert expected_d == calculate_distance_to_fault(longitude, latitude, round_down)
