@@ -2,7 +2,7 @@
   {
     "version_id": "1",
     "nzshm_model_version": "NSHM_v1.0.4",
-    "description": null,
+    "description": "first version for engineering committee review and feedback.",
     "conversions": [
       {
         "input_filepath": "pipeline/v1/SaT-variables_v5_corrected-locations.pkl",
@@ -37,6 +37,7 @@
         "filepath": "v1/urban_area_polygons.geojson"
       }
     ],
+    "reports": [],
     "nzshm_common_lib_version": "0.6.0"
   }
 ]

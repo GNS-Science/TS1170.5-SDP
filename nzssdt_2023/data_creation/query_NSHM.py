@@ -50,8 +50,9 @@ def create_sites_df(
         # if no list is passed, include all named sites
         if site_list is None:
             site_list = [location_by_id(loc_id)["name"] for loc_id in id_list]
-            if site_limit:
-                site_list = site_list[:site_limit]
+
+        if site_limit:
+            site_list = site_list[:site_limit]
 
         controlling_site = LOWER_BOUND_PARAMETERS["controlling_site"]
         if controlling_site not in site_list:
@@ -91,16 +92,35 @@ def create_sites_df(
         i_loc = grid_locs.index((-34.7, 172.7))
         grid_locs = grid_locs[0:i_loc] + grid_locs[i_loc + 1 :]
 
-        site_list = []
-        for gloc in grid_locs:
-            loc = CodedLocation(*gloc, resolution=0.001)
-            site_list.append(loc.code)
+        # if no list is passed, include all gridded sites
+        if site_list is None:
+            site_list = [
+                CodedLocation(*gloc, resolution=0.001).code for gloc in grid_locs
+            ]
+        else:
+            # remove named sites
+            new_site_list = []
+            for latlon in site_list:
+                try:
+                    lat, lon = latlon.split("~")
+                    new_site_list.append(latlon)
+                except ValueError as exc:
+                    print(f"got {exc} for {latlon}")
+                    continue
+                site_list = new_site_list
+
+        if site_limit:
+            site_list = site_list[:site_limit]
 
         # print(site_list)
         # create the df of gridded locations
         sites = pd.DataFrame(index=site_list, dtype="str")
         for latlon in site_list:
-            lat, lon = latlon.split("~")
+            try:
+                lat, lon = latlon.split("~")
+            except ValueError as exc:
+                print(f"got {exc} for {latlon}")
+                continue
             sites.loc[latlon, ["latlon", "lat", "lon"]] = [latlon, lat, lon]
 
         # remove sites based on latlon

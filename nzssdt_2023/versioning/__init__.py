@@ -2,10 +2,9 @@
 this package contains the versioning features for the library.
 
 """
+from .dataclass import ConvertedFile, IncludedFile, VersionInfo
 from .versioning import (
-    ConvertedFile,
-    IncludedFile,
-    VersionInfo,
     VersionManager,
+    ensure_resource_folders,
     standard_output_filename,
 )

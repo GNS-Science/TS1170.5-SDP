@@ -28,4 +28,4 @@ The file **[version_list.json](https://github.com/GNS-Science/nzssdt-2023/blob/m
 
 ## For NSHM and SRWG members
 
-See the process documentation
+See the [process pipeline documentation](./scripts/pipeline_cli.md)

@@ -1,10 +1,7 @@
 """
-Build PDF and equivalent CSV table structures for version 2+ using the OLD format.
+Build PDF and equivalent CSV table structures for version 2+ using the new table format.
 
 This module uses the `borb` library to produce the PDF document.
-
-TODO:
- - [x] extra column Td to each soil/site class
 
 methods:
  build_report_page
@@ -59,9 +56,7 @@ medium_font = TrueTypeFont.true_type_font_from_file(
 
 
 def build_report_page(
-    table_id: str,
-    rowdata=List[List],
-    table_part: int = 1,
+    table_id: str, rowdata=List[List], table_part: int = 1, is_final: bool = False
 ):
 
     # create Document (needed for borbs page layout engine )
@@ -79,7 +74,7 @@ def build_report_page(
     doc.add_page(page)
 
     # add watermark
-    if WATERMARK_ENABLED:
+    if not is_final and WATERMARK_ENABLED:
         Watermark(
             text="DRAFT " + time.strftime("%Y-%m-%d %H:%M"),
             # font="Helvetica-bold",
@@ -107,7 +102,7 @@ def build_report_page(
         number_of_columns=4 + (6 * 4),  # 4 intro, + 4 parameters per siteclass = 28
         number_of_rows=2 + (len(rowdata) * len(constants.DEFAULT_RPS)),
         # adjust the ratios of column widths for this FixedColumnWidthTable
-        column_widths=[Decimal(1.75), Decimal(0.75), Decimal(0.5), Decimal(0.5)]
+        column_widths=[Decimal(1.7), Decimal(0.8), Decimal(0.5), Decimal(0.5)]
         + 6 * [Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)],
     )
 
@@ -248,7 +243,7 @@ def build_report_page(
     # data rows
     for row in rowdata:
         # row[0] is location
-        # print("@@@ row:", row)
+        print("@@@ row:", row)
 
         if row[0][1] == row[0][0]:
             location_str = row[0][0]
@@ -256,6 +251,7 @@ def build_report_page(
             location_str = (
                 row[0][0] + ', "' + searchable_ascii_name(row[0][0], row[0][1]) + '"'
             )  # add 2nd chunk for searching anglicised names (no macrons)
+        print(f"build_report_page location_str: {location_str}")
         table.add(
             TableCell(
                 Paragraph(
@@ -269,56 +265,8 @@ def build_report_page(
                 row_span=len(constants.DEFAULT_RPS),
             )
         )
-        ###
-        #
-        #  This was an attempt to do transparent text.
-        #  It works except for values [`Waihi Bowentown`  `Ōakura (New Plymouth District)`]
-        #
-        # else:
-        #  1st Chunk is visible Macronnised names
-        #     # chunks = [
-        #     #                 ChunkOfText(
-        #     #                     row[0][0] + " " +  searchable_ascii_name(row[0][0], row[0][1]),
-        #     #                     # font="Helvetica",
-        #     #                     font=medium_font,
-        #     #                     font_size=Decimal(8),
-        #     #                     # font_color=HexColor("ffffff"),
-        #     #                     # font_transparency=100
-        #     #                 ),
-        #  2nd chunk for searching anglicised names (no macrons)
-        #     #                 # ChunkOfText("  " + searchable_ascii_name(row[0][0], row[0][1]),
-        #     #                 #     font_size=Decimal(3),
-        #     #                 #     font=medium_font,
-        #     #                 #     font_color=HexColor("fefefe"),
-        #     #                 # ),
-        #     #                 # ChunkOfText(
-        #     #                 #     ,   (can't rotate yet)
-        #     #                 #     # font="Helvetica",
-        #     #                 #     font=medium_font,
-        #     #                 #     font_size=Decimal(8),
-        #     #                 #     font_color=HexColor("ffffff"),
-        #     #                 # ),
-        #     #             ]
-        #     # # chunks = reversed(chunks)
-        #     # table.add(
-        #     #     TableCell(
-        #     #         HeterogeneousParagraph(
-        #     #             chunks,
-        #     #             horizontal_alignment=Alignment.LEFT,
-        #     #             vertical_alignment=Alignment.MIDDLE,
-        #     #         ),
-        #     #         # Paragraph(row[0][0],
-        #     #         #     font=medium_font,
-        #     #         #     font_size=Decimal(8),
-        #     #         # ),
-        #     #         row_span=len(constants.DEFAULT_RPS),
-        #     #     )
-        #     # )
-
-        # print(row[1])
 
         for subrow in row[1]:
-            # print(f"**** {len(subrow)} {subrow}")
             for cell in subrow:
                 try:
                     table.add(
@@ -374,15 +322,11 @@ def generate_location_block(combo_table: pd.DataFrame, location: str) -> Iterato
     site_classes = location_df["Site Class"].unique().tolist()
     apoes = location_df["APoE (1/n)"].unique().tolist()
 
-    # print(location_df)
-    # print(location_df.index)
-
     for apoe in apoes:
         rec = location_df[
             (location_df["Site Class"] == "I") & (location_df["APoE (1/n)"] == apoe)
         ]  # get site_class I
-        # print(rec[])
-        # assert 0
+
         d_str = format_D(rec["D"].to_list()[0], apoe)
         row = [f"1/{apoe}", rec["M"].to_list()[0], d_str]
         for site_class in site_classes:
@@ -397,7 +341,7 @@ def generate_location_block(combo_table: pd.DataFrame, location: str) -> Iterato
                     round(sc_tup.Tc, 2),
                     round(sc_tup.Td, 1),
                 ]
-        # print("generate_location_block -> row", row)
+        print("generate_location_block -> row", row, location)
         yield (row)
 
 
@@ -413,23 +357,12 @@ def locations_tuple_padded(location: str, modify_locations: bool):
 
 
 def generate_table_rows(
-    combo_table: pd.DataFrame,
-    modify_locations: bool = False,
+    combo_table: pd.DataFrame, modify_locations: bool = False, location_limit: int = 0
 ) -> Iterator:
     count = 0
-
-    # print("generate_table_rows", combo_table.Location.unique())
     for location in combo_table.Location.unique():
-        # location = location.replace("-", " - ")
 
         count += 1
-        # if not (location == "Wellington"):
-        #     continue
-        # if count < 46:
-        #     continue
-        # if count in [47, 86]:  #47 `Waihi Bowentown` BOOM, 85 `Ōakura (New Plymouth District)`
-        #     continue
-        # print("loc", location)
         yield (
             locations_tuple_padded(location, modify_locations),
             generate_location_block(combo_table, location),
@@ -438,7 +371,7 @@ def generate_table_rows(
         if count % 10 == 0:
             print(f"row count: {count}")
 
-        if LOCATION_LIMIT and (count >= LOCATION_LIMIT):
+        if location_limit and (count >= location_limit):
             break
 
 
@@ -459,16 +392,100 @@ def chunks(items, chunk_size):
         yield chunk
 
 
-def build_pdf_report_pages(location_df: pd.DataFrame, report_name: str):
-    print("build_pdf_report_pages", report_name, report_name == "named")
+def build_pdf_report_pages(
+    location_df: pd.DataFrame,
+    report_name: str,
+    is_final: bool = False,
+    location_limit: int = 0,
+    modify_locations: bool = True,
+):
+    print("build_pdf_report_pages", report_name)
     ### PDF
-    table_rows = generate_table_rows(location_df, report_name == "named")
+    table_rows = generate_table_rows(location_df, modify_locations, location_limit)
     for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_BLOCKS)):
         yield build_report_page(
-            f"{report_name}",
-            list(chunk),
-            table_part=idx + 1,
+            f"{report_name}", list(chunk), table_part=idx + 1, is_final=is_final
         )
+
+
+def publish_gridded(
+    location_df: pd.DataFrame,
+    output_folder: Path,
+    produce_csv: bool = True,
+    is_final: bool = False,
+    location_limit: int = 0,
+):
+    publish_table(
+        location_df,
+        output_folder,
+        table_title="3.5",
+        filename="gridded_location_report",
+        produce_csv=produce_csv,
+        is_final=is_final,
+        location_limit=location_limit,
+        modify_locations=False,
+    )
+
+
+def publish_named(
+    location_df: pd.DataFrame,
+    output_folder: Path,
+    produce_csv: bool = True,
+    is_final: bool = False,
+    location_limit: int = 0,
+):
+    publish_table(
+        location_df,
+        output_folder,
+        table_title="3.4",
+        filename="named_location_report",
+        produce_csv=produce_csv,
+        is_final=is_final,
+        location_limit=location_limit,
+        modify_locations=True,
+    )
+
+
+def publish_table(
+    location_df: pd.DataFrame,
+    output_folder: Path,
+    table_title: str,
+    filename: str,
+    produce_csv: bool = True,
+    is_final: bool = False,
+    location_limit: int = 0,
+    modify_locations: bool = True,
+):
+
+    if not is_final:
+        filename += "-DRAFT"
+
+    print(f"report: {filename}")
+
+    report: Document = Document()
+
+    if produce_csv:
+        csv_rows = generate_csv_rows(location_df, modify_locations=False)
+
+        ### CSV
+        with open(Path(output_folder, filename + ".csv"), "w") as out_csv:
+            writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
+            header = ["location", "location_ascii", "apoe", "M", "D"]
+            for sss in SITE_CLASSES:
+                for attr in ["PGA", "Sas", "Tc", "Td"]:
+                    header.append(f"{sss}-{attr}")
+            writer.writerow(header)
+            for row in csv_rows:
+                writer.writerow(row)
+
+    # PDF
+    for page in build_pdf_report_pages(
+        location_df, table_title, is_final, location_limit, modify_locations
+    ):
+        report.add_page(page)
+
+    with open(Path(output_folder, filename + ".pdf"), "wb") as out_file_handle:
+        PDF.dumps(out_file_handle, report)
 
 
 if __name__ == "__main__":
@@ -489,37 +506,18 @@ if __name__ == "__main__":
         return pd.read_json(filepath, orient="table")
 
     named_df = combo_named_table()
+    publish_named(
+        named_df,
+        OUTPUT_FOLDER,
+        PRODUCE_CSV,  # CSV
+        location_limit=LOCATION_LIMIT,
+        is_final=False,
+    )
     grid_df = combo_grid_table()
-
-    report_grps = list(zip([0, 1], [named_df, grid_df]))
-    report_grp_titles = ["3.4", "3.5"]
-    report_names = ["named", "gridded"]
-
-    for report_grp, location_df in report_grps:
-
-        filename = f"{report_names[report_grp]}_location_report_v2-DRAFT"
-        print(f"report: {filename}")
-
-        report: Document = Document()
-
-        if PRODUCE_CSV:
-            csv_rows = generate_csv_rows(
-                location_df, report_names[report_grp] == "named"
-            )
-
-            ### CSV
-            with open(Path(OUTPUT_FOLDER, filename + ".csv"), "w") as out_csv:
-                writer = csv.writer(out_csv, quoting=csv.QUOTE_NONNUMERIC)
-                header = ["location", "location_ascii", "apoe", "M", "D"]
-                for sss in SITE_CLASSES:
-                    for attr in ["PGA", "Sas", "Tc", "Td"]:
-                        header.append(f"{sss}-{attr}")
-                writer.writerow(header)
-                for row in csv_rows:
-                    writer.writerow(row)
-
-        for page in build_pdf_report_pages(location_df, report_names[report_grp]):
-            report.add_page(page)
-
-        with open(Path(OUTPUT_FOLDER, filename + ".pdf"), "wb") as out_file_handle:
-            PDF.dumps(out_file_handle, report)
+    publish_gridded(
+        grid_df,
+        OUTPUT_FOLDER,
+        PRODUCE_CSV,  # CSV
+        location_limit=LOCATION_LIMIT,
+        is_final=False,
+    )

@@ -1,10 +1,7 @@
 """
-Build PDF and equivalent CSV table structures for version 2+ using the OLD format.
+Superceded. Build PDF and equivalent CSV table structures for version 2+ using the OLD format.
 
 This module uses the `borb` library to produce the PDF document.
-
-TODO:
- - [x] extra column Td to each soil/site class
 
 methods:
  build_report_page

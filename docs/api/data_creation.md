@@ -1,6 +1,6 @@
 ::: nzssdt_2023.data_creation
 
-::: nzssdt_2023.data_creation.calculate_D_values
+<!-- ::: nzssdt_2023.data_creation.calculate_D_values -->
 
 ::: nzssdt_2023.data_creation.query_NSHM
 
