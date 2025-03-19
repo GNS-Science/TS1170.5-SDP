@@ -1,6 +1,3 @@
-import pandas as pd
-import pytest
-
 from nzssdt_2023.scripts import pipeline_steps
 
 
@@ -43,5 +40,3 @@ def test_create_geojsons():
 
     pipeline_steps.create_geojson_files = mock_create_geojson_files
     pipeline_steps.create_geojsons(version="cbc", overwrite=True)
-
-
