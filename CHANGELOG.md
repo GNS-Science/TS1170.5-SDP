@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.0] TBD
+## [0.5.0] 2025-03-20 
 
 ### Added
  - new `nzssdt_2023.data_creation` package for Annes process steps
