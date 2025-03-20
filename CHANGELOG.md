@@ -21,7 +21,8 @@
    `poetry run pipeline 04-geometry --verbose 2`
  - added V2 to the version_list with 
    `poetry run pipeline 06-publish 2 NSHM_v1.0.4 "Seismic Demand Parameters version 2, incorporating feedback from reviewers."`
-
+ - added doc publiscation workflow
+ 
  ## Changed
  - migrated report.py into new `publish` package
  - minor typing improvents
