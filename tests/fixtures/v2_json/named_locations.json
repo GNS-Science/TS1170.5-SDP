@@ -1,0 +1,100 @@
+{
+  "schema":{
+    "fields":[
+      {
+        "name":"Location",
+        "type":"string"
+      },
+      {
+        "name":"Site Class",
+        "type":"string"
+      },
+      {
+        "name":"APoE (1\/n)",
+        "type":"integer"
+      },
+      {
+        "name":"PGA",
+        "type":"number"
+      },
+      {
+        "name":"Sas",
+        "type":"number"
+      },
+      {
+        "name":"Tc",
+        "type":"number"
+      },
+      {
+        "name":"Td",
+        "type":"number"
+      }
+    ],
+    "pandas_version":"1.4.0"
+  },
+  "data":[
+    {
+      "Location":"Kaitaia",
+      "Site Class":"I",
+      "APoE (1\/n)":25,
+      "PGA":0.02,
+      "Sas":0.03,
+      "Tc":0.39,
+      "Td":1.6
+    },
+    {
+      "Location":"Kerikeri",
+      "Site Class":"I",
+      "APoE (1\/n)":25,
+      "PGA":0.02,
+      "Sas":0.03,
+      "Tc":0.39,
+      "Td":1.6
+    },
+    {
+      "Location":"Haruru",
+      "Site Class":"I",
+      "APoE (1\/n)":25,
+      "PGA":0.02,
+      "Sas":0.03,
+      "Tc":0.39,
+      "Td":1.6
+    },
+    {
+      "Location":"Auckland",
+      "Site Class":"I",
+      "APoE (1\/n)":25,
+      "PGA":0.02,
+      "Sas":0.03,
+      "Tc":0.39,
+      "Td":1.6
+    },
+    {
+      "Location":"Wellington",
+      "Site Class":"I",
+      "APoE (1\/n)":25,
+      "PGA":0.11,
+      "Sas":0.24,
+      "Tc":0.27,
+      "Td":1.0
+    },
+    {
+      "Location":"Christchurch",
+      "Site Class":"I",
+      "APoE (1\/n)":25,
+      "PGA":0.06,
+      "Sas":0.11,
+      "Tc":0.31,
+      "Td":1.3
+    },
+    {
+      "Location":"Dunedin",
+      "Site Class":"I",
+      "APoE (1\/n)":25,
+      "PGA":0.03,
+      "Sas":0.06,
+      "Tc":0.32,
+      "Td":1.5
+    }
+  ]
+}

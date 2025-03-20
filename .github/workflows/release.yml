@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-versions: ["3.9", "3.10"]
+        python-versions: ["3.10", "3.11"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -33,11 +33,11 @@ jobs:
         shell: bash
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Get Changelog Entry
         id: changelog_reader
-        uses: mindsers/changelog-reader-action@v2
+        uses: GNS-Science/changelog-reader-action@master
         with:
           validation_depth: 10
           version: ${{ steps.tag_name.outputs.current_version }}
