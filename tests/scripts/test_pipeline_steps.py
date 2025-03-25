@@ -1,6 +1,3 @@
-import pandas as pd
-import pytest
-
 from nzssdt_2023.scripts import pipeline_steps
 
 

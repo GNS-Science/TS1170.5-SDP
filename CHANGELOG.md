@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.0] TBD
+## [0.5.0] 2025-03-20 
 
 ### Added
  - new `nzssdt_2023.data_creation` package for Annes process steps
@@ -17,8 +17,13 @@
  - new report artefacts in `reports/v2`
  - PDF report value tests to ensure layout display the data correctly.
  - reports included in VersionInfo json
-
-### Changed
+ - added the Version 2 geojson artefacts with 
+   `poetry run pipeline 04-geometry --verbose 2`
+ - added V2 to the version_list with 
+   `poetry run pipeline 06-publish 2 NSHM_v1.0.4 "Seismic Demand Parameters version 2, incorporating feedback from reviewers."`
+ - added doc publiscation workflow
+ 
+ ## Changed
  - migrated report.py into new `publish` package
  - minor typing improvents
  - renamed `nzssdt_2023\cli.py` -> `nzssdt_2023\scripts\publish_cli.py`
