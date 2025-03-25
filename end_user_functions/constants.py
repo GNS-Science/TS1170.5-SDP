@@ -10,16 +10,13 @@ import numpy as np
 import pandas as pd
 
 ### The resources folder is points outside of repo until V2 is merged
-GIS_FOLDER = Path(
-    r"C:\Users\ahul697\OneDrive - The University of Auckland\Desktop\Research\GitHub_Repos\GNS\srwg-risk-toolbox\data"
-)
 TS_VERSION = "v2"
 RESOURCES_FOLDER = str(PurePath(os.path.realpath(__file__)).parent.parent / "resources")
 
 NAMED_PARAMETERS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "named_locations_combo.json")
 GRID_PARAMETERS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "grid_locations_combo.json")
-POLYGONS_PATH = Path(GIS_FOLDER, "urban_area_polygons.geojson")
-FAULTS_PATH = Path(GIS_FOLDER, "major_faults.geojson")
+POLYGONS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "urban_area_polygons.geojson")
+FAULTS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "major_faults.geojson")
 NZ_MAP_PATH = Path(RESOURCES_FOLDER, "end_user_functions", "nz_map.geojson")
 
 NAMED_PARAMETER_TABLE = pd.read_json(
