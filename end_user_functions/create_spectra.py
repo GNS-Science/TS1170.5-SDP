@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 
 from end_user_functions.constants import DEFAULT_PERIODS
-from nzssdt_2023.data_creation.sa_parameter_generation import uhs_value
 from end_user_functions.query_parameters import retrieve_sa_parameters
+from nzssdt_2023.data_creation.sa_parameter_generation import uhs_value
 
 
 def create_spectrum_from_parameters(
@@ -34,8 +34,10 @@ def create_spectrum_from_parameters(
     return list(spectrum)
 
 
-def create_enveloped_spectra(location_id, apoe_n, site_class_list, periods=DEFAULT_PERIODS, precision=3):
-    """ Creates the set of site class spectra for a given location_id and APoE
+def create_enveloped_spectra(
+    location_id, apoe_n, site_class_list, periods=DEFAULT_PERIODS, precision=3
+):
+    """Creates the set of site class spectra for a given location_id and APoE
 
     Args:
         location_id: label for a TS location (e.g., 'Wellington' or '-47.3~167.8')
@@ -48,13 +50,13 @@ def create_enveloped_spectra(location_id, apoe_n, site_class_list, periods=DEFAU
     """
 
     df = pd.DataFrame()
-    df['Period'] = periods
+    df["Period"] = periods
 
     for sc in site_class_list:
-        pga,sas,tc,td = retrieve_sa_parameters(location_id, apoe_n, sc)
+        pga, sas, tc, td = retrieve_sa_parameters(location_id, apoe_n, sc)
         df[sc] = create_spectrum_from_parameters(pga, sas, tc, td, periods, precision)
 
-    df['Envelope'] = np.max(df.loc[:, df.columns != 'Period'], axis=1)
+    df["Envelope"] = np.max(df.loc[:, df.columns != "Period"], axis=1)
     enveloped_spectra = df.round(precision)
 
     return enveloped_spectra
