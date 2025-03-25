@@ -2,20 +2,15 @@
 This module contains end user functions for spatially identifying the relevant TS row and distance calculations
 """
 
-import numpy as np
 import geopandas as gpd
+import numpy as np
 from shapely.geometry import Point
 
-from end_user_functions.constants import (
-    POLYGONS,
-    FAULTS,
-    GRID_PTS,
-    NZ_MAP
-)
+from end_user_functions.constants import FAULTS, GRID_PTS, NZ_MAP, POLYGONS
 
 
 def identify_location_id(longitude, latitude):
-    """ Identifies the TS location assigned to a latitute and longitude
+    """Identifies the TS location assigned to a latitute and longitude
 
     Args:
         longitude: longitude of the point of interest
@@ -26,7 +21,7 @@ def identify_location_id(longitude, latitude):
     """
 
     # check whether point falls within New Zealand
-    if sum(NZ_MAP.contains(Point(longitude, latitude)))>0:
+    if sum(NZ_MAP.contains(Point(longitude, latitude))) > 0:
 
         # identify polygons that the point falls within
         point_location = Point(longitude, latitude)
@@ -35,13 +30,15 @@ def identify_location_id(longitude, latitude):
         # if point falls in a polygon
         if sum(within_idx) > 0:
             # confirm that it only falls in one polygon
-            assert sum(within_idx) == 1, 'Point falls within more than one polygon'
+            assert sum(within_idx) == 1, "Point falls within more than one polygon"
             location_id = POLYGONS[within_idx].index[0]
 
         # if point does not fall in a polygon
         else:
             # calculate distance to all grid points
-            grid_dist = GRID_PTS.geometry.apply(lambda x: point_location.distance(x)).round(4)
+            grid_dist = GRID_PTS.geometry.apply(
+                lambda x: point_location.distance(x)
+            ).round(4)
             # find the closest locations (ordered by northwest, NE, SW, SE)
             closest_idx = np.where(grid_dist == grid_dist.min())[0]
             # for equidistant points, take the first
@@ -54,7 +51,7 @@ def identify_location_id(longitude, latitude):
 
 
 def calculate_distance_to_fault(longitude, latitude, round_down=True):
-    """ Calculates the distance from a point to the nearest fault
+    """Calculates the distance from a point to the nearest fault
 
     Args:
         longitude: longitude of the point of interest
@@ -65,14 +62,14 @@ def calculate_distance_to_fault(longitude, latitude, round_down=True):
         d: distance to fault, reported to nearest kilometre
     """
     point_location = Point(longitude, latitude)
-    latlon = gpd.GeoDataFrame(geometry=[point_location], crs='EPSG:4326')
+    latlon = gpd.GeoDataFrame(geometry=[point_location], crs="EPSG:4326")
 
     # convert to NZTM for distance calcs
     latlon_nztm = latlon.to_crs(epsg=2193)
     faults_nztm = FAULTS.to_crs(epsg=2193)
 
     # calculate minimum distance to fault
-    d = latlon_nztm.geometry.apply(lambda x: faults_nztm.distance(x).min()) / 1000.
+    d = latlon_nztm.geometry.apply(lambda x: faults_nztm.distance(x).min()) / 1000.0
 
     print(d)
 

@@ -43,5 +43,3 @@ def test_create_geojsons():
 
     pipeline_steps.create_geojson_files = mock_create_geojson_files
     pipeline_steps.create_geojsons(version="cbc", overwrite=True)
-
-
