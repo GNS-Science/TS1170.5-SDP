@@ -8,11 +8,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from end_user_functions.geospatial_analysis import (
+from nzssdt_2023.end_user_functions.geospatial_analysis import (
     calculate_distance_to_fault,
     identify_location_id,
 )
-from end_user_functions.query_parameters import (
+from nzssdt_2023.end_user_functions.query_parameters import (
     parameters_by_location_id,
     retrieve_md_parameters,
     retrieve_sa_parameters,

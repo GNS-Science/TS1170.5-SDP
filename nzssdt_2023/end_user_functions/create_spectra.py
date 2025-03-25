@@ -5,8 +5,8 @@ This module contains end user functions for creating the TS spectra from the tab
 import numpy as np
 import pandas as pd
 
-from end_user_functions.constants import DEFAULT_PERIODS
-from end_user_functions.query_parameters import retrieve_sa_parameters
+from nzssdt_2023.end_user_functions.constants import DEFAULT_PERIODS
+from nzssdt_2023.end_user_functions.query_parameters import retrieve_sa_parameters
 from nzssdt_2023.data_creation.sa_parameter_generation import uhs_value
 
 

@@ -6,7 +6,7 @@ import geopandas as gpd
 import numpy as np
 from shapely.geometry import Point
 
-from end_user_functions.constants import FAULTS, GRID_PTS, NZ_MAP, POLYGONS
+from nzssdt_2023.end_user_functions.constants import FAULTS, GRID_PTS, NZ_MAP, POLYGONS
 
 
 def identify_location_id(longitude, latitude):

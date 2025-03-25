@@ -6,7 +6,7 @@ tests for creating TS spectra from TS parameters
 
 import pytest
 
-from end_user_functions.create_spectra import (
+from nzssdt_2023.end_user_functions.create_spectra import (
     create_enveloped_spectra,
     create_spectrum_from_parameters,
 )

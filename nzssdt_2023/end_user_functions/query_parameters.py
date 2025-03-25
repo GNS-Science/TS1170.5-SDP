@@ -5,7 +5,7 @@ This module contains end user functions for querying the TS table
 import numpy as np
 import pandas as pd
 
-from end_user_functions.constants import (
+from nzssdt_2023.end_user_functions.constants import (
     APOE_N_THRESHOLD_FOR_D,
     APOE_NS,
     APOES,
