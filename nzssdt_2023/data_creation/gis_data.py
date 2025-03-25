@@ -130,6 +130,11 @@ def calc_distance_to_faults(
 ) -> "pdt.DataFrame":
     """Calculates the closest distance of polygons or points to a set of fault lines
 
+     Todo:
+        This function uses .astype("int") to round the distance down to the
+        nearest kilometre by truncating decimal places.
+        Rounding to the nearest kilometre may be more appropriate for future iterations.
+
     Args:
         gdf: geodataframe of locations (polygons or points)
         faults: geodataframe of fault lines

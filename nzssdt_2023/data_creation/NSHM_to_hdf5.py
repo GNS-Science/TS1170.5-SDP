@@ -95,6 +95,11 @@ def calculate_hazard_design_intensities(
     """
     calculate design intensities based on an annual probability of exceedance (APoE)
 
+    Todo:
+        The hazard curve is interpolated linearly in logspace.
+        However, this function does that in natural log and converts back with the exponent
+        It should be done in log base10 and converted back through 10**x
+
     :param data: dictionary containing hazard curves and metadata for vs30, sites, intensity measures
     :param hazard_rps: list containing the desired return periods (1 / APoE)
 
