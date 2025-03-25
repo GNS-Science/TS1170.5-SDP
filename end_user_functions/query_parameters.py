@@ -1,5 +1,5 @@
 """
-This module contains functions for querying the TS table
+This module contains end user functions for querying the TS table
 """
 
 import pandas as pd

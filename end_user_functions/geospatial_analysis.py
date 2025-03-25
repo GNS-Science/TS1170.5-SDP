@@ -1,5 +1,5 @@
 """
-This module contains functions spatially identifying the relevant TS row and distance calculations
+This module contains end user functions for spatially identifying the relevant TS row and distance calculations
 """
 
 import numpy as np

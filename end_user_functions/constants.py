@@ -1,5 +1,5 @@
 """
-This module contains constants
+This module contains constants for the end user functions module
 """
 
 import os
@@ -8,15 +8,16 @@ import pandas as pd
 import geopandas as gpd
 
 ### The resources folder is points outside of repo until V2 is merged
-VERSION_FOLDER = Path(
+GIS_FOLDER = Path(
     r"C:\Users\ahul697\OneDrive - The University of Auckland\Desktop\Research\GitHub_Repos\GNS\srwg-risk-toolbox\data"
 )
+TS_VERSION = 'v2'
 RESOURCES_FOLDER = str(PurePath(os.path.realpath(__file__)).parent.parent / "resources")
 
-NAMED_PARAMETERS_PATH = Path(VERSION_FOLDER, "named_locations_combo.json")
-GRID_PARAMETERS_PATH = Path(VERSION_FOLDER, "grid_locations_combo.json")
-POLYGONS_PATH = Path(VERSION_FOLDER, "urban_area_polygons.geojson")
-FAULTS_PATH = Path(VERSION_FOLDER, "major_faults.geojson")
+NAMED_PARAMETERS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "named_locations_combo.json")
+GRID_PARAMETERS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "grid_locations_combo.json")
+POLYGONS_PATH = Path(GIS_FOLDER, "urban_area_polygons.geojson")
+FAULTS_PATH = Path(GIS_FOLDER, "major_faults.geojson")
 NZ_MAP_PATH = Path(RESOURCES_FOLDER, "end_user_functions", "nz_map.geojson")
 
 NAMED_PARAMETER_TABLE = pd.read_json(
