@@ -1,5 +1,5 @@
 """
-This package encapsluates Anne Hulseys' data processing pipeline.
+This package encapsulates Anne Hulsey's data processing pipeline.
 
 Modules:
  calculate_D_values: get distances from locations to the urban polygons

@@ -11,7 +11,9 @@ import pandas as pd
 
 ### The resources folder is points outside of repo until V2 is merged
 TS_VERSION = "v2"
-RESOURCES_FOLDER = str(PurePath(os.path.realpath(__file__)).parent.parent.parent / "resources")
+RESOURCES_FOLDER = str(
+    PurePath(os.path.realpath(__file__)).parent.parent.parent / "resources"
+)
 
 NAMED_PARAMETERS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "named_locations_combo.json")
 GRID_PARAMETERS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "grid_locations_combo.json")

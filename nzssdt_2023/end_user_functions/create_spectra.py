@@ -2,17 +2,27 @@
 This module contains end user functions for creating the TS spectra from the tabulated parameters
 """
 
+from typing import TYPE_CHECKING, List
+
 import numpy as np
 import pandas as pd
 
+from nzssdt_2023.data_creation.sa_parameter_generation import uhs_value
 from nzssdt_2023.end_user_functions.constants import DEFAULT_PERIODS
 from nzssdt_2023.end_user_functions.query_parameters import retrieve_sa_parameters
-from nzssdt_2023.data_creation.sa_parameter_generation import uhs_value
+
+if TYPE_CHECKING:
+    import pandas.typing as pdt
 
 
 def create_spectrum_from_parameters(
-    pga, sas, tc, td, periods=DEFAULT_PERIODS, precision=3
-):
+    pga: float,
+    sas: float,
+    tc: float,
+    td: float,
+    periods: List[float] = DEFAULT_PERIODS,
+    precision: int = 3,
+) -> List[float]:
     """Creates the TS spectrum based on the incoming parameters
 
     Args:
@@ -20,7 +30,7 @@ def create_spectrum_from_parameters(
         sas: short-period spectral acceleration [g]
         tc: spectral-acceleration-plateau corner period [seconds]
         td: spectral-velocity-plateau corner period [seconds]
-        periods: list of periods [seconds] a which to calculate the spectrum
+        periods: list of periods [seconds] at which to calculate the spectrum
         precision: number of decimals to include in output
 
     Returns:
@@ -35,14 +45,20 @@ def create_spectrum_from_parameters(
 
 
 def create_enveloped_spectra(
-    location_id, apoe_n, site_class_list, periods=DEFAULT_PERIODS, precision=3
-):
+    location_id: str,
+    apoe_n: int,
+    site_class_list: List[str],
+    periods: List[float] = DEFAULT_PERIODS,
+    precision: int = 3,
+) -> "pdt.DataFrame":
     """Creates the set of site class spectra for a given location_id and APoE
 
     Args:
         location_id: label for a TS location (e.g., 'Wellington' or '-47.3~167.8')
         apoe_n: shorthand for APoE (1/n)  # this is commonly known as a return period
         site_class_list: list of TS site class label (e.g., ['III',IV'])
+        periods: list of periods [seconds] at which to calculate the spectrum
+        precision: number of decimals to include in output
 
     Returns:
         enveloped_spectra: df of each site class's spectrum and the combined envelope of them all

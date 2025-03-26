@@ -1,19 +1,7 @@
-## Dynamic access to the TS Seismic Demand Parameters
+::: nzssdt_2023.end_user_functions
 
-*Python functions to dynamically query the TS tables for use in seismic design*
+::: nzssdt_2023.end_user_functions.geospatial_analysis
 
-This set of functions allows engineers to:
+::: nzssdt_2023.end_user_functions.query_parameters
 
- - identify which TS table is relevant for a site with a given latitude and longitude 
-    - Table 3.1 for locations within the named urban boundaries
-	- Table 3.2 for other locations that snap to the nearest grid locations
-	
- - retrieve the TS parameters associated with a given site:
-    - for all annual probabilities of exceedance (APoE) and site classes
-	- for specific combinations of APoEs and site classes
-	
- - calculate the distance from a site to the nearest major fault
- 
- - develop the spectral accelerations associated with a set of TS parameters
-    - a single spectrum for one site class
-	- an enveloped spectrum across multiple site class spectra 
+::: nzssdt_2023.end_user_functions.create_spectra

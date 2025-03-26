@@ -20,8 +20,9 @@ nav:
     - nzssdt.data_creation: api/data_creation.md
     - nzssdt.convert: api/convert.md
     - nzssdt.publish: api/publish.md
-  - End User Functions:
-    - end_user_functions/end_user_functions.md
+  - End User Tools:
+    - end_user_functions/end_user_tools.md
+    - nzssdt_2023.end_user_functions: end_user_functions/end_user_functions.md
   - Development and Contributing:
     - contributing.md
     - Installation: installation.md

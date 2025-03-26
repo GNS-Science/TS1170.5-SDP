@@ -134,6 +134,7 @@ def calc_distance_to_faults(
         This function uses .astype("int") to round the distance down to the
         nearest kilometre by truncating decimal places.
         Rounding to the nearest kilometre may be more appropriate for future iterations.
+        If it is changed, the corresponding end_user_function should be amended as well.
 
     Args:
         gdf: geodataframe of locations (polygons or points)

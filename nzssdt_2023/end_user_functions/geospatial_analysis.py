@@ -9,7 +9,7 @@ from shapely.geometry import Point
 from nzssdt_2023.end_user_functions.constants import FAULTS, GRID_PTS, NZ_MAP, POLYGONS
 
 
-def identify_location_id(longitude, latitude):
+def identify_location_id(longitude: float, latitude: float) -> str:
     """Identifies the TS location assigned to a latitute and longitude
 
     Args:
@@ -50,13 +50,15 @@ def identify_location_id(longitude, latitude):
     return location_id
 
 
-def calculate_distance_to_fault(longitude, latitude, round_down=True):
+def calculate_distance_to_fault(
+    longitude: float, latitude: float, round_down: bool = True
+) -> float:
     """Calculates the distance from a point to the nearest fault
 
     Args:
         longitude: longitude of the point of interest
         latitude: latitude of the point of interest
-        round_down: true rounding to nearest integer or to lower integer (default)
+        round_down: rounding down to lower integer (default) or to nearest integer
 
     Returns:
         d: distance to fault, reported to nearest kilometre

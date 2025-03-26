@@ -2,6 +2,8 @@
 This module contains end user functions for querying the TS table
 """
 
+from typing import TYPE_CHECKING, Tuple
+
 import numpy as np
 import pandas as pd
 
@@ -14,8 +16,13 @@ from nzssdt_2023.end_user_functions.constants import (
     SITE_CLASSES,
 )
 
+if TYPE_CHECKING:
+    import pandas.typing as pdt
 
-def retrieve_sa_parameters(location_id, apoe_n, site_class):
+
+def retrieve_sa_parameters(
+    location_id: str, apoe_n: int, site_class: str
+) -> Tuple[float, float, float, float]:
     """retrieves the spectral acceleration parameters for a single line of the TS table
 
     Args:
@@ -40,7 +47,9 @@ def retrieve_sa_parameters(location_id, apoe_n, site_class):
     return pga, sas, tc, td
 
 
-def retrieve_md_parameters(location_id, apoe_n, site_class):
+def retrieve_md_parameters(
+    location_id: str, apoe_n: int, site_class: str
+) -> Tuple[float, float | str]:
     """retrieves the M and D parameters for a single line of the TS table
 
     Args:
@@ -67,7 +76,7 @@ def retrieve_md_parameters(location_id, apoe_n, site_class):
     return m, d
 
 
-def parameters_by_location_id(location_id):
+def parameters_by_location_id(location_id: str) -> "pdt.DataFrame":
     """retrieves all parameters associated with a given location id
 
     Args:
