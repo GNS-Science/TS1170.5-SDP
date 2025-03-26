@@ -53,15 +53,15 @@ def identify_location_id(longitude: float, latitude: float) -> str:
 def calculate_distance_to_fault(
     longitude: float, latitude: float, round_down: bool = True
 ) -> float:
-    """Calculates the distance from a point to the nearest fault
+    """Calculates the distance from a latitude and longitude point to the nearest fault
 
     Args:
         longitude: longitude of the point of interest
         latitude: latitude of the point of interest
-        round_down: rounding down to lower integer (default) or to nearest integer
+        round_down: the distance [km] is reported as an integer by rounding down (default) or by rounding to the nearest integer
 
     Returns:
-        d: distance to fault, reported to nearest kilometre
+        d: distance to fault [km]
     """
     point_location = Point(longitude, latitude)
     latlon = gpd.GeoDataFrame(geometry=[point_location], crs="EPSG:4326")

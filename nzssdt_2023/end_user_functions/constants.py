@@ -1,19 +1,24 @@
 """
 This module contains constants for the end user functions module
+
+Three constants are imported from other parts of the library:
+
+    from nzssdt_2023.config import RESOURCES_FOLDER
+
+    from nzssdt_2023.data_creation.constants import DEFAULT_RPS, SITE_CLASSES
 """
 
-import os
-from pathlib import Path, PurePath
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+from nzssdt_2023.config import RESOURCES_FOLDER
+from nzssdt_2023.data_creation.constants import DEFAULT_RPS, SITE_CLASSES
+
 ### The resources folder is points outside of repo until V2 is merged
 TS_VERSION = "v2"
-RESOURCES_FOLDER = str(
-    PurePath(os.path.realpath(__file__)).parent.parent.parent / "resources"
-)
 
 NAMED_PARAMETERS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "named_locations_combo.json")
 GRID_PARAMETERS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "grid_locations_combo.json")
@@ -29,9 +34,9 @@ GRID_PARAMETER_TABLE = pd.read_json(
 )
 PARAMETER_TABLE = pd.concat([NAMED_PARAMETER_TABLE, GRID_PARAMETER_TABLE], axis=0)
 
-APOE_NS = [25, 50, 100, 250, 500, 1000, 2500]
+APOE_NS = DEFAULT_RPS
 APOES = [f"1/{n}" for n in APOE_NS]
-SITE_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
+SITE_CLASSES_LIST = list(SITE_CLASSES.keys())
 SA_PARAMETER_NAMES = ["PGA", "Sas", "Tc", "Td"]
 
 APOE_N_THRESHOLD_FOR_D = 500
@@ -54,7 +59,7 @@ def create_grid_gdf():
 
     # filter by apoe and site class to get an index of unique locations
     apoe_n = APOE_NS[0]
-    site_class = SITE_CLASSES[0]
+    site_class = SITE_CLASSES_LIST[0]
 
     apoe_idx = GRID_PARAMETER_TABLE["APoE (1/n)"] == apoe_n
     sc_idx = GRID_PARAMETER_TABLE["Site Class"] == site_class

@@ -13,7 +13,7 @@ from nzssdt_2023.end_user_functions.constants import (
     APOES,
     PARAMETER_TABLE,
     SA_PARAMETER_NAMES,
-    SITE_CLASSES,
+    SITE_CLASSES_LIST,
 )
 
 if TYPE_CHECKING:
@@ -27,7 +27,7 @@ def retrieve_sa_parameters(
 
     Args:
         location_id: label for a TS location (e.g., 'Wellington' or '-47.3~167.8')
-        apoe_n: shorthand for APoE (1/n)  # this is commonly known as a return period
+        apoe_n: shorthand for APoE (1/n)  (this is commonly known as a return period)
         site_class: TS site class label (e.g., 'IV')
 
     Returns:
@@ -54,7 +54,7 @@ def retrieve_md_parameters(
 
     Args:
         location_id: label for a TS location (e.g., 'Wellington' or '-47.3~167.8')
-        apoe_n: shorthand for APoE (1/n)  # this is commonly known as a return period
+        apoe_n: shorthand for APoE (1/n)  (this is commonly known as a return period)
         site_class: TS site class label (e.g., 'IV')
 
     Returns:
@@ -77,25 +77,25 @@ def retrieve_md_parameters(
 
 
 def parameters_by_location_id(location_id: str) -> "pdt.DataFrame":
-    """retrieves all parameters associated with a given location id
+    """retrieves all TS parameters associated with a given location id
 
     Args:
         location_id: label for a TS location (e.g., Wellington or -47.3~167.8)
 
     Returns:
-        df: dataframe with all the parameters
+        df: dataframe with the TS parameters by APoE (rows) and (Site Class, parameter) (multi-index columns)
     """
 
     # initialize df for sa parameters
     index = pd.Index(APOES, name="APoE")
     columns = pd.MultiIndex.from_product(
-        [SITE_CLASSES, SA_PARAMETER_NAMES], names=["Site Class", "Parameter"]
+        [SITE_CLASSES_LIST, SA_PARAMETER_NAMES], names=["Site Class", "Parameter"]
     )
     sa_df = pd.DataFrame(index=index, columns=columns)
 
     for apoe_n in APOE_NS:
         apoe = f"1/{apoe_n}"
-        for site_class in SITE_CLASSES:
+        for site_class in SITE_CLASSES_LIST:
             sa_df.loc[(apoe), (site_class, slice(None))] = retrieve_sa_parameters(
                 location_id, apoe_n, site_class
             )
@@ -107,7 +107,7 @@ def parameters_by_location_id(location_id: str) -> "pdt.DataFrame":
     md_df = pd.DataFrame(index=index, columns=columns)
     for apoe_n in APOE_NS:
         apoe = f"1/{apoe_n}"
-        for site_class in [SITE_CLASSES[0]]:
+        for site_class in [SITE_CLASSES_LIST[0]]:
             m, d = retrieve_md_parameters(location_id, apoe_n, site_class)
             md_df.loc[(apoe), ("", "M")] = m
             md_df.loc[(apoe), ("", "D")] = d

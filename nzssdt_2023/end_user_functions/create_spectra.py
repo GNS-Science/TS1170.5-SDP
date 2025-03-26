@@ -23,7 +23,7 @@ def create_spectrum_from_parameters(
     periods: List[float] = DEFAULT_PERIODS,
     precision: int = 3,
 ) -> List[float]:
-    """Creates the TS spectrum based on the incoming parameters
+    """Creates the TS spectrum based on the incoming pga, sas, tc, and td parameters
 
     Args:
         pga: peak ground acceleration [g]
@@ -51,7 +51,7 @@ def create_enveloped_spectra(
     periods: List[float] = DEFAULT_PERIODS,
     precision: int = 3,
 ) -> "pdt.DataFrame":
-    """Creates the set of site class spectra for a given location_id and APoE
+    """Creates a set of site class spectra for a given location_id and APoE
 
     Args:
         location_id: label for a TS location (e.g., 'Wellington' or '-47.3~167.8')
@@ -61,7 +61,7 @@ def create_enveloped_spectra(
         precision: number of decimals to include in output
 
     Returns:
-        enveloped_spectra: df of each site class's spectrum and the combined envelope of them all
+        enveloped_spectra: dataframe of spectra for each period (rows), the columns include each site class's spectrum and the combined envelope of them all
 
     """
 
