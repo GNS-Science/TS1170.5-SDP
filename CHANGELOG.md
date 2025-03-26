@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.0] 2025-03-26 
+
+### Added
+ - new `nzssdt_2023.end_user_functions` package for querying TS tables and producing response spectra
+
 ## [0.5.0] 2025-03-20 
 
 ### Added
