@@ -24,7 +24,7 @@ These tools allows engineers to:
 
 ### Example usage
 
-	from end_user_functions.geospatial_analysis import identify_location_id, calculate_distance_to_fault
+	from nzssdt_2023.end_user_functions.geospatial_analysis import identify_location_id, calculate_distance_to_fault
 
 	location_id = identify_location_id(longitude, latitude)
 	
@@ -32,13 +32,13 @@ These tools allows engineers to:
 	
 	
 	
-	from end_user_functions.query_parameters import parameters_by_location_id
+	from nzssdt_2023.end_user_functions.query_parameters import parameters_by_location_id
 	
 	parameters = parameters_by_location_id(location_id)
 	
 	
 	
-	from end_user_functions.create_spectra import create_enveloped_spectra
+	from nzssdt_2023.end_user_functions.create_spectra import create_enveloped_spectra
 	
 	spectra = create_enveloped_spectra(location_id, apoe_n, site_class_list)
 	
