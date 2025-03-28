@@ -61,7 +61,7 @@ def create_enveloped_spectra(
         precision: number of decimals to include in output
 
     Returns:
-        enveloped_spectra: dataframe of spectra for each period (rows), the columns include each site class's spectrum and the combined envelope of them all
+        enveloped_spectra: dataframe of spectra for each period (rows), spectrum and the combined envelope (columns)
 
     """
 

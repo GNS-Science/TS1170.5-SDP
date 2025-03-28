@@ -68,6 +68,8 @@ def calculate_distance_to_fault(longitude: float, latitude: float) -> float:
     faults_nztm = FAULTS.to_crs(epsg=2193)
 
     # calculate minimum distance to fault
-    d = round(latlon_nztm.geometry.apply(lambda x: faults_nztm.distance(x).min()) / 1000.0)
+    d = round(
+        latlon_nztm.geometry.apply(lambda x: faults_nztm.distance(x).min()) / 1000.0
+    )
 
-    return d
+    return d[0]
