@@ -73,8 +73,6 @@ def calculate_distance_to_fault(
     # calculate minimum distance to fault
     d = latlon_nztm.geometry.apply(lambda x: faults_nztm.distance(x).min()) / 1000.0
 
-    print(d)
-
     # round down to lower integer (DEFAULT BEHAVIOR)
     if round_down:
         d = np.floor(d[0])
