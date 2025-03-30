@@ -4,6 +4,7 @@
 
 ### Added
  - new `nzssdt_2023.end_user_functions` package for querying TS tables and producing response spectra
+ - add missing API documentation and 2nd homepage option
 
 ## [0.5.0] 2025-03-20 
 
