@@ -7,12 +7,13 @@ watch:
   - nzssdt_2023
   - docs
 nav:
-  - Home: index.md
+  - Home A: index.md
+  - Home B: user_orientation/index.md
   - Usage:
     - usage.md
     - Versions: versions.md
   - End User Tools:
-    - end_user_functions/index.md
+    - End User Tools: end_user_functions/index.md
     - constants: end_user_functions/constants.md
     - geospatial_analysis: end_user_functions/geospatial_analysis.md
     - query_parameters: end_user_functions/query_parameters.md
