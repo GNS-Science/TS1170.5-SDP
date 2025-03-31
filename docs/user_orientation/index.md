@@ -46,11 +46,18 @@ Formatted, searchable files, as included in the TS 1170.5 document. Settlement n
 
 ### CSV files
 
-Unformatted, comma separated text files.
-*Note: By default, Microsoft Excel converts all date-like values into dates.
-To correctly import the APoE values, see [Microsoft's recommendation](https://support.microsoft.com/en-us/office/opening-csv-utf-8-files-correctly-in-excel-8a935af5-3416-4edd-ba7e-3dfd2bc4a032).*
+Unformatted, Comma Separated Value (CSV) text files with UTF-8 encoding.
 
 ![csv_table](csv_table.png)
+
+#### Note for Microsoft Excel Users
+
+Please [follow this guidance from Microsoft](https://support.microsoft.com/en-us/office/opening-csv-utf-8-files-correctly-in-excel-8a935af5-3416-4edd-ba7e-3dfd2bc4a032) to:
+
+- help Excel import the UTF-8 encoding correctly for macrons in placenames, and
+
+- override Excel's default date conversions, which affect APoE values such as 1/25.
+
 
 &nbsp;
 

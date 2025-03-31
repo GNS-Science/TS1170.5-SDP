@@ -17,7 +17,6 @@ import pandas as pd
 from nzssdt_2023.config import RESOURCES_FOLDER
 from nzssdt_2023.data_creation.constants import DEFAULT_RPS, SITE_CLASSES
 
-### The resources folder is points outside of repo until V2 is merged
 TS_VERSION = "v2"
 
 NAMED_PARAMETERS_PATH = Path(RESOURCES_FOLDER, TS_VERSION, "named_locations_combo.json")
