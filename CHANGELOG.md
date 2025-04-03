@@ -4,7 +4,6 @@
 
 ### Added
  - new .geojson of the lat/lon grid points
- - new package for creating the deliverable for Standards New Zealand
 
 ## [0.6.0] 2025-03-26 
 
