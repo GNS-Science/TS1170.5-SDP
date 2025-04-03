@@ -17,6 +17,7 @@ from nzssdt_2023.data_creation.gis_data import (
     filter_cfm_by_sliprate,
     create_grid_gpd,
     filter_cfm_by_sliprate,
+    create_grid_gpd,
 )
 
 latlon_precision = 1e-10
@@ -58,6 +59,13 @@ def test_grid_points(grid_points_expected):
             grid_points_expected["geometry"], latlon_precision
         )
     )
+
+
+def test_grid_points(grid_points_expected):
+
+    grid_points = create_grid_gpd().reset_index()
+
+    assert all(grid_points == grid_points_expected)
 
 
 # test generated D values against v1 fixture
