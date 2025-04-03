@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.0]
+
+### Added
+ - new .geojson of the lat/lon grid points
+
 ## [0.6.0] 2025-03-26 
 
 ### Added
