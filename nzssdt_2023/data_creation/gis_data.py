@@ -18,7 +18,6 @@ from nzssdt_2023.data_creation.constants import (
     POLYGON_PATH,
 )
 from nzssdt_2023.data_creation.query_NSHM import create_sites_df
-
 from nzssdt_2023.data_creation.util import set_coded_location_resolution
 
 if TYPE_CHECKING:
@@ -188,7 +187,7 @@ def create_grid_gpd() -> "gpdt.DataFrame":
         data=grid_df,
     )
 
-    return grid[['geometry']]
+    return grid[["geometry"]]
 
 
 def create_geojson_files(
