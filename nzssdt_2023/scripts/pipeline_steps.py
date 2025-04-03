@@ -141,9 +141,10 @@ def create_geojsons(version: str, overwrite: bool = False):
     # pipeline_folder = Path(RESOURCES_FOLDER, "pipeline" ,  f"v{version}")
     polygons_path = output_folder / "urban_area_polygons.geojson"
     faults_path = output_folder / "major_faults.geojson"
+    grid_path = output_folder / "grid_points.geojson"
 
     # write geojson files to resources
-    create_geojson_files(polygons_path, faults_path, override=overwrite)
+    create_geojson_files(polygons_path, faults_path, grid_path, override=overwrite)
 
 
 def create_parameter_tables(

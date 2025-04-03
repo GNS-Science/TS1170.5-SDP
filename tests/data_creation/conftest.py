@@ -90,3 +90,8 @@ def polygons_v1():
 def faults_v1():
     path = FIXTURES / "gis_data/major_faults.geojson"
     yield gpd.read_file(path)
+
+@pytest.fixture(scope="module")
+def grid_points_expected():
+    path = FIXTURES / "gis_data/grid_points.geojson"
+    yield gpd.read_file(path)

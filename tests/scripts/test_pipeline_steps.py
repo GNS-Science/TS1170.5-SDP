@@ -35,7 +35,7 @@ def test_get_resources_version_path():
 
 def test_create_geojsons():
     # Mocking the create_geojson_files function
-    def mock_create_geojson_files(polygons_path, faults_path, override):
+    def mock_create_geojson_files(polygons_path, faults_path, grid_path, override):
         pass
 
     pipeline_steps.create_geojson_files = mock_create_geojson_files

@@ -1,6 +1,8 @@
 """
 test gis data versus v1 fixtures
 
+note: the grid points geodataframe so it is tested against a new expected gdf
+
 """
 
 from nzssdt_2023.data_creation.constants import (
@@ -12,6 +14,7 @@ from nzssdt_2023.data_creation.gis_data import (
     build_d_value_dataframe,
     cleanup_polygon_gpd,
     filter_cfm_by_sliprate,
+    create_grid_gpd,
 )
 
 
@@ -27,6 +30,13 @@ def test_faults(faults_v1):
     faults = filter_cfm_by_sliprate(CFM_URL)
 
     assert all(faults[["Name", "geometry"]] == faults_v1[["Name", "geometry"]])
+
+
+def test_grid_points(grid_points_expected):
+
+    grid_points = create_grid_gpd().reset_index()
+
+    assert all(grid_points == grid_points_expected)
 
 
 # test generated D values against v1 fixture
