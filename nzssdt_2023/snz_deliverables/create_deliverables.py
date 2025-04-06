@@ -76,7 +76,8 @@ def zip_deliverable_files(zip_name: str, zip_path: Path):
     # TODO: confirm whether I can stay in the version folder or have to return to the previous directory
 
     os.chdir(version_folder)
-    shutil.make_archive(zip_name, "zip", version_folder)
+    shutil.make_archive(zip_name, "zip", version_folder, base_dir='./')
+
 
 
 def create_deliverable_zipfile(
@@ -121,10 +122,9 @@ def create_deliverable_zipfile(
     gns_named_json = Path(resources_folder, ts_version, "named_locations_combo.json")
     gns_grid_json = Path(resources_folder, ts_version, "grid_locations_combo.json")
     gns_polygons = Path(resources_folder, ts_version, "urban_area_polygons.geojson")
-    # gns_grid_points = Path(resources_folder, ts_version, "grid_points.geojson")
+    gns_grid_points = Path(resources_folder, ts_version, "grid_points.geojson")
     gns_faults = Path(resources_folder, ts_version, "major_faults.geojson")
-    # TODO: add grid points file once it is included in v2 resources
-    gns_geojsons = [gns_polygons, gns_faults]
+    gns_geojsons = [gns_polygons, gns_grid_points, gns_faults]
     gns_jsons = [gns_named_json, gns_grid_json]
 
     # set relevant paths for snz deliverable
@@ -167,14 +167,13 @@ def create_deliverable_zipfile(
         ts_version,
         f"{snz_name_prefix}_UrbanAreaPolygons_{publication_year}.geojson",
     )
-    # snz_grid_points = Path(deliverables_folder, ts_version, f"{snz_name_prefix}_GridPoints_{publication_year}.geojson")  # noqa
+    snz_grid_points = Path(deliverables_folder, ts_version, f"{snz_name_prefix}_GridPoints_{publication_year}.geojson")
     snz_faults = Path(
         deliverables_folder,
         ts_version,
         f"{snz_name_prefix}_MajorFaults_{publication_year}.geojson",
     )
-    # TODO: add grid points file once it is included in v2 resources
-    snz_geojsons = [snz_polygons, snz_faults]
+    snz_geojsons = [snz_polygons, snz_grid_points, snz_faults]
     snz_jsons = [snz_named_json, snz_grid_json]
 
     # create deliverables version folder
