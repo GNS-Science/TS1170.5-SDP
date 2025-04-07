@@ -60,7 +60,6 @@ def test_grid_points(grid_points_expected):
     )
 
 
-
 # test generated D values against v1 fixture
 def test_D_values_against_v1(dandm_v1):
 
