@@ -5,7 +5,6 @@ import pandas as pd
 import pytest
 
 import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
-
 from nzssdt_2023.data_creation.util import set_coded_location_resolution
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
