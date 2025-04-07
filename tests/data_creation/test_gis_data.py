@@ -28,14 +28,20 @@ def test_polygons(polygons_v1):
     polygons_v1.set_index("Name", inplace=True)
     polygons_v1 = polygons_v1.loc[polygons.index]
 
-    assert all(polygons["geometry"].geom_equals_exact(polygons_v1["geometry"],latlon_precision))
+    assert all(
+        polygons["geometry"].geom_equals_exact(
+            polygons_v1["geometry"], latlon_precision
+        )
+    )
 
 
 def test_faults(faults_v1):
 
     faults = filter_cfm_by_sliprate(CFM_URL)
 
-    assert all(faults["geometry"].geom_equals_exact(faults_v1["geometry"], latlon_precision))
+    assert all(
+        faults["geometry"].geom_equals_exact(faults_v1["geometry"], latlon_precision)
+    )
 
 
 def test_grid_points(grid_points_expected):
@@ -45,7 +51,11 @@ def test_grid_points(grid_points_expected):
     # reformat expected
     grid_points_expected.set_index("Name", inplace=True)
 
-    assert all(grid_points["geometry"].geom_equals_exact(grid_points_expected["geometry"], latlon_precision))
+    assert all(
+        grid_points["geometry"].geom_equals_exact(
+            grid_points_expected["geometry"], latlon_precision
+        )
+    )
 
 
 # test generated D values against v1 fixture
