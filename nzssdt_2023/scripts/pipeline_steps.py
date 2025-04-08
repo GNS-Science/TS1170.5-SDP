@@ -9,12 +9,7 @@ from typing import List
 
 import pandas as pd
 
-from nzssdt_2023.config import (
-    DELIVERABLES_FOLDER,
-    REPORTS_FOLDER,
-    RESOURCES_FOLDER,
-    WORKING_FOLDER,
-)
+from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER, DELIVERABLES_FOLDER, REPORTS_FOLDER
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
@@ -228,13 +223,14 @@ def create_deliverables(version: str, overwrite: bool = False):
         # TODO: should this raise a warning instead of assert 0?
         assert 0, "the TS deliverable needs a year with which to label the files"
 
+
     create_deliverables_zipfile(
         snz_name_prefix,
         publication_year,
         deliverables_folder,
         reports_folder,
         resources_folder,
-        override=overwrite,
+        override=overwrite
     )
 
 

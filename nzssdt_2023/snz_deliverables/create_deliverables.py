@@ -80,13 +80,13 @@ def zip_deliverable_files(zip_name: str, zip_path: Path):
 
 
 
-def create_deliverable_zipfile(
+def create_deliverables_zipfile(
     snz_name_prefix: str,
     publication_year: int,
-    ts_version: str,
     deliverables_folder: Path,
     reports_folder: Path,
     resources_folder: Path,
+    override: bool = False,
 ) -> str:
     """
     identifies the relevant reports and resources and includes them in a zipfile
@@ -94,103 +94,78 @@ def create_deliverable_zipfile(
     Args:
         snz_name_prefix: prefix for filenames
         publication_year: date suffix for filenames
-        ts_version: relevant TS version
-        deliverables_folder: path to the folder containing all versions' deliverables
-        reports_folder: path to the folder containing all versions' reports
-        resources_folder: path to the folder containing all versions' resources
+        deliverables_folder: path to the deliverables folder for the version
+        reports_folder: path to the reports folder for the version
+        resources_folder: path to the resources folder for the version
+        override: if True, rewrite all files
 
     Returns:
          zip_path: path to the zip file deliverable
     """
 
     zip_name = f"{snz_name_prefix}_files"
-    zip_path = Path(deliverables_folder, ts_version, zip_name + ".zip")
+    zip_path = Path(deliverables_folder, zip_name + ".zip")
 
     # set relevant paths in gns repo
-    gns_named_report_pdf = Path(reports_folder, ts_version, "named_location_report.pdf")
-    gns_grid_report_pdf = Path(
-        reports_folder, ts_version, "gridded_location_report.pdf"
-    )
+    gns_named_report_pdf = Path(reports_folder, "named_location_report.pdf")
+    gns_grid_report_pdf = Path(reports_folder, "gridded_location_report.pdf")
     gns_pdf_files = [gns_grid_report_pdf, gns_named_report_pdf]
 
-    gns_named_report_csv = Path(reports_folder, ts_version, "named_location_report.csv")
-    gns_grid_report_csv = Path(
-        reports_folder, ts_version, "gridded_location_report.csv"
-    )
+    gns_named_report_csv = Path(reports_folder, "named_location_report.csv")
+    gns_grid_report_csv = Path(reports_folder, "gridded_location_report.csv")
     gns_csv_files = [gns_grid_report_csv, gns_named_report_csv]
 
-    gns_named_json = Path(resources_folder, ts_version, "named_locations_combo.json")
-    gns_grid_json = Path(resources_folder, ts_version, "grid_locations_combo.json")
-    gns_polygons = Path(resources_folder, ts_version, "urban_area_polygons.geojson")
-    gns_grid_points = Path(resources_folder, ts_version, "grid_points.geojson")
-    gns_faults = Path(resources_folder, ts_version, "major_faults.geojson")
+    gns_named_json = Path(resources_folder, "named_locations_combo.json")
+    gns_grid_json = Path(resources_folder, "grid_locations_combo.json")
+    gns_polygons = Path(resources_folder, "urban_area_polygons.geojson")
+    gns_grid_points = Path(resources_folder, "grid_points.geojson")
+    gns_faults = Path(resources_folder, "major_faults.geojson")
     gns_geojsons = [gns_polygons, gns_grid_points, gns_faults]
     gns_jsons = [gns_named_json, gns_grid_json]
 
     # set relevant paths for snz deliverable
-    snz_named_report_pdf = Path(
-        deliverables_folder,
-        ts_version,
-        f"{snz_name_prefix}_Table3-1_{publication_year}.pdf",
-    )
-    snz_grid_report_pdf = Path(
-        deliverables_folder,
-        ts_version,
-        f"{snz_name_prefix}_Table3-2_{publication_year}.pdf",
-    )
+    snz_named_report_pdf = Path(deliverables_folder, f"{snz_name_prefix}_Table3-1_{publication_year}.pdf")
+    snz_grid_report_pdf = Path(deliverables_folder, f"{snz_name_prefix}_Table3-2_{publication_year}.pdf")
     snz_pdf_files = [snz_grid_report_pdf, snz_named_report_pdf]
 
-    snz_named_report_csv = Path(
-        deliverables_folder,
-        ts_version,
-        f"{snz_name_prefix}_Table3-1_{publication_year}.csv",
-    )
-    snz_grid_report_csv = Path(
-        deliverables_folder,
-        ts_version,
-        f"{snz_name_prefix}_Table3-2_{publication_year}.csv",
-    )
+    snz_named_report_csv = Path(deliverables_folder, f"{snz_name_prefix}_Table3-1_{publication_year}.csv")
+    snz_grid_report_csv = Path(deliverables_folder, f"{snz_name_prefix}_Table3-2_{publication_year}.csv")
     snz_csv_files = [snz_grid_report_csv, snz_named_report_csv]
 
-    snz_named_json = Path(
-        deliverables_folder,
-        ts_version,
-        f"{snz_name_prefix}_Table3-1_{publication_year}.json",
-    )
-    snz_grid_json = Path(
-        deliverables_folder,
-        ts_version,
-        f"{snz_name_prefix}_Table3-2_{publication_year}.json",
-    )
-    snz_polygons = Path(
-        deliverables_folder,
-        ts_version,
-        f"{snz_name_prefix}_UrbanAreaPolygons_{publication_year}.geojson",
-    )
-    snz_grid_points = Path(deliverables_folder, ts_version, f"{snz_name_prefix}_GridPoints_{publication_year}.geojson")
-    snz_faults = Path(
-        deliverables_folder,
-        ts_version,
-        f"{snz_name_prefix}_MajorFaults_{publication_year}.geojson",
-    )
+    snz_named_json = Path(deliverables_folder, f"{snz_name_prefix}_Table3-1_{publication_year}.json")
+    snz_grid_json = Path(deliverables_folder, f"{snz_name_prefix}_Table3-2_{publication_year}.json")
+    snz_polygons = Path(deliverables_folder, f"{snz_name_prefix}_UrbanAreaPolygons_{publication_year}.geojson")
+    snz_grid_points = Path(deliverables_folder, f"{snz_name_prefix}_GridPoints_{publication_year}.geojson")
+    snz_faults = Path(deliverables_folder, f"{snz_name_prefix}_MajorFaults_{publication_year}.geojson")
     snz_geojsons = [snz_polygons, snz_grid_points, snz_faults]
     snz_jsons = [snz_named_json, snz_grid_json]
 
-    # create deliverables version folder
-    version_folder = zip_path.parent
-    if not os.path.exists(version_folder):
-        os.makedirs(version_folder)
+    if (override
+        | (not snz_named_report_pdf.exists())
+        | (not snz_grid_report_pdf.exists())
+        | (not snz_named_report_csv.exists())
+        | (not snz_grid_report_pdf.exists())
+        | (not snz_named_json.exists())
+        | (not snz_grid_json.exists())
+        | (not snz_polygons.exists())
+        | (not snz_grid_points.exists())
+        | (not snz_faults.exists())
+    ):
 
-    # copy files for zip folder
-    copy_files_to_deliverable(
-        gns_pdf_files + gns_geojsons, snz_pdf_files + snz_geojsons
-    )
-    copy_csv_reports_to_deliverable(gns_csv_files, snz_csv_files)
-    zip_deliverable_files(zip_name, zip_path)
+        # create deliverables version folder
+        if not os.path.exists(deliverables_folder):
+            os.makedirs(deliverables_folder)
 
-    # add jsons outside of the zipped folder
-    copy_files_to_deliverable(
-        gns_jsons, snz_jsons
-    )
+        # copy files for zip folder
+        copy_files_to_deliverable(
+            gns_pdf_files + gns_geojsons, snz_pdf_files + snz_geojsons
+        )
+        copy_csv_reports_to_deliverable(gns_csv_files, snz_csv_files)
+        zip_deliverable_files(zip_name, zip_path)
+
+        # add jsons outside of the zipped folder
+        copy_files_to_deliverable(
+            gns_jsons, snz_jsons
+        )
 
     return str(zip_path)
