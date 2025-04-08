@@ -203,6 +203,7 @@ def create_geojson_files(
     Args:
         polygons_path: path to polygon .geojson
         faults_path: path to faults .geojson
+        grid_path: path to grid points .geojson
         override: if True, rewrite all files
 
     """
