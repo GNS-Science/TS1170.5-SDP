@@ -73,6 +73,38 @@
         "filepath": "reports/v2/gridded_location_report.csv"
       }
     ],
+    "deliverables": [
+      {
+        "filepath": "deliverables/v2/TS1170-5_Table3-1_2025.pdf"
+      },
+      {
+        "filepath": "deliverables/v2/TS1170-5_Table3-2_2025.pdf"
+      },
+      {
+        "filepath": "deliverables/v2/TS1170-5_Table3-1_2025.csv"
+      },
+      {
+        "filepath": "deliverables/v2/TS1170-5_Table3-2_2025.csv"
+      },
+      {
+        "filepath": "deliverables/v2/TS1170-5_Table3-1_2025.json"
+      },
+      {
+        "filepath": "deliverables/v2/TS1170-5_Table3-2_2025.json"
+      },
+      {
+        "filepath": "deliverables/v2/TS1170-5_UrbanAreaPolygons.geojson"
+      },
+      {
+        "filepath": "deliverables/v2/TS1170-5_GridPoints_2025.geojson"
+      },
+      {
+        "filepath": "deliverables/v2/TS1170-5_MajorFaults_2025.geojson"
+      },
+      {
+        "filepath": "deliverables/v2/TS1170-5_files.zip"
+      }
+    ],
     "nzshm_common_lib_version": "0.8.4"
   }
 ]
