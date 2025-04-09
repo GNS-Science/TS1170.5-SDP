@@ -19,7 +19,7 @@
        -  internally from create_sites_df.
   - **05-report**: create reports in PDF & CSV format.
   - **06-publish**: seal the version, recording details in `resources\\version_list.json`.
-  - **07-deliverables**: compile the version in the format requests by Standards New Zealand
+  - **07-deliverables**: compile the version in the `deliverables` folder as requested by Standards New Zealand.
 
 **Version commands:**
 
@@ -40,8 +40,8 @@ from nzssdt_2023.publish.report_condensed_v2 import publish_gridded, publish_nam
 from nzssdt_2023.versioning import VersionInfo, VersionManager, ensure_resource_folders
 
 from .pipeline_steps import (
-    create_geojsons,
     create_deliverables,
+    create_geojsons,
     create_parameter_tables,
     get_hazard_curves,
     get_site_list,

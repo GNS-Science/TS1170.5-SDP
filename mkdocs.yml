@@ -27,6 +27,7 @@ nav:
     - data_creation: api/data_creation.md
     - convert: api/convert.md
     - publish: api/publish.md
+    - deliverables: api/deliverables.md
   - Development and Contributing:
     - contributing.md
     - Installation: installation.md
