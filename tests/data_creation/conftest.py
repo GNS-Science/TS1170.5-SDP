@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
+from nzssdt_2023.data_creation.util import set_coded_location_resolution
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
 
@@ -77,7 +78,7 @@ def sa_table_reduced(mini_hcurves_hdf5_path):
 @pytest.fixture(scope="module")
 def dandm_v1():
     path = FIXTURES / "gis_data/D_and_M_with_floor.csv"
-    yield pd.read_csv(path, index_col="Location")
+    yield set_coded_location_resolution(pd.read_csv(path, index_col="Location"))
 
 
 @pytest.fixture(scope="module")
@@ -89,4 +90,10 @@ def polygons_v1():
 @pytest.fixture(scope="module")
 def faults_v1():
     path = FIXTURES / "gis_data/major_faults.geojson"
+    yield gpd.read_file(path)
+
+
+@pytest.fixture(scope="module")
+def grid_points_expected():
+    path = FIXTURES / "gis_data/grid_points.geojson"
     yield gpd.read_file(path)

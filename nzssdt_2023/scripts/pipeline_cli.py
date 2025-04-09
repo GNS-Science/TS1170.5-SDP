@@ -16,6 +16,7 @@
   - **04-geometry**: build geojson artefacts:
        -  from CFM get major faults geojson.
        -  from nicks file `resources\\pipeline\\v2\\polygons_locations.geojson`.
+       -  internally from create_sites_df.
   - **05-report**: create reports in PDF & CSV format.
   - **06-publish**: seal the version, recording details in `resources\\version_list.json`.
 

@@ -18,6 +18,7 @@ from nzssdt_2023.data_creation.constants import (
     POLYGON_PATH,
 )
 from nzssdt_2023.data_creation.query_NSHM import create_sites_df
+from nzssdt_2023.data_creation.util import set_coded_location_resolution
 
 if TYPE_CHECKING:
     import geopandas.typing as gpdt
@@ -170,9 +171,29 @@ def create_fault_and_polygon_gpds() -> Tuple["gpdt.DataFrame", "gpdt.DataFrame"]
     return faults, polygons
 
 
+def create_grid_gpd() -> "gpdt.DataFrame":
+    """Creates one geodataframe for resource output
+
+    Returns:
+        grid: geodataframe of lat/lon grid points
+    """
+
+    grid_df = create_sites_df(named_sites=False)
+    grid_df = set_coded_location_resolution(grid_df)
+    grid_df.index.name = "Name"
+
+    grid = gpd.GeoDataFrame(
+        geometry=gpd.points_from_xy(grid_df.lon, grid_df.lat, crs="EPSG:4326"),
+        data=grid_df,
+    )
+
+    return grid[["geometry"]]
+
+
 def create_geojson_files(
     polygons_path: Union[str | Path],
     faults_path: Union[str | Path],
+    grid_path: Union[str | Path],
     override: bool = False,
 ):
     """Create the .geojsons for the version resources
@@ -184,12 +205,20 @@ def create_geojson_files(
 
     """
 
-    if override | (not Path(polygons_path).exists()) | (not Path(faults_path).exists()):
+    if (
+        override
+        | (not Path(polygons_path).exists())
+        | (not Path(faults_path).exists())
+        | (not Path(grid_path).exists())
+    ):
 
         faults, polygons = create_fault_and_polygon_gpds()
 
         save_gdf_to_geojson(faults, faults_path)
         save_gdf_to_geojson(polygons, polygons_path, include_idx=True)
+
+        grid = create_grid_gpd()
+        save_gdf_to_geojson(grid, grid_path, include_idx=True)
 
     if override:
         d_values_path = Path(WORKING_FOLDER, "D_values.json")
@@ -213,11 +242,7 @@ def build_d_value_dataframe() -> "pdt.DataFrame":
 
     D_polygons = calc_distance_to_faults(polygons, faults)
 
-    grid_df = create_sites_df(named_sites=False)
-    grid = gpd.GeoDataFrame(
-        geometry=gpd.points_from_xy(grid_df.lon, grid_df.lat, crs="EPSG:4326"),
-        data=grid_df,
-    )
+    grid = create_grid_gpd()
     D_grid = calc_distance_to_faults(grid, faults)
 
     D_values = pd.concat([D_polygons, D_grid])
