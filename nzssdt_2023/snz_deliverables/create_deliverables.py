@@ -3,12 +3,13 @@ This module compiles the deliverable for Standards New Zealand from the reports 
 """
 
 import csv
-import os
-import shutil
-from pathlib import Path
+import zipfile
+from pathlib import Path, PurePath
 from typing import List
 
 import pandas as pd
+
+from nzssdt_2023.config import WORKING_FOLDER
 
 
 def copy_files_to_deliverable(gns_files: List[Path], snz_files: List[Path]):
@@ -22,7 +23,11 @@ def copy_files_to_deliverable(gns_files: List[Path], snz_files: List[Path]):
     """
 
     for gns_file, snz_file in zip(gns_files, snz_files):
-        shutil.copy(gns_file, snz_file)
+
+        if gns_file.suffix == ".pdf":
+            snz_file.write_bytes(gns_file.read_bytes())
+        else:
+            snz_file.write_text(gns_file.read_text())
 
 
 def copy_csv_reports_to_deliverable(
@@ -60,24 +65,28 @@ def copy_csv_reports_to_deliverable(
         )
 
 
-def zip_deliverable_files(zip_name: str, zip_path: Path):
+def archive_zip_folder(source_path: Path, zip_path: Path):
     """
     zip the deliverables folder
 
     Args:
-        zip_name: base name of the zip folder
-        zip_path: path to zip folder
+        source_path: path to source folder
+        zip_path: path to zipped folder
 
     """
 
-    version_folder = zip_path.parent
-    if os.path.exists(zip_path):
-        os.remove(zip_path)
+    # remove current zip folder, if it exists
+    zip_path.unlink(missing_ok=True)
 
-    # TODO: confirm whether I can stay in the version folder or have to return to the previous directory
+    # create temporary zip
+    temp_path = Path(WORKING_FOLDER, PurePath(zip_path).name)
+    with zipfile.ZipFile(temp_path, "w") as zip:
+        for filename in Path(source_path).rglob("*"):
+            zip.write(filename, arcname=str(Path(filename).relative_to(source_path)))
 
-    os.chdir(version_folder)
-    shutil.make_archive(zip_name, "zip", version_folder, base_dir="./")
+    temp_path.rename(zip_path)
+
+    return zip_path
 
 
 def create_deliverables_zipfile(
@@ -87,7 +96,7 @@ def create_deliverables_zipfile(
     reports_folder: Path,
     resources_folder: Path,
     override: bool = False,
-) -> str:
+) -> Path:
     """
     identify the relevant reports and resources and includes them in a zipfile
 
@@ -173,17 +182,17 @@ def create_deliverables_zipfile(
     ):
 
         # create deliverables version folder
-        if not os.path.exists(deliverables_folder):
-            os.makedirs(deliverables_folder)
+        if not deliverables_folder.is_dir():
+            deliverables_folder.mkdir()
 
         # copy files for zip folder
         copy_files_to_deliverable(
             gns_pdf_files + gns_geojsons, snz_pdf_files + snz_geojsons
         )
         copy_csv_reports_to_deliverable(gns_csv_files, snz_csv_files)
-        zip_deliverable_files(zip_name, zip_path)
+        zip_path = archive_zip_folder(deliverables_folder, zip_path)
 
         # add jsons outside of the zipped folder
         copy_files_to_deliverable(gns_jsons, snz_jsons)
 
-    return str(zip_path)
+    return zip_path
