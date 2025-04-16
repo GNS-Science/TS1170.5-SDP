@@ -7,17 +7,11 @@ watch:
   - nzssdt_2023
   - docs
 nav:
-  - Home A: index.md
-  - Home B: user_orientation/index.md
-  - Usage:
-    - usage.md
+  - Home:
+    - index.md
+    - User Orientation: user_orientation/index.md
     - Versions: versions.md
-  - End User Tools:
-    - End User Tools: end_user_functions/index.md
-    - constants: end_user_functions/constants.md
-    - geospatial_analysis: end_user_functions/geospatial_analysis.md
-    - query_parameters: end_user_functions/query_parameters.md
-    - create_spectra: end_user_functions/create_spectra.md
+    - Usage: usage.md
   - Process: scripts/pipeline_cli.md
   - API:
     - api/index.md
@@ -28,6 +22,12 @@ nav:
     - convert: api/convert.md
     - publish: api/publish.md
     - deliverables: api/deliverables.md
+  - End User Tools:
+    - End User Tools: end_user_functions/index.md
+    - constants: end_user_functions/constants.md
+    - geospatial_analysis: end_user_functions/geospatial_analysis.md
+    - query_parameters: end_user_functions/query_parameters.md
+    - create_spectra: end_user_functions/create_spectra.md    
   - Development and Contributing:
     - contributing.md
     - Installation: installation.md

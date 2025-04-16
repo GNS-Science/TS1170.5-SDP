@@ -1,10 +1,13 @@
 # Changelog
 
-## [0.7.0]
+## [0.7.0] 2025-04-
 
 ### Added
  - new .geojson of the lat/lon grid points
  - new package for creating the deliverable for Standards New Zealand
+ ## Changed
+  - refactored documentation layout and front matter content.
+  - updated README.md
 
 ## [0.6.0] 2025-03-26 
 
