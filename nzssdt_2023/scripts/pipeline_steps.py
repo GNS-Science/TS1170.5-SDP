@@ -9,7 +9,12 @@ from typing import List
 
 import pandas as pd
 
-from nzssdt_2023.config import RESOURCES_FOLDER, WORKING_FOLDER
+from nzssdt_2023.config import (
+    DELIVERABLES_FOLDER,
+    REPORTS_FOLDER,
+    RESOURCES_FOLDER,
+    WORKING_FOLDER,
+)
 from nzssdt_2023.data_creation import constants
 from nzssdt_2023.data_creation import dm_parameter_generation as dm_gen
 from nzssdt_2023.data_creation import sa_parameter_generation as sa_gen
@@ -23,6 +28,7 @@ from nzssdt_2023.publish.convert import (
     sat_table_json_path,
     to_standard_json,
 )
+from nzssdt_2023.snz_deliverables.create_deliverables import create_deliverables_zipfile
 
 # configure logging
 logging.basicConfig(level=logging.INFO)
@@ -75,12 +81,32 @@ def get_hazard_curves(
 
 def get_resources_version_path(version: str):
     """
-    Get the version folder for the given version.
+    Get the resources version folder for the given version.
 
     Args:
         version: the version string
     """
     return Path(RESOURCES_FOLDER, f"v{version}")
+
+
+def get_reports_version_path(version: str):
+    """
+    Get the reports version folder for the given version.
+
+    Args:
+        version: the version string
+    """
+    return Path(REPORTS_FOLDER, f"v{version}")
+
+
+def get_deliverables_version_path(version: str):
+    """
+    Get the deliverables version folder for the given version.
+
+    Args:
+        version: the version string
+    """
+    return Path(DELIVERABLES_FOLDER, f"v{version}")
 
 
 def build_json_tables(
@@ -180,6 +206,36 @@ def create_parameter_tables(
     # build the tables
     sites = sites_df.index.tolist()
     build_json_tables(hf_path, sites, version, site_limit, overwrite_json)
+
+
+def create_deliverables(version: str, overwrite: bool = False):
+    """
+    Create the deliverable zip file for Standards New Zealand.
+
+    Args:
+        version: the version string
+        override: whether to override existing files
+    """
+
+    reports_folder = get_reports_version_path(version)
+    resources_folder = get_resources_version_path(version)
+    deliverables_folder = get_deliverables_version_path(version)
+
+    snz_name_prefix = "TS1170-5"
+    if version == str(2):
+        publication_year = 2025
+    else:
+        # TODO: should this raise a warning instead of assert 0?
+        assert 0, "the TS deliverable needs a year with which to label the files"
+
+    create_deliverables_zipfile(
+        snz_name_prefix,
+        publication_year,
+        deliverables_folder,
+        reports_folder,
+        resources_folder,
+        override=overwrite,
+    )
 
 
 if __name__ == "__main__":
