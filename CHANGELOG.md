@@ -4,10 +4,10 @@
 
 ### Added
  - new .geojson of the lat/lon grid points
- - new package for creating the deliverable for Standards New Zealand
- ## Changed
-  - refactored documentation layout and front matter content.
-  - updated README.md
+ - new `nzssdt_2023.snz_deliverables` package to create the deliverables for Standards NZ
+### Changed
+ - refactored documentation layout and front matter content.
+ - updated README.md
 
 ## [0.6.0] 2025-03-26 
 
@@ -39,7 +39,7 @@
    `poetry run pipeline 06-publish 2 NSHM_v1.0.4 "Seismic Demand Parameters version 2, incorporating feedback from reviewers."`
  - added doc publiscation workflow
  
- ## Changed
+### Changed
  - migrated report.py into new `publish` package
  - minor typing improvents
  - renamed `nzssdt_2023\cli.py` -> `nzssdt_2023\scripts\publish_cli.py`

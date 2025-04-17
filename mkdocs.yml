@@ -1,4 +1,4 @@
-site_name: NZSSDT Documentation
+site_name: TS1170.5 SDP Documentation
 site_url: https://gns-science.github.io/nzssdt-2023
 repo_url: https://github.com/GNS-Science/nzssdt-2023
 repo_name: GNS-Science/nzssdt-2023
@@ -11,7 +11,7 @@ nav:
     - index.md
     - User Orientation: user_orientation/index.md
     - Versions: versions.md
-    - Usage: usage.md
+    # - Usage: usage.md
   - Process: scripts/pipeline_cli.md
   - API:
     - api/index.md
