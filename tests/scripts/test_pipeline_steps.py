@@ -1,12 +1,14 @@
 from nzssdt_2023.scripts import pipeline_steps
+from nzssdt_2023.config import WORKING_FOLDER
+from pathlib import Path
 
 
 # Test cases for pipeline_steps module
 def test_hf_filepath():
     assert (
-        str(pipeline_steps.hf_filepath(site_limit=10)) == "/tmp/first_20_hcurves.hdf5"
+        str(pipeline_steps.hf_filepath(site_limit=10)) == str(Path(WORKING_FOLDER) / "first_20_hcurves.hdf5")
     )
-    assert str(pipeline_steps.hf_filepath()) == "/tmp/all_hcurves.hdf5"
+    assert str(pipeline_steps.hf_filepath()) == str(Path(WORKING_FOLDER) / "all_hcurves.hdf5")
 
 
 def test_get_site_list():
