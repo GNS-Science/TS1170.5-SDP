@@ -81,9 +81,7 @@ def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str
     return sc
 
 
-def sig_figs(
-    x: Union[float, List[float], "npt.NDArray"], n: int
-) -> Union[float, "npt.NDArray"]:
+def sig_figs(x: Union[float, List[float], "npt.NDArray"], n: int) -> "npt.NDArray":
     """Rounds all values of x to n significant figures
 
     Inputs:
@@ -96,7 +94,7 @@ def sig_figs(
     x = np.asarray(x)
     x_positive = np.where(np.isfinite(x) & (x != 0), np.abs(x), 10 ** (n - 1))
     mags = 10 ** (n - 1 - np.floor(np.log10(x_positive)))
-    x_rounded = np.round(x * mags) / mags
+    x_rounded: "npt.NDArray" = np.round(x * mags) / mags
     return x_rounded
 
 
@@ -450,11 +448,11 @@ def calculate_parameter_arrays(
             f"PGA rounding skipped because `PGA_ROUNDING_ENABLED` == {PGA_ROUNDING_ENABLED}"
         )
 
-    Sas = 0.9 * np.max(acc_spectra, axis=2)
+    Sas: npt.NDArray = 0.9 * np.max(acc_spectra, axis=2)
     Sas = np.round(Sas, SAS_N_DP)
 
-    PSV = 0.95 * np.max(vel_spectra, axis=2)
-    Tc = 2 * np.pi * PSV / (Sas * g)
+    PSV: npt.NDArray = 0.95 * np.max(vel_spectra, axis=2)
+    Tc: npt.NDArray = 2 * np.pi * PSV / (Sas * g)
     Tc = sig_figs(Tc, TC_N_SF)
 
     return PGA, Sas, PSV, Tc
