@@ -141,7 +141,9 @@ def test_report_pdf_values_named(named_combo_table, monkeypatch):
 
     report: Document = Document()
 
-    for page in report_condensed_v2.build_pdf_report_pages(named_combo_table, "named"):
+    for page in report_condensed_v2.build_pdf_report_pages(
+        named_combo_table, "named", "by location name"
+    ):
         print("added page")
         report.add_page(page)
 
@@ -166,7 +168,9 @@ def test_report_pdf_values_gridded(grid_combo_table, monkeypatch):
 
     report: Document = Document()
 
-    for page in report_condensed_v2.build_pdf_report_pages(grid_combo_table, "gridded"):
+    for page in report_condensed_v2.build_pdf_report_pages(
+        grid_combo_table, "gridded", "by grid point"
+    ):
         print("added page")
         report.add_page(page)
 

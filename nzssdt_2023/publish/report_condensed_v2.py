@@ -56,7 +56,12 @@ medium_font = TrueTypeFont.true_type_font_from_file(
 
 
 def build_report_page(
-    table_id: str, rowdata=List[List], table_part: int = 1, is_final: bool = False
+    table_id: str,
+    table_description,
+    rowdata=List[List],
+    table_part: int = 1,
+    is_final: bool = False,
+    print_footer: bool = False,
 ):
 
     # create Document (needed for borbs page layout engine )
@@ -85,8 +90,9 @@ def build_report_page(
             font_color=HexColor("070707"),
         ).paint(page, None)
 
-    heading = f"TABLE {table_id} part {table_part}: Site demand parameters"
-    # heading += f" probability of exceedance of 1/{apoe[1]}"
+    heading = f"Table {table_id} - Site demand parameters {table_description}"
+    if table_part > 1:
+        heading += " (continued)"
     layout.add(
         Paragraph(
             heading,
@@ -142,7 +148,7 @@ def build_report_page(
         table.add(
             TableCell(
                 Paragraph(
-                    "Location",
+                    "Location" if table_id == "3.1" else "Grid point (lat-lon)",
                     font="Helvetica-bold",
                     font_size=Decimal(8),
                     horizontal_alignment=Alignment.LEFT,
@@ -296,15 +302,16 @@ def build_report_page(
     layout.add(table)
 
     # page footer
-    layout.add(
-        Paragraph(
-            f"page {table_part}",
-            font="Helvetica",
-            font_size=Decimal(9),
-            horizontal_alignment=Alignment.CENTERED,
-            vertical_alignment=Alignment.BOTTOM,
+    if print_footer:
+        layout.add(
+            Paragraph(
+                f"page {table_part}",
+                font="Helvetica",
+                font_size=Decimal(9),
+                horizontal_alignment=Alignment.CENTERED,
+                vertical_alignment=Alignment.BOTTOM,
+            )
         )
-    )
 
     return page
 
@@ -395,6 +402,7 @@ def chunks(items, chunk_size):
 def build_pdf_report_pages(
     location_df: pd.DataFrame,
     report_name: str,
+    table_description: str,
     is_final: bool = False,
     location_limit: int = 0,
     modify_locations: bool = True,
@@ -404,7 +412,11 @@ def build_pdf_report_pages(
     table_rows = generate_table_rows(location_df, modify_locations, location_limit)
     for idx, chunk in enumerate(chunks(table_rows, MAX_PAGE_BLOCKS)):
         yield build_report_page(
-            f"{report_name}", list(chunk), table_part=idx + 1, is_final=is_final
+            report_name,
+            table_description,
+            list(chunk),
+            table_part=idx + 1,
+            is_final=is_final,
         )
 
 
@@ -418,7 +430,8 @@ def publish_gridded(
     publish_table(
         location_df,
         output_folder,
-        table_title="3.5",
+        table_title="3.2",
+        table_description="by grid point",
         filename="gridded_location_report",
         produce_csv=produce_csv,
         is_final=is_final,
@@ -437,7 +450,8 @@ def publish_named(
     publish_table(
         location_df,
         output_folder,
-        table_title="3.4",
+        table_title="3.1",
+        table_description="by location name",
         filename="named_location_report",
         produce_csv=produce_csv,
         is_final=is_final,
@@ -450,6 +464,7 @@ def publish_table(
     location_df: pd.DataFrame,
     output_folder: Path,
     table_title: str,
+    table_description: str,
     filename: str,
     produce_csv: bool = True,
     is_final: bool = False,
@@ -480,7 +495,12 @@ def publish_table(
 
     # PDF
     for page in build_pdf_report_pages(
-        location_df, table_title, is_final, location_limit, modify_locations
+        location_df,
+        table_title,
+        table_description,
+        is_final,
+        location_limit,
+        modify_locations,
     ):
         report.add_page(page)
 
