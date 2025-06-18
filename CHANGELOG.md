@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.0] 2025-04-
+## [0.7.0] 2025-06-
 
 ### Added
  - new .geojson of the lat/lon grid points
@@ -8,6 +8,7 @@
 ### Changed
  - refactored documentation layout and front matter content.
  - updated README.md
+ - updated pdf report formatting per SNZ request
 
 ## [0.6.0] 2025-03-26 
 
