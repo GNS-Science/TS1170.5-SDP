@@ -157,7 +157,7 @@ def create_deliverables_zipfile(
     )
     snz_polygons = Path(
         deliverables_folder,
-        f"{snz_name_prefix}_UrbanAreaPolygons_{publication_year}.geojson",
+        f"{snz_name_prefix}_Figure3-2_{publication_year}.geojson",
     )
     snz_grid_points = Path(
         deliverables_folder, f"{snz_name_prefix}_GridPoints_{publication_year}.geojson"
