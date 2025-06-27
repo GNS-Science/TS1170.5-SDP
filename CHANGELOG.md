@@ -1,10 +1,12 @@
 # Changelog
 
-## [0.7.0] 2025-06-
+## [0.7.0] 2025-06-27
 
 ### Added
  - new .geojson of the lat/lon grid points
  - new `nzssdt_2023.snz_deliverables` package to create the deliverables for Standards NZ
+ - GNU Affero 3 licence
+
 ### Changed
  - refactored documentation layout and front matter content.
  - updated README.md
