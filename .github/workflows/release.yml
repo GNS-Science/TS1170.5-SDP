@@ -12,65 +12,11 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+
 jobs:
-
-  release:
-    name: Create Release
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      - name: Get version from tag
-        id: tag_name
-        run: |
-          echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
-        shell: bash
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      # run build using the minimum supported python version
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
-      - name: Get Changelog Entry
-        id: changelog_reader
-        uses: GNS-Science/changelog-reader-action@master
-        with:
-          validation_depth: 10
-          version: ${{ steps.tag_name.outputs.current_version }}
-          path: ./CHANGELOG.md
-
-      - name: Install and configure Poetry
-        uses: GNS-Science/install-poetry@main
-        with:
-          version: 1.8.4
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
-
-      - name: Build wheels and source tarball
-        run: >-
-          poetry build
-
-      - name: show temporary files
-        run: >-
-          ls -l
-
-      - name: create github release
-        id: create_release
-        uses: GNS-Science/action-gh-release@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          body: ${{ steps.changelog_reader.outputs.changes }}
-          files: dist/*.whl
-          draft: false
-          prerelease: false
-
-      # - name: publish to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
-      #   with:
-      #     user: __token__
-      #     password: ${{ secrets.PYPI_API_TOKEN }}
-      #     skip_existing: true
+  release-and-distribute:
+    uses:  GNS-Science/nshm-github-actions/.github/workflows/python-release.yml@main
+    with:
+      python-version:  '3.12'
+      pypi-publish: false
+    secrets: inherit
