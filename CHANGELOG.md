@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.0] 2025-10-
+
+### Changed
+ - end_user_tools now point to a URL for the deliverables, rather than a local folder
+
 ## [0.7.0] 2025-06-
 
 ### Added
