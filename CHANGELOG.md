@@ -11,7 +11,7 @@
  - refactored documentation layout and front matter content.
  - updated README.md, and minor doc improvements.
  - updated pdf report formatting per SNZ request.
- - updated end_user_tools to point to a URL for the deliverables.
+ - updated end_user_tools to point to a URL for the deliverables
  - migrated `pyproject.toml` to [PEP 508](https://peps.python.org/pep-0508) as per poetry v2.2 docs.
  - updated setup.cfg
  - ensureCI/CD workflows use minimum install footprints
