@@ -12,11 +12,12 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-
 jobs:
   release-and-distribute:
     uses:  GNS-Science/nshm-github-actions/.github/workflows/python-release.yml@main
     with:
       python-version:  '3.12'
-      pypi-publish: false
+      pypi-publish: False
     secrets: inherit
+
+
