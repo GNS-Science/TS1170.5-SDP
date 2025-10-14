@@ -1,6 +1,7 @@
 """
 utility functions
 """
+
 import pandas as pd
 from nzshm_common.location import CodedLocation
 

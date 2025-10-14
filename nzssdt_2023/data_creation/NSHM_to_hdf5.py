@@ -1,6 +1,7 @@
 """
 helper functions for producing an HDF5 file for the NZSSDT tables
 """
+
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -165,9 +166,9 @@ def add_uniform_hazard_spectra(
 
     for intensity_type in ["acc", "disp"]:
         data["hazard_design"][intensity_type] = {}
-        data["hazard_design"][intensity_type][
-            "stats_im_hazard"
-        ] = calculate_hazard_design_intensities(data, hazard_rps, intensity_type)
+        data["hazard_design"][intensity_type]["stats_im_hazard"] = (
+            calculate_hazard_design_intensities(data, hazard_rps, intensity_type)
+        )
 
     return data
 

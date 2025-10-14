@@ -110,9 +110,9 @@ def filter_cfm_by_sliprate(cfm_url, slip_rate: float = 5.0) -> "gpdt.DataFrame":
 
     gdf["Slip rate preferred value"] = gdf["SR_pref"]
     gdf["Slip rate filter"] = f"≥{slip_rate} mm/yr"
-    gdf[
-        "Source for linework and slip rate assessment"
-    ] = "NZ CFM v1.0 (Seebeck et al. 2022, 2023)"
+    gdf["Source for linework and slip rate assessment"] = (
+        "NZ CFM v1.0 (Seebeck et al. 2022, 2023)"
+    )
     gdf = gdf[
         [
             "Name",
