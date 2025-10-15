@@ -11,8 +11,21 @@
  - The folder  **[deliverables](https://github.com/GNS-Science/nzssdt-2023/tree/main/deliverables)**
    contains the final deliverables for use by Standards NZ.
  
+## Version 2 - March 2025 (Latest)
 
-## Version 1  - June 2023
+Version 2 was produced for TS1170.5:2025.
+
+This version contains the following files, all located in the [resources/v2](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v2) folder:
+
+ - **[named_locations_combo.json](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v2/named_locations_combo.json)** contains all the site parameters for the named locations that correspond to the polygons in the **urban_area_polygons.geojson**
+ - **[grid_locations_combo.json](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v2/grid_locations_combo.json)** contains all the site parameters that correspond to a 0.1 lat/lon degree grid spacing across New Zealand.
+ - **[urban_area_polygons.geojson](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1/urban_area_polygons.geojson)** contains the polygons for use with the **named_locations_combo.json**, using the CRS84 coordinate system.
+ - **[grid_points.geojson](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1/grid_points.geojson)** contains the grid points for use with the **grid_locations_combo.json**, using the CRS84 coordinate system.
+ - **[major_faults.geojson](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1/major_faults.geojson)** contains the major NZ faults using the CRS84 coordinate system.
+
+## Version 1 - June 2023
+
+Version 1 was produced for TS1170.5:2024 DRAFT.
 
 This version contains the following files, all located in the [resources/v1](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1) folder:
 
@@ -23,12 +36,4 @@ This version contains the following files, all located in the [resources/v1](htt
  - **[urban_area_polygons.geojson](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1/urban_area_polygons.geojson)** contains the polygons for use with the **named_locations.json**, using the CRS84 coordinate system.
  - **[major_faults.geojson](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1/major_faults.geojson)** contains the major NZ faults using the CRS84 coordinate system.
  
-## Version 2 -  March 2025
 
-This version contains the following files, all located in the [resources/v2](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v2) folder:
-
- - **[named_locations_combo.json](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v2/named_locations_combo.json)** contains all the site parameters for the named locations that correspond to the polygons in the **urban_area_polygons.geojson**
- - **[grid_locations_combo.json](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v2/grid_locations_combo.json)** contains all the site parameters that correspond to a 0.1 lat/lon degree grid spacing across New Zealand.
- - **[urban_area_polygons.geojson](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1/urban_area_polygons.geojson)** contains the polygons for use with the **named_locations_combo.json**, using the CRS84 coordinate system.
- - **[grid_points.geojson](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1/grid_points.geojson)** contains the grid points for use with the **grid_locations_combo.json**, using the CRS84 coordinate system.
- - **[major_faults.geojson](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1/major_faults.geojson)** contains the major NZ faults using the CRS84 coordinate system.

@@ -8,7 +8,7 @@ watch:
   - docs
 nav:
   - Home:
-    - index.md
+    - README: index.md
     - User Orientation: user_orientation/index.md
     - Versions: versions.md
     # - Usage: usage.md
