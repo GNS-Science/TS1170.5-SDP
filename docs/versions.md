@@ -13,6 +13,8 @@
  
 ## Version 2 - March 2025 (Latest)
 
+Version 2 was produced for TS1170.5:2025.
+
 This version contains the following files, all located in the [resources/v2](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v2) folder:
 
  - **[named_locations_combo.json](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v2/named_locations_combo.json)** contains all the site parameters for the named locations that correspond to the polygons in the **urban_area_polygons.geojson**
@@ -22,6 +24,8 @@ This version contains the following files, all located in the [resources/v2](htt
  - **[major_faults.geojson](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1/major_faults.geojson)** contains the major NZ faults using the CRS84 coordinate system.
 
 ## Version 1 - June 2023
+
+Version 1 was produced for TS1170.5:2024 DRAFT.
 
 This version contains the following files, all located in the [resources/v1](https://github.com/GNS-Science/nzssdt-2023/blob/main/resources/v1) folder:
 
