@@ -11,10 +11,11 @@
 **TS1170.5-SDP** stands for **NZ Technical Standard 1170.5 Seismic Demand Parameters**. 
 
 This project contains the source code and configuration used to 
-produce the tables published as part of TS1170.5:2024 DRAFT by Standards NZ. These tables are derived from the **[NZ National Seismic Hazard Model 2022](https://www.gns.cri.nz/research-projects/national-seismic-hazard-model/)** **Seismic Risk Working Group** . 
+produce the tables published as part of TS1170.5:2025 by Standards NZ. These tables are derived from the **[NZ National Seismic Hazard Model 2022](https://www.gns.cri.nz/research-projects/national-seismic-hazard-model/)** **Seismic Risk Working Group** . 
 
 For more about TS1170.5, please see:
 
+ - TS1170.5:2025 IN PUBLICATION (link to come)
  - [NZSEE:Overview of TS 1170.5:2025 and changes from NZS 1170.5:2004](https://bulletin.nzsee.org.nz/index.php/bnzsee/article/view/1695)
  - [TS1170.5:2024 DRAFT (PDF)](https://consultations.standards.govt.nz/draft-standards/ts1170-5-public-consultation/user_uploads/20240215-ts-1170.5---public-comment-draft_v2.pdf)
  
