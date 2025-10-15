@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.0] 2025-06-
+## [0.7.0] 2025-10-15
 
 ### Added
  - new .geojson of the lat/lon grid points
@@ -9,8 +9,8 @@
 
 ### Changed
  - refactored documentation layout and front matter content.
- - updated README.md
- - updated pdf report formatting per SNZ request
+ - updated README.md, and minor doc improvements.
+ - updated pdf report formatting per SNZ request.
  - migrated `pyproject.toml` to [PEP 508](https://peps.python.org/pep-0508) as per poetry v2.2 docs.
  - updated setup.cfg
  - ensureCI/CD workflows use minimum install footprints
