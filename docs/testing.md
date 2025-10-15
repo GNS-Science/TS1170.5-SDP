@@ -6,7 +6,7 @@ environment. In order to get all of the tests running,
 [install](installation.md) with all extras:
 
 ```
-poetry install --all-extras
+poetry install --with doc,dev
 ```
 
 Solvis uses [pytest][] and [tox][] to test its code.
@@ -22,7 +22,6 @@ For code quality, the following tools are used:
 * **black** and **flake8** for linting
 * **isort** for file import tidying
 * **mypy** for static type checking
-
 
 ## pytest
 By default, pytest will search for all tests in the `test/` directory.
