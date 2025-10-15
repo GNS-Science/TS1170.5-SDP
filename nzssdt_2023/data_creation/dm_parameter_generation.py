@@ -7,6 +7,7 @@ TODO:
     - Consolidate the mean mag csv files into one cache rather than 3 separate files. Any locations/poes
         not available can be looked up and added to the cache.
 """
+
 import itertools
 from pathlib import Path
 from typing import TYPE_CHECKING, List

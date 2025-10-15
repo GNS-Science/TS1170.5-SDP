@@ -2,6 +2,7 @@
 Functions to get hazard data from the NSHM hazard API.
 
 """
+
 import datetime
 import datetime as dt
 import logging

@@ -1,57 +1,86 @@
-[tool.poetry]
+[project]
 name = "nzssdt-2023"
 version = "0.6.0"
 description = "Data resource library for the NZ Seismic Site Demand Table 2023"
-authors = ["NZ NSHM team <nshm@gns.cri.nz>"]
-license = "AGPL3"
+license = "AGPL-3.0-or-later"
 readme = "README.md"
-packages = [{include = "nzssdt_2023"}]
+authors = [
+    { name = "Chris B Chamberlain", email = "chrisbc@artisan.co.nz" },
+    {name = "Chris DiCaprio", email = "christopher.dicaprio@gmail.com"},
+    {name="Anne Hulsey"},
+    {name="NSHM Compute Working Group", email="nshm@gns.cri.nz"}
+]
 
-[tool.poetry.scripts]
+classifiers=[
+    'Development Status :: 2 - Pre-Alpha',
+    'Intended Audience :: Developers',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',    
+]
+requires-python = ">=3.10,<3.13"
+
+dependencies = [
+    "pandas (>=2.0.2)",
+    "click (>=8.1.3)",
+    "dacite (>=1.8.1)",
+    "borb (>=2.1.13,<3.0)",
+    "h5py (>=3.11.0)",
+    "geopandas (>=1.0.1)",
+    "openpyxl (>=3.1.5)",
+    "nzshm-common (>=0.8.4)",
+    "shapely (>=2.0.7)",  
+    "toshi-hazard-store"    
+]
+
+[project.scripts]
 pipeline = 'nzssdt_2023.scripts.pipeline_cli:cli'
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-pandas = "^2.0.2"
-click = "^8.1.3"
-dacite = "^1.8.1"
-borb = "^2.1.13"
-h5py = "^3.11.0"
-geopandas = "^1.0.1"
-openpyxl = "^3.1.5"
-toshi-hazard-store = {git = "https://github.com/GNS-Science/toshi-hazard-store.git"}
-nzshm-common = "^0.8.4"
-shapely = "^2.0.7"
-
-[tool.poetry.group.dev.dependencies]
-black  = { version = "^22.3"}
-bump2version = {version = "^1.0.1"}
-flake8  = { version = "^3.9.2"}
-flake8-docstrings = { version = "^1.6.0", optional = true }
-isort  = { version = "^5.8.0"}
-mypy = {version = "^1.2"}
-pre-commit = {version = "^2.12.0", optional = true}
-pytest = ">7.0"
-pytest-cov  = { version = "^2.12.0"}
-tox = "^4.5.2"
-twine = "^5.1.1"
-pytest-lazy-fixtures = "^1.1.1"
-pytest-mock = "^3.14.0"
+[tool.poetry]
+packages = [{include = "nzssdt_2023"}]
 
 [tool.poetry.group.doc]
 optional = true
 
-[tool.poetry.group.doc.dependencies]
-mkdocs = "^1.6.0"
-mkdocstrings = {version = "^0.26.0", extras = ["python"]}
-mkdocs-autorefs = "^1.0.1"
-mkdocs-include-markdown-plugin = "^6.0.6"
-mkdocs-material = "^9.5.21"
-mkdocs-material-extensions = "^1.3.1"
-mkdocs-pymdownx-material-extras = "^2.5.6"
-mkdocs-with-pdf = "^0.9.3"
-mkdocs-click = "^0.8.1"
+[tool.poetry.group.dev]
+optional = true
+
+[dependency-groups]
+dev = [
+    "black",
+    "bump2version",
+    "flake8-docstrings",
+    "flake8",
+    "isort",
+    "mypy",
+    "pip-audit (>=2.9.0,<3.0.0)",
+    "pre-commit",
+    "pytest-cov",
+    "pytest",
+    "safety (>=3.6.2,<4.0.0)",
+    "shapely",
+    "toml",
+    "tox",
+    "twine",
+    "pytest-lazy-fixtures",
+    "pytest-mock"    
+]
+
+doc = [
+    "griffe (>=1.14.0,<2.0.0)",
+    "mkdocs-autorefs",
+    "mkdocs-click (>=0.9.0,<0.10.0)",
+    "mkdocs-include-markdown-plugin",
+    "mkdocs-material-extensions",
+    "mkdocs-material",
+    "mkdocs",
+    "mkdocstrings-python (>=1.18.2,<2.0.0)",
+    "mkdocstrings",
+    "mkdocs-with-pdf"
+]
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.2.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"

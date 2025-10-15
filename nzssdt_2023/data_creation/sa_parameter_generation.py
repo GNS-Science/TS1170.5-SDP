@@ -1,6 +1,7 @@
 """
 This module derives the PGA, Sa,s, Tc, and Td parameters from the NSHM hazard curves.
 """
+
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union

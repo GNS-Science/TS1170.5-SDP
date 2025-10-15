@@ -5,10 +5,15 @@
 ### Added
  - new .geojson of the lat/lon grid points
  - new `nzssdt_2023.snz_deliverables` package to create the deliverables for Standards NZ
+ - GNU Affero 3 licence
+
 ### Changed
  - refactored documentation layout and front matter content.
  - updated README.md
  - updated pdf report formatting per SNZ request
+ - migrated `pyproject.toml` to [PEP 508](https://peps.python.org/pep-0508) as per poetry v2.2 docs.
+ - updated setup.cfg
+ - ensureCI/CD workflows use minimum install footprints
 
 ## [0.6.0] 2025-03-26 
 
