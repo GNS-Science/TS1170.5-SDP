@@ -1,6 +1,14 @@
 # Changelog
 
-## [0.7.0] 2025-10-15
+## [0.8.0] 2025-10-15
+
+### Changed
+ - updated end_user_tools to point to a URL for the deliverables.
+ - migrated `pyproject.toml` to [PEP 508](https://peps.python.org/pep-0508) as per poetry v2.2 docs.
+ - updated setup.cfg
+ - ensure CI/CD workflows use minimum install footprints
+
+## [0.7.0] 2025-06-27
 
 ### Added
  - new .geojson of the lat/lon grid points
@@ -11,10 +19,6 @@
  - refactored documentation layout and front matter content.
  - updated README.md, and minor doc improvements.
  - updated pdf report formatting per SNZ request.
- - updated end_user_tools to point to a URL for the deliverables.
- - migrated `pyproject.toml` to [PEP 508](https://peps.python.org/pep-0508) as per poetry v2.2 docs.
- - updated setup.cfg
- - ensureCI/CD workflows use minimum install footprints
 
 ## [0.6.0] 2025-03-26 
 
