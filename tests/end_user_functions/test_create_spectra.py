@@ -21,9 +21,7 @@ from nzssdt_2023.end_user_functions.create_spectra import (
 )
 def test_create_spectrum(pga, sas, tc, td, periods, expected_spectrum):
 
-    assert expected_spectrum == create_spectrum_from_parameters(
-        pga, sas, tc, td, periods
-    )
+    assert expected_spectrum == create_spectrum_from_parameters(pga, sas, tc, td, periods)
 
 
 @pytest.mark.parametrize(
@@ -38,12 +36,8 @@ def test_create_spectrum(pga, sas, tc, td, periods, expected_spectrum):
         )
     ],
 )
-def test_create_enveloped_spectra(
-    location_id, apoe_n, site_class_list, periods, expected_envelope
-):
+def test_create_enveloped_spectra(location_id, apoe_n, site_class_list, periods, expected_envelope):
 
-    envelope = create_enveloped_spectra(location_id, apoe_n, site_class_list, periods)[
-        "Envelope"
-    ].to_list()
+    envelope = create_enveloped_spectra(location_id, apoe_n, site_class_list, periods)["Envelope"].to_list()
 
     assert expected_envelope == envelope

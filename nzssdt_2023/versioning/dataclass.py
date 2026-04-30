@@ -5,7 +5,6 @@ Dataclasses defining structures for versioning.
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
 
 import nzshm_common
 
@@ -57,20 +56,20 @@ class VersionInfo:
 
     version_id: str = field(hash=True)
     nzshm_model_version: str  # nzshm_model.CURRENT_VERSION  # default to latest
-    description: Optional[str] = None
-    conversions: List[ConvertedFile] = field(default_factory=list)  # not used after v1
-    manifest: List[IncludedFile] = field(default_factory=list)
-    reports: List[IncludedFile] = field(default_factory=list)
+    description: str | None = None
+    conversions: list[ConvertedFile] = field(default_factory=list)  # not used after v1
+    manifest: list[IncludedFile] = field(default_factory=list)
+    reports: list[IncludedFile] = field(default_factory=list)
     nzshm_common_lib_version: str = nzshm_common.__version__
 
     def __str__(self):
         return f"version: {self.version_id}, model: {self.nzshm_model_version}, description: `{self.description}`"
 
-    def resource_path(self, resource_folder: Optional[str] = None) -> Path:
+    def resource_path(self, resource_folder: str | None = None) -> Path:
         rf = resource_folder or RESOURCES_FOLDER
         return Path(rf) / f"v{self.version_id}"
 
-    def reports_path(self, reports_folder: Optional[str] = None) -> Path:
+    def reports_path(self, reports_folder: str | None = None) -> Path:
         rf = reports_folder or REPORTS_FOLDER
         return Path(rf) / f"v{self.version_id}"
 
@@ -78,12 +77,8 @@ class VersionInfo:
         # update manifest
         resources = self.resource_path()
         for file in resources.iterdir():
-            self.manifest.append(
-                IncludedFile(str(file.relative_to(resources.parent.parent)))
-            )
+            self.manifest.append(IncludedFile(str(file.relative_to(resources.parent.parent))))
 
         reports = self.reports_path()
         for file in reports.iterdir():
-            self.reports.append(
-                IncludedFile(str(file.relative_to(reports.parent.parent)))
-            )
+            self.reports.append(IncludedFile(str(file.relative_to(reports.parent.parent))))

@@ -38,9 +38,7 @@ def test_dm_table_flatten(mini_sat_table):
     site_list = df2.Location.unique().tolist()
 
     print(site_list)
-    dm_df = convert.DistMagTable(
-        dm_gen.create_D_and_M_df(site_list, rp_list=constants.DEFAULT_RPS)
-    ).flatten()
+    dm_df = convert.DistMagTable(dm_gen.create_D_and_M_df(site_list, rp_list=constants.DEFAULT_RPS)).flatten()
 
     print("flat d&m")
     print("========")

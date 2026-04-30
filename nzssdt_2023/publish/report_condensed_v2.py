@@ -10,10 +10,10 @@ methods:
 
 import csv
 import time
+from collections.abc import Iterator
 from decimal import Decimal
 from itertools import islice
 from pathlib import Path
-from typing import Iterator, List, Union
 
 import pandas as pd
 from borb.pdf import (
@@ -47,6 +47,7 @@ APOE_MAPPINGS = list(
     zip(
         "abcdefghij"[: len(constants.DEFAULT_RPS)],
         sorted(constants.DEFAULT_RPS),
+        strict=False,
     )
 )
 
@@ -58,7 +59,7 @@ medium_font = TrueTypeFont.true_type_font_from_file(
 def build_report_page(
     table_id: str,
     table_description,
-    rowdata=List[List],
+    rowdata=list[list],
     table_part: int = 1,
     is_final: bool = False,
     print_footer: bool = False,
@@ -182,7 +183,7 @@ def build_report_page(
                 )
             )
         )
-        for sss in SITE_CLASSES:
+        for _sss in SITE_CLASSES:
             table.add(
                 Paragraph(
                     "PGA",
@@ -193,9 +194,7 @@ def build_report_page(
             ).add(
                 HeterogeneousParagraph(
                     [
-                        ChunkOfText(
-                            "S", font="Helvetica-bold-oblique", font_size=Decimal(8)
-                        ),
+                        ChunkOfText("S", font="Helvetica-bold-oblique", font_size=Decimal(8)),
                         ChunkOfText(
                             "a,s",
                             font="Helvetica-bold",
@@ -316,7 +315,7 @@ def build_report_page(
     return page
 
 
-def format_D(value, apoe: int) -> Union[str, int]:
+def format_D(value, apoe: int) -> str | int:
     """NB NaN in the source dataframe has different meanings, depending on the apoe..."""
     if pd.isna(value):
         return "n/a" if apoe < 500 else ">20"
@@ -330,17 +329,12 @@ def generate_location_block(combo_table: pd.DataFrame, location: str) -> Iterato
     apoes = location_df["APoE (1/n)"].unique().tolist()
 
     for apoe in apoes:
-        rec = location_df[
-            (location_df["Site Class"] == "I") & (location_df["APoE (1/n)"] == apoe)
-        ]  # get site_class I
+        rec = location_df[(location_df["Site Class"] == "I") & (location_df["APoE (1/n)"] == apoe)]  # get site_class I
 
         d_str = format_D(rec["D"].to_list()[0], apoe)
         row = [f"1/{apoe}", rec["M"].to_list()[0], d_str]
         for site_class in site_classes:
-            apoe_df = location_df[
-                (location_df["APoE (1/n)"] == apoe)
-                & (location_df["Site Class"] == site_class)
-            ]
+            apoe_df = location_df[(location_df["APoE (1/n)"] == apoe) & (location_df["Site Class"] == site_class)]
             for sc_tup in apoe_df.itertuples():
                 row += [
                     round(sc_tup.PGA, 2),
@@ -363,12 +357,9 @@ def locations_tuple_padded(location: str, modify_locations: bool):
     )
 
 
-def generate_table_rows(
-    combo_table: pd.DataFrame, modify_locations: bool = False, location_limit: int = 0
-) -> Iterator:
+def generate_table_rows(combo_table: pd.DataFrame, modify_locations: bool = False, location_limit: int = 0) -> Iterator:
     count = 0
     for location in combo_table.Location.unique():
-
         count += 1
         yield (
             locations_tuple_padded(location, modify_locations),
@@ -509,20 +500,15 @@ def publish_table(
 
 
 if __name__ == "__main__":
-
     OUTPUT_FOLDER = Path(RESOURCES_FOLDER).parent / "reports" / "v_cbc"
 
     # TODO shift this into the CLI
     def combo_named_table():
-        filepath = (
-            Path(RESOURCES_FOLDER) / "v_cbc" / "first_10_named_locations_combo.json"
-        )
+        filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "first_10_named_locations_combo.json"
         return pd.read_json(filepath, orient="table")
 
     def combo_grid_table():
-        filepath = (
-            Path(RESOURCES_FOLDER) / "v_cbc" / "first_10_grid_locations_combo.json"
-        )
+        filepath = Path(RESOURCES_FOLDER) / "v_cbc" / "first_10_grid_locations_combo.json"
         return pd.read_json(filepath, orient="table")
 
     named_df = combo_named_table()

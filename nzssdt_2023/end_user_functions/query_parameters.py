@@ -2,7 +2,7 @@
 This module contains end user functions for querying the TS table
 """
 
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -20,9 +20,7 @@ if TYPE_CHECKING:
     import pandas.typing as pdt
 
 
-def retrieve_sa_parameters(
-    location_id: str, apoe_n: int, site_class: str
-) -> Tuple[float, float, float, float]:
+def retrieve_sa_parameters(location_id: str, apoe_n: int, site_class: str) -> tuple[float, float, float, float]:
     """retrieves the spectral acceleration parameters for a single line of the TS table
 
     Args:
@@ -47,9 +45,7 @@ def retrieve_sa_parameters(
     return pga, sas, tc, td
 
 
-def retrieve_md_parameters(
-    location_id: str, apoe_n: int, site_class: str
-) -> Tuple[float, float | str]:
+def retrieve_md_parameters(location_id: str, apoe_n: int, site_class: str) -> tuple[float, float | str]:
     """retrieves the M and D parameters for a single line of the TS table
 
     Args:
@@ -88,22 +84,16 @@ def parameters_by_location_id(location_id: str) -> "pdt.DataFrame":
 
     # initialize df for sa parameters
     index = pd.Index(APOES, name="APoE")
-    columns = pd.MultiIndex.from_product(
-        [SITE_CLASSES_LIST, SA_PARAMETER_NAMES], names=["Site Class", "Parameter"]
-    )
+    columns = pd.MultiIndex.from_product([SITE_CLASSES_LIST, SA_PARAMETER_NAMES], names=["Site Class", "Parameter"])
     sa_df = pd.DataFrame(index=index, columns=columns)
 
     for apoe_n in APOE_NS:
         apoe = f"1/{apoe_n}"
         for site_class in SITE_CLASSES_LIST:
-            sa_df.loc[(apoe), (site_class, slice(None))] = retrieve_sa_parameters(
-                location_id, apoe_n, site_class
-            )
+            sa_df.loc[(apoe), (site_class, slice(None))] = retrieve_sa_parameters(location_id, apoe_n, site_class)
 
     # initialize df for dm parameters
-    columns = pd.MultiIndex.from_tuples(
-        [("", "M"), ("", "D")], names=["Site Class", "Parameter"]
-    )
+    columns = pd.MultiIndex.from_tuples([("", "M"), ("", "D")], names=["Site Class", "Parameter"])
     md_df = pd.DataFrame(index=index, columns=columns)
     for apoe_n in APOE_NS:
         apoe = f"1/{apoe_n}"

@@ -3,7 +3,7 @@ This module contains constants.
 """
 
 from pathlib import Path
-from typing import Any, Dict, NamedTuple
+from typing import Any, NamedTuple
 
 import numpy as np
 from nzshm_common.location.location import LOCATION_LISTS, location_by_id
@@ -53,9 +53,8 @@ RP_TO_POE = {
 }
 POE_TO_RP = {poe: rp for rp, poe in RP_TO_POE.items()}
 
-ALL_SITES: Dict[str, Dict[str, Any]] = {
-    location_by_id(_id)["name"]: location_by_id(_id)
-    for _id in LOCATION_LISTS[location_list]["locations"]
+ALL_SITES: dict[str, dict[str, Any]] = {
+    location_by_id(_id)["name"]: location_by_id(_id) for _id in LOCATION_LISTS[location_list]["locations"]
 }
 
 DEFAULT_RPS = [25, 50, 100, 250, 500, 1000, 2500]
@@ -178,9 +177,9 @@ PSV_N_DP = 2
 TC_N_SF = 2
 
 # url for zipped Community Fault Model
-CFM_URL = r"https://www.gns.cri.nz/assets/Data-and-Resources/Download-files/Community-Hazard-Model/NZ_CFM_v1_0_shapefile.zip"  # noqa
+CFM_URL = (
+    r"https://www.gns.cri.nz/assets/Data-and-Resources/Download-files/Community-Hazard-Model/NZ_CFM_v1_0_shapefile.zip"  # noqa
+)
 
 # path to polygon file from Nick
-POLYGON_PATH = (
-    Path(RESOURCES_FOLDER) / "pipeline/v1/input_data" / "polygons_locations.geojson"
-)
+POLYGON_PATH = Path(RESOURCES_FOLDER) / "pipeline/v1/input_data" / "polygons_locations.geojson"

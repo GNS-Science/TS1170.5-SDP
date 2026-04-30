@@ -6,7 +6,7 @@ This module creates .geojson version of all gis data and calculates D (distance)
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Tuple, Union
+from typing import TYPE_CHECKING
 
 import geopandas as gpd
 import pandas as pd
@@ -41,7 +41,7 @@ def save_gdf_to_geojson(gdf: "gpdt.DataFrame", path, include_idx=False):
     gdf.to_file(path, driver="GeoJSON", index=include_idx)
 
 
-def polygon_location_list() -> List[str]:
+def polygon_location_list() -> list[str]:
     """Returns the urban and rural settlement names, excluding those that do not have their own polygon
 
     Returns:
@@ -54,9 +54,7 @@ def polygon_location_list() -> List[str]:
         for replaced_location in LOCATION_REPLACEMENTS[location].replaced_locations:
             replaced_locations.append(replaced_location)
 
-    polygon_list = [
-        loc for loc in ts_urban_locations_list if loc not in replaced_locations
-    ]
+    polygon_list = [loc for loc in ts_urban_locations_list if loc not in replaced_locations]
 
     return polygon_list
 
@@ -110,9 +108,7 @@ def filter_cfm_by_sliprate(cfm_url, slip_rate: float = 5.0) -> "gpdt.DataFrame":
 
     gdf["Slip rate preferred value"] = gdf["SR_pref"]
     gdf["Slip rate filter"] = f"≥{slip_rate} mm/yr"
-    gdf["Source for linework and slip rate assessment"] = (
-        "NZ CFM v1.0 (Seebeck et al. 2022, 2023)"
-    )
+    gdf["Source for linework and slip rate assessment"] = "NZ CFM v1.0 (Seebeck et al. 2022, 2023)"
     gdf = gdf[
         [
             "Name",
@@ -126,9 +122,7 @@ def filter_cfm_by_sliprate(cfm_url, slip_rate: float = 5.0) -> "gpdt.DataFrame":
     return gdf
 
 
-def calc_distance_to_faults(
-    gdf: "gpdt.DataFrame", faults: "gpdt.DataFrame"
-) -> "pdt.DataFrame":
+def calc_distance_to_faults(gdf: "gpdt.DataFrame", faults: "gpdt.DataFrame") -> "pdt.DataFrame":
     """Calculates the closest distance of polygons or points to a set of fault lines
 
     Args:
@@ -142,9 +136,7 @@ def calc_distance_to_faults(
     faults.to_crs(epsg=meter_epsg, inplace=True)
     gdf.to_crs(epsg=meter_epsg, inplace=True)
 
-    gdf["distance"] = round(
-        gdf.geometry.apply(lambda x: faults.distance(x).min()) / 1000.0
-    )
+    gdf["distance"] = round(gdf.geometry.apply(lambda x: faults.distance(x).min()) / 1000.0)
 
     gdf["D"] = gdf["distance"].astype("int")
     gdf.loc[gdf["D"] >= 20, "D"] = None
@@ -157,7 +149,7 @@ def calc_distance_to_faults(
     return gdf[["D"]]
 
 
-def create_fault_and_polygon_gpds() -> Tuple["gpdt.DataFrame", "gpdt.DataFrame"]:
+def create_fault_and_polygon_gpds() -> tuple["gpdt.DataFrame", "gpdt.DataFrame"]:
     """Creates the two geodataframes for resource output
 
     Returns:
@@ -191,9 +183,9 @@ def create_grid_gpd() -> "gpdt.DataFrame":
 
 
 def create_geojson_files(
-    polygons_path: Union[str | Path],
-    faults_path: Union[str | Path],
-    grid_path: Union[str | Path],
+    polygons_path: str | Path,
+    faults_path: str | Path,
+    grid_path: str | Path,
     override: bool = False,
 ):
     """Create the .geojsons for the version resources
@@ -212,7 +204,6 @@ def create_geojson_files(
         | (not Path(faults_path).exists())
         | (not Path(grid_path).exists())
     ):
-
         faults, polygons = create_fault_and_polygon_gpds()
 
         save_gdf_to_geojson(faults, faults_path)

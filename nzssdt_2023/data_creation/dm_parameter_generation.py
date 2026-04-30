@@ -10,7 +10,7 @@ TODO:
 
 import itertools
 from pathlib import Path
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -40,8 +40,8 @@ pd.options.mode.copy_on_write = True
 
 
 def extract_m_values(
-    site_names: List[str],
-    freqs: List[str],
+    site_names: list[str],
+    freqs: list[str],
     agg: AggregationEnum,
     no_cache: bool = False,
     legacy: bool = False,
@@ -85,11 +85,7 @@ def extract_m_values(
 
     # fill in the missing values one at a time
     for site, freq in itertools.product(site_names, freqs):
-        if (
-            (site not in mags.index)
-            or (freq not in mags.columns)
-            or (pd.isnull(mags.loc[site, freq]))
-        ):
+        if (site not in mags.index) or (freq not in mags.columns) or (pd.isnull(mags.loc[site, freq])):
             location = site_name_to_coded_location(site)
             poe = frequency_to_poe(freq)
             mag = get_mean_mag(DISAGG_HAZARD_ID, location, poe, agg, legacy)
@@ -100,8 +96,8 @@ def extract_m_values(
 
 
 def create_D_and_M_df(
-    site_list: List[str],
-    rp_list: List[int] = DEFAULT_RPS,
+    site_list: list[str],
+    rp_list: list[int] = DEFAULT_RPS,
     no_cache: bool = False,
     legacy: bool = False,
 ) -> "pdt.DataFrame":
@@ -139,9 +135,7 @@ def create_D_and_M_df(
     # include M values
     for APoE in APoEs:
         # M value is >= the 90th %ile values for Auckland
-        D_and_M.loc[site_list, APoE] = np.maximum(
-            M_mean.loc[site_list, APoE], M_p90.loc["Auckland", APoE]
-        )
+        D_and_M.loc[site_list, APoE] = np.maximum(M_mean.loc[site_list, APoE], M_p90.loc["Auckland", APoE])
 
     D_and_M = replace_relevant_locations(D_and_M)
     D_and_M = set_coded_location_resolution(D_and_M)

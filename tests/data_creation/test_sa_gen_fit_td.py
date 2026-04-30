@@ -233,9 +233,7 @@ def test_relevant_spectrum_domain_exploratory(tc, inclusive):
         ]
     )  # spectra in g
 
-    r_spectrum, r_periods = sa_gen.relevant_spectrum_domain(
-        spectrum, periods, tc, inclusive
-    )
+    r_spectrum, r_periods = sa_gen.relevant_spectrum_domain(spectrum, periods, tc, inclusive)
     n = len(r_periods)
 
     assert np.all(r_spectrum == spectrum[-n - 1 : -1])
@@ -243,14 +241,14 @@ def test_relevant_spectrum_domain_exploratory(tc, inclusive):
 
     if tc == 0.75:
         if inclusive:
-            r_periods[0] == 0.7
+            r_periods[0] == 0.7  # noqa: B015
         else:
-            r_periods[0] == 0.8
+            r_periods[0] == 0.8  # noqa: B015
     elif tc == 0.8:
         if inclusive:
-            r_periods[0] == 0.8
+            r_periods[0] == 0.8  # noqa: B015
         else:
-            r_periods[0] == 0.8
+            r_periods[0] == 0.8  # noqa: B015
     else:
         assert 0
 
@@ -390,9 +388,7 @@ def test_Td_fit_error_exploratory():
     sas = 1.71
     tc = 0.66
     td = 2.6
-    relevant_spectrum, relevant_periods = sa_gen.relevant_spectrum_domain(
-        spectrum, periods, tc
-    )
+    relevant_spectrum, relevant_periods = sa_gen.relevant_spectrum_domain(spectrum, periods, tc)
     result = sa_gen.Td_fit_error(td, relevant_periods, relevant_spectrum, pga, sas, tc)
 
     assert pytest.approx(result) == 0.013511859172484967

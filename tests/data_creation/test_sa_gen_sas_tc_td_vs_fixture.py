@@ -11,21 +11,15 @@ import pytest
 
 
 # @pytest.mark.skip('update fixture')
-@pytest.mark.parametrize(
-    "site", ["Auckland", "Christchurch", "Dunedin", "Hamilton", "Wellington"]
-)
+@pytest.mark.parametrize("site", ["Auckland", "Christchurch", "Dunedin", "Hamilton", "Wellington"])
 @pytest.mark.parametrize("return_period", [25, 50, 100, 250, 500, 1000, 2500])
 @pytest.mark.parametrize("sc", ["I", "II", "III", "IV", "V", "VI"])
 @pytest.mark.parametrize("parameter", ["Sas", "Tc", "Td"])
-def test_parameter_table(
-    site, return_period, sc, parameter, sas_tc_td_parameters, fsim_json_table
-):
+def test_parameter_table(site, return_period, sc, parameter, sas_tc_td_parameters, fsim_json_table):
     """Test the generated output table against fixture values."""
 
     if parameter == "PGA":
-        assert (
-            0
-        ), "PGA values should not be checked again the sas_tc_td_parameters fixture."
+        assert 0, "PGA values should not be checked again the sas_tc_td_parameters fixture."
 
     apoe = f"APoE: 1/{return_period}"
     site_class = f"Site Class {sc}"
@@ -39,10 +33,8 @@ def test_parameter_table(
 
     print(df)
 
-    df_value = df[
-        (df["Location"] == site)
-        & (df["APoE (1/n)"] == return_period)
-        & (df["Site Class"] == sc)
-    ][parameter].to_numpy()[0]
+    df_value = df[(df["Location"] == site) & (df["APoE (1/n)"] == return_period) & (df["Site Class"] == sc)][
+        parameter
+    ].to_numpy()[0]
 
     assert df_value == fixture_value

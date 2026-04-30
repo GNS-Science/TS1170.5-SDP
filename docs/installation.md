@@ -4,7 +4,7 @@ nzssdt-2023 requires Python, and at the time of writing supports the following v
 
 [![python](https://img.shields.io/pypi/pyversions/nzssdt-2023.svg)](https://pypi.org/project/nzssdt-2023/)
 
-For easy package installation, either [pip][] or [poetry][] is recommended.
+For easy package installation, either [pip][] or [uv][] is recommended.
 
 ## Stable release
 
@@ -18,10 +18,10 @@ Index (PyPI).
 $ pip install nzssdt-2023
 ```
 
-### Adding to a poetry project
+### Adding to a uv project
 
 ```console
-$ poetry add nzssdt-2023
+$ uv add nzssdt-2023
 ```
 
 ## From source code
@@ -41,13 +41,13 @@ Python environment:
 $ pip install .
 ```
 
-Or with Poetry (using `--all-extras` to install all extra dependencies is
+Or with uv (using `--all-extras` to install all extra dependencies is
 recommended for development):
 ```console
-$ poetry install --all-extras
+$ uv sync --all-extras
 ```
 
-[poetry]: https://python-poetry.org/
+[uv]: https://docs.astral.sh/uv/
 [pip]: https://pip.pypa.io
 [Python installation guide]: http://docs.python-guide.org/en/latest/starting/installation/
 [Github repository]: https://github.com/GNS-Science/nzssdt-2023

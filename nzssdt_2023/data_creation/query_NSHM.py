@@ -3,10 +3,9 @@ Functions to get hazard data from the NSHM hazard API.
 
 """
 
-import datetime
 import datetime as dt
 import logging
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -26,9 +25,9 @@ log = logging.getLogger(__name__)
 
 def create_sites_df(
     named_sites: bool = True,
-    site_list: Optional[List[str]] = None,
+    site_list: list[str] | None = None,
     cropped_grid: bool = False,
-    grid_limits: Tuple[float, float, float, float] = (-np.inf, np.inf, -np.inf, np.inf),
+    grid_limits: tuple[float, float, float, float] = (-np.inf, np.inf, -np.inf, np.inf),
     site_limit: int = 0,  # for creating test artefacts
 ) -> "pdt.DataFrame":
     """
@@ -57,14 +56,10 @@ def create_sites_df(
 
         controlling_site = LOWER_BOUND_PARAMETERS["controlling_site"]
         if controlling_site not in site_list:
-            site_list = [
-                controlling_site
-            ] + site_list  # ensure the controlling site is included
+            site_list = [controlling_site] + site_list  # ensure the controlling site is included
 
         # collect the ids for the relevant sites
-        id_list = [
-            loc_id for loc_id in id_list if location_by_id(loc_id)["name"] in site_list
-        ]
+        id_list = [loc_id for loc_id in id_list if location_by_id(loc_id)["name"] in site_list]
 
         # create the df of named sites
         sites = pd.DataFrame(index=site_list, dtype="str")
@@ -95,9 +90,7 @@ def create_sites_df(
 
         # if no list is passed, include all gridded sites
         if site_list is None:
-            site_list = [
-                CodedLocation(*gloc, resolution=0.001).code for gloc in grid_locs
-            ]
+            site_list = [CodedLocation(*gloc, resolution=0.001).code for gloc in grid_locs]
         else:
             # remove named sites
             new_site_list = []
@@ -128,13 +121,9 @@ def create_sites_df(
         if cropped_grid:
             min_lat, max_lat, min_lon, max_lon = grid_limits
             sites["float_lat"] = [float(lat) for lat in sites["lat"]]
-            sites = sites[
-                (sites["float_lat"] >= min_lat) & (sites["float_lat"] <= max_lat)
-            ].drop(["float_lat"], axis=1)
+            sites = sites[(sites["float_lat"] >= min_lat) & (sites["float_lat"] <= max_lat)].drop(["float_lat"], axis=1)
             sites["float_lon"] = [float(lon) for lon in sites["lon"]]
-            sites = sites[
-                (sites["float_lon"] >= min_lon) & (sites["float_lon"] <= max_lon)
-            ].drop(["float_lon"], axis=1)
+            sites = sites[(sites["float_lon"] >= min_lon) & (sites["float_lon"] <= max_lon)].drop(["float_lon"], axis=1)
 
         if site_limit:
             sites = sites[:site_limit]
@@ -144,11 +133,11 @@ def create_sites_df(
 
 def retrieve_hazard_curves(
     sites: "pdt.DataFrame",
-    vs30_list: List[int],
-    imt_list: List[str],
-    agg_list: List[str],
+    vs30_list: list[int],
+    imt_list: list[str],
+    agg_list: list[str],
     hazard_id: str,
-) -> Tuple["npt.NDArray", List[float]]:
+) -> tuple["npt.NDArray", list[float]]:
     """
     retrieves the hazard curves for the sites, vs30s, imts, and aggs of interest
 
@@ -164,47 +153,33 @@ def retrieve_hazard_curves(
              list   intensities included
     """
 
-    log.info(
-        f"begin retrieve_hazard_curves for {len(sites)} sites; {len(vs30_list)} vs30;  {len(agg_list)} aggs;"
-    )
+    log.info(f"begin retrieve_hazard_curves for {len(sites)} sites; {len(vs30_list)} vs30;  {len(agg_list)} aggs;")
 
     # call a location to get the imtls that are returned
-    res = next(
-        get_hazard_curves(
-            sites["latlon"][:1], vs30_list[:1], [hazard_id], imt_list[:1], agg_list[:1]
-        )
-    )
+    res = next(get_hazard_curves(sites["latlon"][:1], vs30_list[:1], [hazard_id], imt_list[:1], agg_list[:1]))
     imtl_list = [float(val.lvl) for val in res.values]
 
     # initialize hcurves
-    hcurves = -1 * np.ones(
-        [len(vs30_list), len(sites), len(imt_list), len(imtl_list), len(agg_list)]
-    )
+    hcurves = -1 * np.ones([len(vs30_list), len(sites), len(imt_list), len(imtl_list), len(agg_list)])
 
     log.info("Querying hazard curves...")
 
     # cycle through all hazard parameters
     count = 0
     CHUNK = 1000
-    expected_count = (
-        len(sites["latlon"]) * len(vs30_list) * len(imt_list) * len(agg_list)
-    )
+    expected_count = len(sites["latlon"]) * len(vs30_list) * len(imt_list) * len(agg_list)
     timings = []
     t0 = dt.datetime.now()
-    for res in get_hazard_curves(
-        sites["latlon"], vs30_list, [hazard_id], imt_list, agg_list
-    ):
+    for res in get_hazard_curves(sites["latlon"], vs30_list, [hazard_id], imt_list, agg_list):
         count += 1
         delta = dt.datetime.now() - t0
         duration = delta.seconds + delta.microseconds / 1e6
         timings.append(duration)  # time.delta
         if count % CHUNK == 0:
-            eta = dt.datetime.now() + dt.timedelta(
-                seconds=(expected_count - count) * sum(timings[-10:]) / 10
-            )
+            eta = dt.datetime.now() + dt.timedelta(seconds=(expected_count - count) * sum(timings[-10:]) / 10)
             log.info(
                 f"retrieve_hazard_curves progress: {count} of {expected_count}. "
-                f"Approx {(count/expected_count) * 100:.1f} % progress. "
+                f"Approx {(count / expected_count) * 100:.1f} % progress. "
                 f"Last {CHUNK} curves took {sum(timings):.4f}s. "
                 f"ETA: {eta}"
             )
@@ -233,9 +208,7 @@ def retrieve_hazard_curves(
         print("\nMissing NSHM data from:")
         print(f"\t{[vs30_list[idx] for idx in np.unique(vs30_idx)]}")
         if len(np.unique(site_idx)) > 5:
-            print(
-                f"\t{[site_list[idx] for idx in np.unique(site_idx)[:5]]} and more..."
-            )
+            print(f"\t{[site_list[idx] for idx in np.unique(site_idx)[:5]]} and more...")
         else:
             print(f"\t{[site_list[idx] for idx in np.unique(site_idx)]}")
         print(f"\t{[imt_list[idx] for idx in np.unique(imt_idx)]}")

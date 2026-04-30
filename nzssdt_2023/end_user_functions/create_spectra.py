@@ -2,7 +2,7 @@
 This module contains end user functions for creating the TS spectra from the tabulated parameters
 """
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -20,9 +20,9 @@ def create_spectrum_from_parameters(
     sas: float,
     tc: float,
     td: float,
-    periods: List[float] = DEFAULT_PERIODS,
+    periods: list[float] = DEFAULT_PERIODS,
     precision: int = 3,
-) -> List[float]:
+) -> list[float]:
     """Creates the TS spectrum based on the incoming pga, sas, tc, and td parameters
 
     Args:
@@ -37,9 +37,7 @@ def create_spectrum_from_parameters(
         spectrum: acceleration spectrum [g] calculated at the incoming list of periods
     """
 
-    spectrum = np.array(
-        [uhs_value(period, pga, sas, tc, td) for period in periods]
-    ).round(precision)
+    spectrum = np.array([uhs_value(period, pga, sas, tc, td) for period in periods]).round(precision)
 
     return list(spectrum)
 
@@ -47,8 +45,8 @@ def create_spectrum_from_parameters(
 def create_enveloped_spectra(
     location_id: str,
     apoe_n: int,
-    site_class_list: List[str],
-    periods: List[float] = DEFAULT_PERIODS,
+    site_class_list: list[str],
+    periods: list[float] = DEFAULT_PERIODS,
     precision: int = 3,
 ) -> "pdt.DataFrame":
     """Creates a set of site class spectra for a given location_id and APoE

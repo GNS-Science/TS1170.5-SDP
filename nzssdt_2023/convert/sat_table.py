@@ -9,9 +9,7 @@ import pandas as pd
 from nzssdt_2023 import RESOURCES_FOLDER
 
 APoEs = [f"APoE: 1/{rp}" for rp in [25, 100, 250, 500, 1000, 2500]]
-site_class_labels = [
-    f"Site Soil Class {n}" for n in ["I", "II", "III", "IV", "V", "VI"]
-]
+site_class_labels = [f"Site Soil Class {n}" for n in ["I", "II", "III", "IV", "V", "VI"]]
 
 
 parameters = ["PGA", "Sas", "Tc"]
@@ -46,7 +44,7 @@ class SatTable:
     def __init__(self, raw_table: pd.DataFrame):
         self.raw_table = raw_table
 
-    @lru_cache
+    @lru_cache  # noqa: B019
     def flatten(self):
         return flatten_df(self.raw_table)  # .sort_index()
 

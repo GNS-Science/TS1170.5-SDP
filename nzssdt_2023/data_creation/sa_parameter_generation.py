@@ -4,7 +4,7 @@ This module derives the PGA, Sa,s, Tc, and Td parameters from the NSHM hazard cu
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 import pandas as pd
@@ -38,13 +38,11 @@ if TYPE_CHECKING:
     import numpy.typing as npt
     import pandas.typing as pdt
 
-PGA_REDUCTION_ENABLED = (
-    True  # for testing only, False skips `reduce_PGAs()` function call.
-)
+PGA_REDUCTION_ENABLED = True  # for testing only, False skips `reduce_PGAs()` function call.
 PGA_ROUNDING_ENABLED = True  # for testing only, as above.
 
 
-def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str:
+def choose_site_class(vs30: int | float, lower_bound: bool = False) -> str:
     """Returns the site class for the selected vs30 value
     Site class definitions can be found in TS Table 3.1
 
@@ -82,7 +80,7 @@ def choose_site_class(vs30: Union[int, float], lower_bound: bool = False) -> str
     return sc
 
 
-def sig_figs(x: Union[float, List[float], "npt.NDArray"], n: int) -> "npt.NDArray":
+def sig_figs(x: Union[float, list[float], "npt.NDArray"], n: int) -> "npt.NDArray":
     """Rounds all values of x to n significant figures
 
     Inputs:
@@ -95,7 +93,7 @@ def sig_figs(x: Union[float, List[float], "npt.NDArray"], n: int) -> "npt.NDArra
     x = np.asarray(x)
     x_positive = np.where(np.isfinite(x) & (x != 0), np.abs(x), 10 ** (n - 1))
     mags = 10 ** (n - 1 - np.floor(np.log10(x_positive)))
-    x_rounded: "npt.NDArray" = np.round(x * mags) / mags
+    x_rounded: npt.NDArray = np.round(x * mags) / mags
     return x_rounded
 
 
@@ -178,16 +176,12 @@ def reduce_PGAs(PGA: "npt.NDArray") -> "npt.NDArray":
             for i_rp in range(n_rps):
                 for i_stat in range(n_stats):
                     pga = PGA[i_vs30, i_site, i_rp, i_stat]
-                    reduced_PGA[i_vs30, i_site, i_rp, i_stat] = calc_reduced_PGA(
-                        pga, sc
-                    )
+                    reduced_PGA[i_vs30, i_site, i_rp, i_stat] = calc_reduced_PGA(pga, sc)
 
     return reduced_PGA
 
 
-def uhs_value(
-    period: Union[float, "npt.NDArray"], PGA: float, Sas: float, Tc: float, Td: float
-) -> float:
+def uhs_value(period: Union[float, "npt.NDArray"], PGA: float, Sas: float, Tc: float, Td: float) -> float:
     """Derive the spectral acceleration Sa(T) at a given period (T), based on the seismic demand parameters.
     Sa(T) equations come from TS Eq. 3.2-3.5
 
@@ -225,9 +219,7 @@ def uhs_value(
     return float(SaT)
 
 
-def interpolate_spectra(
-    spectra: "npt.NDArray", imtls: dict, dt: float = 0.1
-) -> Tuple["npt.NDArray", "npt.NDArray"]:
+def interpolate_spectra(spectra: "npt.NDArray", imtls: dict, dt: float = 0.1) -> tuple["npt.NDArray", "npt.NDArray"]:
     """Linearly interpolate spectra over the original domain, in increments of dt
 
     Inputs:
@@ -260,7 +252,7 @@ def interpolate_spectra(
 
 def relevant_spectrum_domain(
     spectrum: "npt.NDArray", periods: "npt.NDArray", tc: float, inclusive: bool = False
-) -> Tuple["npt.NDArray", "npt.NDArray"]:
+) -> tuple["npt.NDArray", "npt.NDArray"]:
     """Return the spectrum over the relevant domain for potential values of Td
 
     Args:
@@ -312,17 +304,13 @@ def Td_fit_error(
     Returns:
         error: error term
     """
-    fitted_spectrum = np.array(
-        [uhs_value(period, pga, sas, tc, td) for period in relevant_periods]
-    )
+    fitted_spectrum = np.array([uhs_value(period, pga, sas, tc, td) for period in relevant_periods])
     error_array = np.abs(relevant_spectrum - fitted_spectrum)
     error = np.sum(error_array**2)
     return error
 
 
-def fit_Td(
-    spectrum: "npt.NDArray", periods: "npt.NDArray", pga: float, sas: float, tc: float
-) -> float:
+def fit_Td(spectrum: "npt.NDArray", periods: "npt.NDArray", pga: float, sas: float, tc: float) -> float:
     """Fit the Td value to obtain the best fit over the response spectrum
 
     Args:
@@ -335,15 +323,10 @@ def fit_Td(
     Returns:
         td: spectral-velocity-plateau corner period [seconds]
     """
-    relevant_spectrum, relevant_periods = relevant_spectrum_domain(
-        spectrum, periods, tc
-    )
+    relevant_spectrum, relevant_periods = relevant_spectrum_domain(spectrum, periods, tc)
 
     # select period with the minimum error
-    td_error = [
-        Td_fit_error(td, relevant_periods, relevant_spectrum, pga, sas, tc)
-        for td in relevant_periods
-    ]
+    td_error = [Td_fit_error(td, relevant_periods, relevant_spectrum, pga, sas, tc) for td in relevant_periods]
     td = relevant_periods[np.argmin(td_error)]
 
     return td
@@ -355,11 +338,11 @@ def fit_Td_array(
     Tc: "npt.NDArray",
     acc_spectra: "npt.NDArray",
     imtls: dict,
-    site_list: List[str],
-    vs30_list: List[int],
-    hazard_rp_list: List[int],
+    site_list: list[str],
+    vs30_list: list[int],
+    hazard_rp_list: list[int],
     i_stat: int = 0,
-    sites_of_interest: Optional[List[str]] = None,
+    sites_of_interest: list[str] | None = None,
 ) -> "npt.NDArray":
     """Fit the Td values for all sites, site classes and APoE of interest
 
@@ -416,7 +399,7 @@ def fit_Td_array(
 
 def calculate_parameter_arrays(
     data_file: str | Path,
-) -> Tuple["npt.NDArray", "npt.NDArray", "npt.NDArray", "npt.NDArray"]:
+) -> tuple["npt.NDArray", "npt.NDArray", "npt.NDArray", "npt.NDArray"]:
     """Calculate PGA, Sa,s, and Tc values for uniform hazard spectra in hdf5
 
     Args:
@@ -438,16 +421,12 @@ def calculate_parameter_arrays(
         log.debug(f"PGA array {PGA}")
         PGA = reduce_PGAs(PGA)
     else:
-        log.warning(
-            f"PGA reduction skipped because `PGA_REDUCTION_ENABLED` == {PGA_REDUCTION_ENABLED}"
-        )
+        log.warning(f"PGA reduction skipped because `PGA_REDUCTION_ENABLED` == {PGA_REDUCTION_ENABLED}")
 
     if PGA_ROUNDING_ENABLED:
         PGA = np.round(PGA, PGA_N_DP)
     else:
-        log.warning(
-            f"PGA rounding skipped because `PGA_ROUNDING_ENABLED` == {PGA_ROUNDING_ENABLED}"
-        )
+        log.warning(f"PGA rounding skipped because `PGA_ROUNDING_ENABLED` == {PGA_ROUNDING_ENABLED}")
 
     Sas: npt.NDArray = 0.9 * np.max(acc_spectra, axis=2)
     Sas = np.round(Sas, SAS_N_DP)
@@ -459,9 +438,7 @@ def calculate_parameter_arrays(
     return PGA, Sas, PSV, Tc
 
 
-def create_mean_sa_table(
-    PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list
-):
+def create_mean_sa_table(PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list):
     i_stat = 0  # spectra index for stats in ['mean'] + quantiles
 
     index = site_list
@@ -479,7 +456,7 @@ def create_mean_sa_table(
 
         log.info(f"site class {sc} label: {sc_label} vs30: {vs30}")
 
-        for APoE, rp in zip(APoEs, hazard_rp_list):
+        for APoE, rp in zip(APoEs, hazard_rp_list, strict=False):
             i_rp = hazard_rp_list.index(rp)
 
             df.loc[:, (APoE, sc_label, "PGA")] = PGA[i_vs30, :, i_rp, i_stat]
@@ -514,9 +491,7 @@ def update_lower_bound_sa(
 
     controlling_site = LOWER_BOUND_PARAMETERS["controlling_site"]
     i_site = site_list.index(controlling_site)
-    i_stat = 1 + quantile_list.index(
-        float(LOWER_BOUND_PARAMETERS["controlling_percentile"])
-    )
+    i_stat = 1 + quantile_list.index(float(LOWER_BOUND_PARAMETERS["controlling_percentile"]))
     log.debug(
         f"update_lower_bound_sa() controlling_site: {controlling_site};"
         f' controlling_percentile {LOWER_BOUND_PARAMETERS["controlling_percentile"]}'
@@ -542,25 +517,15 @@ def update_lower_bound_sa(
 
         log.info(f"site class {sc} label: {sc_label} vs30: {vs30}")
 
-        for APoE, rp in zip(APoEs, hazard_rp_list):
+        for APoE, rp in zip(APoEs, hazard_rp_list, strict=False):
             i_rp = hazard_rp_list.index(rp)
 
             # update the controlling site to use the qth %ile
-            df.loc[controlling_site, (APoE, sc_label, "PGA")] = PGA[
-                i_vs30, i_site, i_rp, i_stat
-            ]
-            df.loc[controlling_site, (APoE, sc_label, "Sas")] = Sas[
-                i_vs30, i_site, i_rp, i_stat
-            ]
-            df.loc[controlling_site, (APoE, sc_label, "PSV")] = PSV[
-                i_vs30, i_site, i_rp, i_stat
-            ]
-            df.loc[controlling_site, (APoE, sc_label, "Tc")] = Tc[
-                i_vs30, i_site, i_rp, i_stat
-            ]
-            df.loc[controlling_site, (APoE, sc_label, "Td")] = lower_bound_Td[
-                i_vs30, 0, i_rp
-            ]
+            df.loc[controlling_site, (APoE, sc_label, "PGA")] = PGA[i_vs30, i_site, i_rp, i_stat]
+            df.loc[controlling_site, (APoE, sc_label, "Sas")] = Sas[i_vs30, i_site, i_rp, i_stat]
+            df.loc[controlling_site, (APoE, sc_label, "PSV")] = PSV[i_vs30, i_site, i_rp, i_stat]
+            df.loc[controlling_site, (APoE, sc_label, "Tc")] = Tc[i_vs30, i_site, i_rp, i_stat]
+            df.loc[controlling_site, (APoE, sc_label, "Td")] = lower_bound_Td[i_vs30, 0, i_rp]
 
             # apply lower bound to all sites for PGA, Sas, and PSV
             df.loc[:, (APoE, sc_label, "PGA")] = np.maximum(
@@ -578,38 +543,24 @@ def update_lower_bound_sa(
 
             # record locations that were controlled by the lower bound
             df.loc[:, (APoE, sc_label, "PGA Floor")] = ~(
-                df.loc[:, (APoE, sc_label, "PGA")]
-                > df.loc[controlling_site, (APoE, sc_label, "PGA")]
+                df.loc[:, (APoE, sc_label, "PGA")] > df.loc[controlling_site, (APoE, sc_label, "PGA")]
             )
             df.loc[:, (APoE, sc_label, "Sas Floor")] = ~(
-                df.loc[:, (APoE, sc_label, "Sas")]
-                > df.loc[controlling_site, (APoE, sc_label, "Sas")]
+                df.loc[:, (APoE, sc_label, "Sas")] > df.loc[controlling_site, (APoE, sc_label, "Sas")]
             )
             df.loc[:, (APoE, sc_label, "PSV Floor")] = ~(
-                df.loc[:, (APoE, sc_label, "PSV")]
-                > df.loc[controlling_site, (APoE, sc_label, "PSV")]
+                df.loc[:, (APoE, sc_label, "PSV")] > df.loc[controlling_site, (APoE, sc_label, "PSV")]
             )
 
             # set new Tc values
-            tc = (
-                2
-                * np.pi
-                * df.loc[:, (APoE, sc_label, "PSV")]
-                / (df.loc[:, (APoE, sc_label, "Sas")] * g)
-            )
+            tc = 2 * np.pi * df.loc[:, (APoE, sc_label, "PSV")] / (df.loc[:, (APoE, sc_label, "Sas")] * g)
             df.loc[:, (APoE, sc_label, "Tc")] = sig_figs(tc, TC_N_SF)
 
             # infer new rounded PSV values from rounded Tcs
-            psv = (
-                df.loc[:, (APoE, sc_label, "Tc")]
-                * df.loc[:, (APoE, sc_label, "Sas")]
-                * g
-            ) / (2 * np.pi)
+            psv = (df.loc[:, (APoE, sc_label, "Tc")] * df.loc[:, (APoE, sc_label, "Sas")] * g) / (2 * np.pi)
             df.loc[:, (APoE, sc_label, "PSV")] = np.round(psv, PSV_N_DP)
             psv_original = df.loc[:, (APoE, sc_label, "PSV")]
-            df.loc[:, (APoE, sc_label, "PSV adjustment")] = (
-                df.loc[:, (APoE, sc_label, "PSV")] - psv_original
-            )
+            df.loc[:, (APoE, sc_label, "PSV adjustment")] = df.loc[:, (APoE, sc_label, "PSV")] - psv_original
             # log.info(f"site class {sc}, APoE: {APoE}, max PSV adjustment: "
             #    "{df.loc[:, (APoE, sc_label, 'PSV adjustment')]}")
             # log.info(df.loc[:, (APoE, sc_label, slice(None))])
@@ -618,20 +569,15 @@ def update_lower_bound_sa(
             df.loc[:, (APoE, sc_label, "Td Floor")] = False
             for site in site_list:
                 if df.loc[site, (APoE, sc_label, "PSV Floor")]:
-                    if (
-                        df.loc[controlling_site, (APoE, sc_label, "Td")]
-                        >= df.loc[site, (APoE, sc_label, "Td")]
-                    ):
-                        df.loc[site, (APoE, sc_label, "Td")] = df.loc[
-                            controlling_site, (APoE, sc_label, "Td")
-                        ]
+                    if df.loc[controlling_site, (APoE, sc_label, "Td")] >= df.loc[site, (APoE, sc_label, "Td")]:
+                        df.loc[site, (APoE, sc_label, "Td")] = df.loc[controlling_site, (APoE, sc_label, "Td")]
                         df.loc[site, (APoE, sc_label, "Td Floor")] = True
 
     return df
 
 
 def remove_irrelevant_location_replacements(
-    site_list: List[str], location_replacements: dict[str, LocationReplacement]
+    site_list: list[str], location_replacements: dict[str, LocationReplacement]
 ) -> dict[str, LocationReplacement]:
     """
 
@@ -655,9 +601,7 @@ def remove_irrelevant_location_replacements(
     return new_location_replacements
 
 
-def replace_relevant_locations(
-    df: "pdt.DataFrame", print_locations: bool = False
-) -> "pdt.DataFrame":
+def replace_relevant_locations(df: "pdt.DataFrame", print_locations: bool = False) -> "pdt.DataFrame":
     """replace parameters for locations that are tied to other locations
 
     Args:
@@ -669,9 +613,7 @@ def replace_relevant_locations(
 
     """
     site_list = list(df.index)
-    location_replacements = remove_irrelevant_location_replacements(
-        site_list, LOCATION_REPLACEMENTS
-    )
+    location_replacements = remove_irrelevant_location_replacements(site_list, LOCATION_REPLACEMENTS)
 
     if print_locations:
         check_replaced_locations = []
@@ -744,14 +686,10 @@ def create_sa_table(hf_path: Path, lower_bound_flags: bool = True) -> "pdt.DataF
     acc_spectra, imtls = extract_spectra(hf_path)
 
     log.info("begin fit_Td_array for mean Tds")
-    mean_Td = fit_Td_array(
-        PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list
-    )
+    mean_Td = fit_Td_array(PGA, Sas, Tc, acc_spectra, imtls, site_list, vs30_list, hazard_rp_list)
 
     log.info("begin create_mean_sa_table")
-    mean_df = create_mean_sa_table(
-        PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list
-    )
+    mean_df = create_mean_sa_table(PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list)
 
     log.info("begin update_lower_bound_sa")
     df = update_lower_bound_sa(

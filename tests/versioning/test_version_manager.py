@@ -81,9 +81,7 @@ def test_version_manager_add(mocker):
     vi_new = VersionInfo("MY_NEW_VER", "NSHM_v99")
 
     # patch the underlying functions
-    mocked_read_version_list = mocker.patch.object(
-        version_manager, "read_version_list", return_value={}
-    )
+    mocked_read_version_list = mocker.patch.object(version_manager, "read_version_list", return_value={})
     mocked_write_version_list = mocker.patch.object(
         version_manager, "write_version_list", return_value={vi_new.version_id: vi_new}
     )
@@ -105,9 +103,7 @@ def test_version_manager_remove(mocker):
     mocked_read_version_list = mocker.patch.object(
         version_manager, "read_version_list", return_value={vi_og.version_id: vi_og}
     )
-    mocked_write_version_list = mocker.patch.object(
-        version_manager, "write_version_list", return_value={}
-    )
+    mocked_write_version_list = mocker.patch.object(version_manager, "write_version_list", return_value={})
 
     og = version_manager.remove(vi_og.version_id)
     mocked_read_version_list.assert_called_once()

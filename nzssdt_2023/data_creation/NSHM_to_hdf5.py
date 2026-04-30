@@ -4,7 +4,7 @@ helper functions for producing an HDF5 file for the NZSSDT tables
 
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Union
 
 import pandas as pd
 
@@ -81,16 +81,14 @@ def convert_imtls_to_disp(acc_imtls):
         period = period_from_imt(acc_imt)
         disp_imt = acc_imt.replace("A", "D")
 
-        disp_imtls[disp_imt] = acc_to_disp(
-            np.array(acc_imtls[acc_imt]), period
-        ).tolist()
+        disp_imtls[disp_imt] = acc_to_disp(np.array(acc_imtls[acc_imt]), period).tolist()
 
     return disp_imtls
 
 
 def calculate_hazard_design_intensities(
-    data: Dict[str, Any],
-    hazard_rps: Union[List[int], "npt.NDArray"],
+    data: dict[str, Any],
+    hazard_rps: Union[list[int], "npt.NDArray"],
     intensity_type="acc",
 ):
     """
@@ -120,7 +118,6 @@ def calculate_hazard_design_intensities(
     for i_vs30 in range(n_vs30):
         for i_site in range(n_sites):
             for i_imt, imt in enumerate(imtls.keys()):
-
                 # loop over the median and any quantiles
                 for i_stat in range(n_stats):
                     # the interpolation is done as a linear interpolation in logspace
@@ -128,9 +125,7 @@ def calculate_hazard_design_intensities(
                     stats_im_hazard[i_vs30, i_site, i_imt, :, i_stat] = np.exp(
                         np.interp(
                             np.log(1 / hazard_rps),
-                            np.log(
-                                np.flip(hcurves_stats[i_vs30, i_site, i_imt, :, i_stat])
-                            ),
+                            np.log(np.flip(hcurves_stats[i_vs30, i_site, i_imt, :, i_stat])),
                             np.log(np.flip(imtls[imt])),
                         )
                     )
@@ -138,9 +133,9 @@ def calculate_hazard_design_intensities(
 
 
 def add_uniform_hazard_spectra(
-    data: Dict[str, Any],
-    hazard_rps: Optional[List[int]] = None,
-) -> Dict[str, Any]:
+    data: dict[str, Any],
+    hazard_rps: list[int] | None = None,
+) -> dict[str, Any]:
     """
     Adds uniform hazard spectra to the data dictionary, based on the input hazard_rps
 
@@ -166,8 +161,8 @@ def add_uniform_hazard_spectra(
 
     for intensity_type in ["acc", "disp"]:
         data["hazard_design"][intensity_type] = {}
-        data["hazard_design"][intensity_type]["stats_im_hazard"] = (
-            calculate_hazard_design_intensities(data, hazard_rps, intensity_type)
+        data["hazard_design"][intensity_type]["stats_im_hazard"] = calculate_hazard_design_intensities(
+            data, hazard_rps, intensity_type
         )
 
     return data
@@ -218,7 +213,6 @@ def save_hdf(hf_name, data):
                      vs30, sites, intensity measures, and design intensities
     """
     with h5py.File(hf_name, "w") as hf:
-
         # add metadata
         grp = hf.create_group("metadata")
         grp.attrs["vs30s"] = data["metadata"]["vs30s"]
@@ -230,9 +224,7 @@ def save_hdf(hf_name, data):
         # add hazard curves
         grp = hf.create_group("hcurves")
         for dset_name in ["hcurves_stats"]:
-            dset = grp.create_dataset(
-                dset_name, np.array(data["hcurves"][dset_name]).shape
-            )
+            dset = grp.create_dataset(dset_name, np.array(data["hcurves"][dset_name]).shape)
             dset[:] = np.array(data["hcurves"][dset_name])
 
         # add poe values
@@ -244,9 +236,7 @@ def save_hdf(hf_name, data):
                 for dset_name in ["stats_im_hazard"]:
                     dset = subgrp.create_dataset(
                         dset_name,
-                        np.array(
-                            data["hazard_design"][intensity_type][dset_name]
-                        ).shape,
+                        np.array(data["hazard_design"][intensity_type][dset_name]).shape,
                     )
                     dset[:] = np.array(data["hazard_design"][intensity_type][dset_name])
 
@@ -273,14 +263,10 @@ def query_NSHM_to_hdf5(
     """
 
     # query NSHM
-    hcurves, _ = q_haz.retrieve_hazard_curves(
-        site_list, VS30_LIST, IMT_LIST, AGG_LIST, hazard_id
-    )
+    hcurves, _ = q_haz.retrieve_hazard_curves(site_list, VS30_LIST, IMT_LIST, AGG_LIST, hazard_id)
 
     # prep hcurves dictionary
-    data = create_hcurve_dictionary(
-        site_list, VS30_LIST, IMT_LIST, IMTL_LIST, AGG_LIST, hcurves
-    )
+    data = create_hcurve_dictionary(site_list, VS30_LIST, IMT_LIST, IMTL_LIST, AGG_LIST, hcurves)
 
     # add uhs spectra
     data = add_uniform_hazard_spectra(data)

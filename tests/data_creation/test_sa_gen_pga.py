@@ -26,26 +26,22 @@ def test_pga_reduction_constants():
 @pytest.mark.parametrize("site_class", constants.PGA_REDUCTIONS.keys())
 def test_calc_R_PGA_below_threshold(site_class):
     r = constants.PGA_REDUCTIONS[site_class]
-    assert (
-        sa_gen.calc_R_PGA(r.PGA_threshold - 1e-3, site_class) == 0
-    ), f"`{site_class}` below threshold"
+    assert sa_gen.calc_R_PGA(r.PGA_threshold - 1e-3, site_class) == 0, f"`{site_class}` below threshold"
 
 
 @pytest.mark.parametrize("site_class", constants.PGA_REDUCTIONS.keys())
 def test_calc_R_PGA_above_threshold(site_class):
     r = constants.PGA_REDUCTIONS[site_class]
-    assert (
-        sa_gen.calc_R_PGA(r.PGA_threshold + 1e-3, site_class) > 0
-    ), f"`{site_class}` above threshold"
+    assert sa_gen.calc_R_PGA(r.PGA_threshold + 1e-3, site_class) > 0, f"`{site_class}` above threshold"
 
 
 @pytest.mark.parametrize("site_class", constants.PGA_REDUCTIONS.keys())
 def test_calc_R_PGA_at_1pt0(site_class):
     pga = 1.0
     r = constants.PGA_REDUCTIONS[site_class]
-    assert (
-        sa_gen.calc_R_PGA(pga, site_class) == r.A0 * np.log(pga) + r.A1
-    ), f"`{site_class}` reduction factor at PGA==1.0"
+    assert sa_gen.calc_R_PGA(pga, site_class) == r.A0 * np.log(pga) + r.A1, (
+        f"`{site_class}` reduction factor at PGA==1.0"
+    )
 
 
 def test_extract_spectra(mini_hcurves_hdf5_path):
@@ -66,6 +62,4 @@ def test_reduce_PGAs(mini_hcurves_hdf5_path):
     reduced_PGA = sa_gen.reduce_PGAs(PGA)
 
     assert reduced_PGA.shape == PGA.shape, "array shape is identical"
-    assert (
-        reduced_PGA <= PGA
-    ).all(), "reduced PGA should not exceed the original value"
+    assert (reduced_PGA <= PGA).all(), "reduced PGA should not exceed the original value"

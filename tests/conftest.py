@@ -23,7 +23,7 @@ def mock_get_mean_mags(
     poes,
     hazard_agg,
 ):
-    for location, vs30, imt, poe in itertools.product(locations, vs30s, imts, poes):
+    for location, _vs30, _imt, poe in itertools.product(locations, vs30s, imts, poes):
         _, name = mean_magnitudes.get_loc_id_and_name(location.downsample(0.001).code)
         yield dict(
             name=name,
@@ -58,9 +58,7 @@ def sat_named_table_v2():
 @pytest.fixture(scope="module")
 def dm_table_v1():
     filename = "D_and_M_with_floor.csv"
-    csv_path = pathlib.Path(
-        RESOURCES_FOLDER, "pipeline", "v1", filename
-    )  # not as per publish/report @ v1
+    csv_path = pathlib.Path(RESOURCES_FOLDER, "pipeline", "v1", filename)  # not as per publish/report @ v1
     return DistMagTable(csv_path)
 
 

@@ -15,10 +15,10 @@ methods:
 """
 
 import csv
+from collections.abc import Iterator
 from decimal import Decimal
 from itertools import islice
 from pathlib import Path
-from typing import Iterator, List, Tuple, Union
 
 import pandas as pd
 from borb.pdf import (
@@ -41,14 +41,14 @@ from nzssdt_2023.publish.convert import DistMagTable, SatTable
 
 MAX_PAGE_ROWS = 30
 SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
-APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
+APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500], strict=False))
 VERTICAL_BUFFER = 40
 
 
 def build_report_page(
     table_id: str,
-    apoe: Tuple[str, int] = ("a", 25),
-    rowdata=List[List],
+    apoe: tuple[str, int] = ("a", 25),
+    rowdata=list[list],
     table_part: int = 1,
 ):
 
@@ -57,9 +57,7 @@ def build_report_page(
 
     # create Page
     PAGE_SIZE = PageSize.A4_LANDSCAPE
-    page: Page = Page(
-        width=PAGE_SIZE.value[0], height=PAGE_SIZE.value[1] + VERTICAL_BUFFER
-    )
+    page: Page = Page(width=PAGE_SIZE.value[0], height=PAGE_SIZE.value[1] + VERTICAL_BUFFER)
     layout: PageLayout = SingleColumnLayout(page)
 
     # add Page to Document
@@ -81,8 +79,7 @@ def build_report_page(
         number_of_columns=3 + (6 * 3),
         number_of_rows=2 + len(rowdata),
         # adjust the ratios of column widths for this FixedColumnWidthTable
-        column_widths=[Decimal(3), Decimal(0.5), Decimal(0.5)]
-        + 6 * [Decimal(0.5), Decimal(0.5), Decimal(0.5)],
+        column_widths=[Decimal(3), Decimal(0.5), Decimal(0.5)] + 6 * [Decimal(0.5), Decimal(0.5), Decimal(0.5)],
     )
 
     def add_row_0(table: FixedColumnWidthTable):
@@ -131,7 +128,7 @@ def build_report_page(
                 )
             )
         )
-        for sss in SOIL_CLASSES:
+        for _sss in SOIL_CLASSES:
             table.add(
                 Paragraph(
                     "PGA",
@@ -142,9 +139,7 @@ def build_report_page(
             ).add(
                 HeterogeneousParagraph(
                     [
-                        ChunkOfText(
-                            "S", font="Helvetica-bold-oblique", font_size=Decimal(9)
-                        ),
+                        ChunkOfText("S", font="Helvetica-bold-oblique", font_size=Decimal(9)),
                         ChunkOfText(
                             "as",
                             font="Helvetica-bold",
@@ -199,9 +194,7 @@ def build_report_page(
                 )
             )
 
-    table.set_padding_on_all_cells(
-        Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5)
-    )
+    table.set_padding_on_all_cells(Decimal(0.5), Decimal(0.5), Decimal(0.5), Decimal(0.5))
     layout.add(table)
 
     # page footer
@@ -217,10 +210,8 @@ def build_report_page(
     return page
 
 
-def generate_table_rows(
-    sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, apoe: int
-) -> Iterator:
-    def format_D(value, apoe: int) -> Union[str, int]:
+def generate_table_rows(sat_table_flat: pd.DataFrame, dm_table_flat: pd.DataFrame, apoe: int) -> Iterator:
+    def format_D(value, apoe: int) -> str | int:
         """NB NaN in the source dataframe has different meanings, depending on the apoe..."""
         if pd.isna(value):
             return "n/a" if apoe < 500 else ">20"
@@ -230,7 +221,7 @@ def generate_table_rows(
         location_df = sat_table_flat[sat_table_flat.Location == location]
         rec = dm_table_flat.loc[location, apoe]
         d_str = format_D(rec["D"], apoe)
-        for tup in location_df.itertuples():
+        for _tup in location_df.itertuples():
             row = [location, rec["M"], d_str]
             for tup2 in location_df[location_df["APoE (1/n)"] == apoe].itertuples():
                 row += [
@@ -248,7 +239,6 @@ def chunks(items, chunk_size):
 
 
 if __name__ == "__main__":
-
     OUTPUT_FOLDER = Path(RESOURCES_FOLDER).parent / "reports" / "v1"
 
     # TODO shift this into the CLI
@@ -267,14 +257,12 @@ if __name__ == "__main__":
     grid_df = sat.grid_location_df()
     d_and_m_df = dm_table().flatten()
 
-    report_grps = list(zip([0, 1], [named_df, grid_df]))
+    report_grps = list(zip([0, 1], [named_df, grid_df], strict=False))
     report_grp_titles = ["3.4", "3.5"]
     report_names = ["named", "gridded"]
 
     for report_grp, location_df in report_grps:
-
         for apoe in APOE_MAPPINGS:
-
             filename = f"{report_names[report_grp]}_location_report_apoe({apoe[1]})"
             print(f"report: {filename}")
 

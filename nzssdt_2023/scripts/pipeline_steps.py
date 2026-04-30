@@ -5,7 +5,6 @@ Complete pipeline from NSHM to pdf (using new formatting)
 
 import logging
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 
@@ -41,9 +40,7 @@ working_folder = Path(WORKING_FOLDER)
 
 def hf_filepath(site_limit: int = 0, working_folder: Path = working_folder):
     return (
-        working_folder / f"first_{site_limit * 2}_hcurves.hdf5"
-        if site_limit
-        else working_folder / "all_hcurves.hdf5"
+        working_folder / f"first_{site_limit * 2}_hcurves.hdf5" if site_limit else working_folder / "all_hcurves.hdf5"
     )
 
 
@@ -62,9 +59,7 @@ def get_site_list(site_limit: int = 0):
     )
 
 
-def get_hazard_curves(
-    site_list: List[str], site_limit: int = 0, hazard_id: str = "NSHM_v1.0.4"
-):
+def get_hazard_curves(site_list: list[str], site_limit: int = 0, hazard_id: str = "NSHM_v1.0.4"):
     """Retrieve the NSHM hazard curves into an HDF5 file into the working folder.
 
     Args:
@@ -74,9 +69,7 @@ def get_hazard_curves(
     """
     hf_path = hf_filepath(site_limit=site_limit)
     log.info(f"building hdf5 for {hazard_id} with {site_limit} sites")
-    query_NSHM_to_hdf5(
-        hf_path, hazard_id=hazard_id, site_list=site_list, site_limit=site_limit
-    )
+    query_NSHM_to_hdf5(hf_path, hazard_id=hazard_id, site_list=site_list, site_limit=site_limit)
 
 
 def get_resources_version_path(version: str):
@@ -111,7 +104,7 @@ def get_deliverables_version_path(version: str):
 
 def build_json_tables(
     hf_path: Path,
-    site_list: List[str],
+    site_list: list[str],
     version: str,
     site_limit: int = 0,
     overwrite_json: bool = True,
@@ -129,21 +122,14 @@ def build_json_tables(
     version_folder = get_resources_version_path(version)
 
     # output paths
-    named_path = sat_table_json_path(
-        version_folder, named_sites=True, site_limit=site_limit, combo=True
-    )
-    gridded_path = sat_table_json_path(
-        version_folder, named_sites=False, site_limit=site_limit, combo=True
-    )
+    named_path = sat_table_json_path(version_folder, named_sites=True, site_limit=site_limit, combo=True)
+    gridded_path = sat_table_json_path(version_folder, named_sites=False, site_limit=site_limit, combo=True)
 
     if overwrite_json | (not named_path.exists()) | (not gridded_path.exists()):
-
         log.info("build the SA and D_and_M tables")
         sat_df = sa_gen.create_sa_table(hf_path)
 
-        dm_df = DistMagTable(
-            dm_gen.create_D_and_M_df(site_list, rp_list=constants.DEFAULT_RPS)
-        ).flatten()
+        dm_df = DistMagTable(dm_gen.create_D_and_M_df(site_list, rp_list=constants.DEFAULT_RPS)).flatten()
 
         log.info("combine the tables")
         combined_df = SatTable(sat_df).combine_dm_table(dm_df)
@@ -199,9 +185,7 @@ def create_parameter_tables(
 
     # query NSHM,
     if no_cache | (not hf_path.exists()):
-        get_hazard_curves(
-            site_list=sites_df, site_limit=site_limit, hazard_id=hazard_id
-        )
+        get_hazard_curves(site_list=sites_df, site_limit=site_limit, hazard_id=hazard_id)
 
     # build the tables
     sites = sites_df.index.tolist()
@@ -239,7 +223,4 @@ def create_deliverables(version: str, overwrite: bool = False):
 
 
 if __name__ == "__main__":
-
-    create_parameter_tables(
-        version="cbc", site_limit=5, no_cache=True, overwrite_json=True
-    )
+    create_parameter_tables(version="cbc", site_limit=5, no_cache=True, overwrite_json=True)

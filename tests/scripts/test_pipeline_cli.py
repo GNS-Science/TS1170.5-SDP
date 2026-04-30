@@ -28,13 +28,9 @@ def test_publish(mocker, options):
 
     # patch the underlying functions
     vi_og = VersionInfo("MY_NEW_VER", "NSHM_v99")
-    vi_new = VersionInfo(
-        "MY_NEW_ONE", "NSHM_v00", description="Read all about the new one"
-    )
+    vi_new = VersionInfo("MY_NEW_ONE", "NSHM_v00", description="Read all about the new one")
 
-    mocked_vi_collect = mocker.patch.object(
-        VersionInfo, "collect_manifest", return_value=[]
-    )
+    mocked_vi_collect = mocker.patch.object(VersionInfo, "collect_manifest", return_value=[])
     mocked_read_version_list = mocker.patch.object(
         version_manager, "read_version_list", return_value={vi_og.version_id: vi_og}
     )
@@ -69,9 +65,7 @@ def test_publish(mocker, options):
 
 @pytest.mark.parametrize("options", [None, "--verbose"])
 def test_01_init(mocker, options):
-    mock_ensure_resource_folders = mocker.patch.object(
-        version_cli, "ensure_resource_folders"
-    )
+    mock_ensure_resource_folders = mocker.patch.object(version_cli, "ensure_resource_folders")
 
     runner = CliRunner()
     cmdline = ["01-init", "MY_NEW_ONE"]
@@ -90,9 +84,7 @@ def test_01_init(mocker, options):
 
 @pytest.mark.parametrize("options", [None, "--verbose"])
 def test_02_hazard(mocker, options):
-    mock_ensure_resource_folders = mocker.patch.object(
-        version_cli, "ensure_resource_folders"
-    )
+    mock_ensure_resource_folders = mocker.patch.object(version_cli, "ensure_resource_folders")
 
     runner = CliRunner()
     cmdline = ["01-init", "MY_NEW_ONE"]

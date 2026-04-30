@@ -27,7 +27,7 @@ def test_standard_filename_from_version_info(version_info_fixture):
     assert standard_output_filename(version_info_fixture) == "nzssdt_2023_v5.json.zip"
 
 
-class TestVersionInfo(object):
+class TestVersionInfo:
     def test_new_version(self, version_info_fixture):
         nv = version_info_fixture
 

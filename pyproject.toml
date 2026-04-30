@@ -18,69 +18,80 @@ classifiers=[
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',    
+    'Programming Language :: Python :: 3.12',
 ]
 requires-python = ">=3.10,<3.13"
 
 dependencies = [
-    "pandas (>=2.0.2)",
-    "click (>=8.1.3)",
-    "dacite (>=1.8.1)",
-    "borb (>=2.1.13,<3.0)",
-    "h5py (>=3.11.0)",
-    "geopandas (>=1.0.1)",
-    "openpyxl (>=3.1.5)",
-    "nzshm-common (>=0.8.4)",
-    "shapely (>=2.0.7)",  
-    "toshi-hazard-store"    
+    "pandas>=2.0.2",
+    "click>=8.1.3",
+    "dacite>=1.8.1",
+    "borb>=2.1.13,<3.0",
+    "h5py>=3.11.0",
+    "geopandas>=1.0.1",
+    "openpyxl>=3.1.5",
+    "nzshm-common>=0.8.4",
+    "shapely>=2.0.7",
+    "toshi-hazard-store"
 ]
 
 [project.scripts]
-pipeline = 'nzssdt_2023.scripts.pipeline_cli:cli'
-
-[tool.poetry]
-packages = [{include = "nzssdt_2023"}]
-
-[tool.poetry.group.doc]
-optional = true
-
-[tool.poetry.group.dev]
-optional = true
+pipeline = "nzssdt_2023.scripts.pipeline_cli:cli"
 
 [dependency-groups]
 dev = [
-    "black",
     "bump2version",
-    "flake8-docstrings",
-    "flake8",
-    "isort",
     "mypy",
-    "pip-audit (>=2.9.0,<3.0.0)",
+    "pip-audit>=2.9.0,<3.0.0",
     "pre-commit",
     "pytest-cov",
     "pytest",
-    "safety (>=3.6.2,<4.0.0)",
+    "ruff",
+    "safety>=3.6.2,<4.0.0",
     "shapely",
     "toml",
     "tox",
     "twine",
     "pytest-lazy-fixtures",
-    "pytest-mock"    
+    "pytest-mock"
 ]
 
 doc = [
-    "griffe (>=1.14.0,<2.0.0)",
+    "griffe>=1.14.0,<2.0.0",
     "mkdocs-autorefs",
-    "mkdocs-click (>=0.9.0,<0.10.0)",
+    "mkdocs-click>=0.9.0,<0.10.0",
     "mkdocs-include-markdown-plugin",
     "mkdocs-material-extensions",
     "mkdocs-material",
     "mkdocs",
-    "mkdocstrings-python (>=1.18.2,<2.0.0)",
+    "mkdocstrings-python>=1.18.2,<2.0.0",
     "mkdocstrings",
     "mkdocs-with-pdf"
 ]
 
 [build-system]
-requires = ["poetry-core>=2.2.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["nzssdt_2023"]
+
+[tool.uv]
+exclude-newer = "1 week"
+exclude-newer-package = { "nzshm-common" = false }
+
+[tool.mypy]
+ignore_missing_imports = true
+exclude = "nzssdt_2023/scripts"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.format]
+quote-style = "preserve"

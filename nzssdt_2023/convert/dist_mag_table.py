@@ -1,18 +1,17 @@
 import pathlib
 from functools import lru_cache
-from typing import Union
 
 import pandas as pd
 
 
 class DistMagTable:
-    def __init__(self, csv_path: Union[str, pathlib.Path]):
+    def __init__(self, csv_path: str | pathlib.Path):
         self.csv_path = csv_path
         if not pathlib.Path(csv_path).exists():
             raise ValueError(f"Invalid csv path: {csv_path}")
         self.raw_table = pd.read_csv(self.csv_path)
 
-    @lru_cache
+    @lru_cache  # noqa: B019
     def flatten(self):
         df2 = self.raw_table.rename(columns={"Unnamed: 0": "Location"})
         df2 = df2.set_index(["Location", "D"]).stack().reset_index()

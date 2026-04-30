@@ -84,16 +84,12 @@ def raw_mag_to_df(raw_df, site_list, APoEs):
     for site in site_list:
         for rp in rps:
             apoe = 1 / rp
-            poe_50 = np.round((100 * (1 - np.exp(-apoe * poe_duration))), 0).astype(
-                "int"
-            )
+            poe_50 = np.round((100 * (1 - np.exp(-apoe * poe_duration))), 0).astype("int")
 
             APoE = f"APoE: 1/{rp}"
             site_idx = raw_df["site name"] == site
             poe_idx = raw_df["poe (% in 50 years)"] == poe_50
-            df.loc[site, APoE] = (
-                raw_df[site_idx & poe_idx]["mean magnitude"].values[0].round(1)
-            )
+            df.loc[site, APoE] = raw_df[site_idx & poe_idx]["mean magnitude"].values[0].round(1)
 
     return df
 
@@ -107,9 +103,7 @@ def mock_get_disagg(
     imts,
     probabilities,
 ):
-    dissag_filepth = (
-        Path(__file__).parent.parent / "fixtures" / "disagg_fixture_all.json"
-    )
+    dissag_filepth = Path(__file__).parent.parent / "fixtures" / "disagg_fixture_all.json"
     with dissag_filepth.open() as disagg_file:
         disaggs = json.load(disagg_file)
     for disagg in disaggs:
@@ -169,9 +163,7 @@ def get_disagg_fixture(monkeypatch):
 
 def test_mean_mag_df_legacy(get_disagg_fixture):
 
-    raw_df_filepath_leg = (
-        Path(__file__).parent.parent / "fixtures" / "SRWG214_mean_mag_legacy.csv"
-    )
+    raw_df_filepath_leg = Path(__file__).parent.parent / "fixtures" / "SRWG214_mean_mag_legacy.csv"
     df_expected_leg = get_df_expected(raw_df_filepath_leg)
     df_leg = get_mean_mag_df(HAZARD_ID, LOCATIONS, POES, HAZARD_AGG, legacy=True)
 

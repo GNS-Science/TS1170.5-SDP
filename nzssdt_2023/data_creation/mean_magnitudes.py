@@ -2,8 +2,9 @@
 This module contains functions for extracting mean magnitudes from disaggregations and packaging into DataFrame objects.
 """
 
+from collections.abc import Generator, Iterable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable, List, Union
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
@@ -22,19 +23,14 @@ IMT = "PGA"
 DTYPE = float
 
 
-coded_locations_with_id = [
-    CodedLocation(*lat_lon_from_id(_id), 0.001)
-    for _id in LOCATION_LISTS["ALL"]["locations"]
-]
+coded_locations_with_id = [CodedLocation(*lat_lon_from_id(_id), 0.001) for _id in LOCATION_LISTS["ALL"]["locations"]]
 location_codes_with_id = [loc.code for loc in coded_locations_with_id]
 
 
 def get_loc_id_and_name(location_code):
 
     if location_code in location_codes_with_id:
-        location_id = LOCATION_LISTS["ALL"]["locations"][
-            location_codes_with_id.index(location_code)
-        ]
+        location_id = LOCATION_LISTS["ALL"]["locations"][location_codes_with_id.index(location_code)]
         name = location_by_id(location_id)["name"]
     else:
         location_id = location_code
@@ -56,9 +52,7 @@ def site_name_to_coded_location(site_name: str) -> CodedLocation:
     """
 
     if not ("~" in site_name or site_name in ALL_SITES):
-        raise ValueError(
-            "site_name must be in list of site names or take form `lat~lon`"
-        )
+        raise ValueError("site_name must be in list of site names or take form `lat~lon`")
 
     if "~" in site_name:
         lat, lon = map(float, site_name.split("~"))
@@ -85,12 +79,7 @@ def calculate_mean_magnitude(disagg: "npt.NDArray", bins: "npt.NDArray"):
     """
     shape_bins = bins.shape
     shape_disagg = disagg.shape
-    if (
-        len(shape_bins) != 2
-        or shape_bins[0] != 1
-        or shape_bins[1] != len(disagg)
-        or len(shape_disagg) != 1
-    ):
+    if len(shape_bins) != 2 or shape_bins[0] != 1 or shape_bins[1] != len(disagg) or len(shape_disagg) != 1:
         raise Exception(
             """Disaggregation does not have the correct shape.
             This function assumes that disaggregations are for magnitude only."""
@@ -108,7 +97,7 @@ def get_mean_mags(
     imts: Iterable[str],
     poes: Iterable[model.ProbabilityEnum],
     hazard_agg: model.AggregationEnum,
-) -> Generator[Dict[str, Any], None, None]:
+) -> Generator[dict[str, Any], None, None]:
     """
     The mean magnitudes for a collection of sites.
 
@@ -195,7 +184,7 @@ def poe_to_rp(apoe: model.ProbabilityEnum) -> int:
     return POE_TO_RP[apoe]
 
 
-def read_mean_mag_df(filepath: Union[Path, str]) -> pd.DataFrame:
+def read_mean_mag_df(filepath: Path | str) -> pd.DataFrame:
     df = pd.read_csv(Path(filepath), index_col=["site_name"])
     return df.astype(DTYPE)
 
@@ -204,23 +193,21 @@ def rp_to_freqstr(rp: int):
     return f"APoE: 1/{rp}"
 
 
-def get_sorted_rp_strs(poes: List[model.ProbabilityEnum]) -> List[str]:
+def get_sorted_rp_strs(poes: list[model.ProbabilityEnum]) -> list[str]:
     return_periods = np.array([poe_to_rp(poe) for poe in poes])
     return_periods = np.sort(return_periods)
     return [rp_to_freqstr(rp) for rp in return_periods]
 
 
-def empty_mean_mag_df(poes: List[model.ProbabilityEnum]) -> pd.DataFrame:
+def empty_mean_mag_df(poes: list[model.ProbabilityEnum]) -> pd.DataFrame:
     rp_strs = get_sorted_rp_strs(poes)
-    return pd.DataFrame(
-        index=pd.Series([], name="site_name"), columns=rp_strs, dtype=DTYPE
-    )
+    return pd.DataFrame(index=pd.Series([], name="site_name"), columns=rp_strs, dtype=DTYPE)
 
 
 def get_mean_mag_df(
     hazard_id: str,
-    locations: List[CodedLocation],
-    poes: List[model.ProbabilityEnum],
+    locations: list[CodedLocation],
+    poes: list[model.ProbabilityEnum],
     hazard_agg: model.AggregationEnum,
     legacy: bool = False,
 ) -> pd.DataFrame:
@@ -265,9 +252,7 @@ def get_mean_mag_df(
     """
 
     rp_strs = get_sorted_rp_strs(poes)
-    site_names = [
-        get_loc_id_and_name(loc.downsample(0.001).code)[1] for loc in locations
-    ]
+    site_names = [get_loc_id_and_name(loc.downsample(0.001).code)[1] for loc in locations]
     df = pd.DataFrame(index=site_names, columns=rp_strs, dtype=DTYPE)
     for disagg in get_mean_mags(hazard_id, locations, [VS30], [IMT], poes, hazard_agg):
         rp = poe_to_rp(disagg["poe"])
@@ -313,9 +298,7 @@ def get_mean_mag(
     ```
     """
 
-    disagg = next(
-        get_mean_mags(hazard_id, [location], [VS30], [IMT], [poe], hazard_agg)
-    )
+    disagg = next(get_mean_mags(hazard_id, [location], [VS30], [IMT], [poe], hazard_agg))
     if legacy:
         return np.round(np.round(disagg["mag"], 2), 1)
     else:
@@ -323,7 +306,6 @@ def get_mean_mag(
 
 
 if __name__ == "__main__":
-
     mean_mag_filepath = "mean_mag.csv"
     hazard_id = "NSHM_v1.0.4_mag"
     imts = ["PGA"]
@@ -339,10 +321,7 @@ if __name__ == "__main__":
     ]
     # grid_01 = set([CodedLocation(*pt, 0.001) for pt in load_grid('NZ_0_1_NB_1_1')])
     # locations = list(grid_01)
-    locations = [
-        CodedLocation(*lat_lon_from_id(_id), 0.001)
-        for _id in LOCATION_LISTS["SRWG214"]["locations"]
-    ]
+    locations = [CodedLocation(*lat_lon_from_id(_id), 0.001) for _id in LOCATION_LISTS["SRWG214"]["locations"]]
 
     # hazard_agg = model.AggregationEnum._90
     hazard_agg = model.AggregationEnum.MEAN

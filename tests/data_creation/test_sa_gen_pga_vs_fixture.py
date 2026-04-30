@@ -20,13 +20,9 @@ import nzssdt_2023.data_creation.sa_parameter_generation as sa_gen
 from nzssdt_2023.data_creation import extract_data
 
 
-@pytest.mark.parametrize(
-    "site_class", ["Site Class VI", "Site Class V", "Site Class IV"]
-)
+@pytest.mark.parametrize("site_class", ["Site Class VI", "Site Class V", "Site Class IV"])
 @pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
-def test_unreduced_unrounded_PGAs(
-    site_class, city, mini_hcurves_hdf5_path, pga_original_rp_2500, monkeypatch
-):
+def test_unreduced_unrounded_PGAs(site_class, city, mini_hcurves_hdf5_path, pga_original_rp_2500, monkeypatch):
     """
     Original PGA are calculated in extract_spectra() function"""
 
@@ -58,13 +54,9 @@ def test_unreduced_unrounded_PGAs(
         2,
     )  # 6 vs30, 4 sites, 27 IMT, 1 RP, 2 stats
 
-    mean_Td = sa_gen.fit_Td_array(
-        PGA, Sas, Tc, acc_spectra_2500, imtls, site_list, vs30_list, hazard_rp_list_2500
-    )
+    mean_Td = sa_gen.fit_Td_array(PGA, Sas, Tc, acc_spectra_2500, imtls, site_list, vs30_list, hazard_rp_list_2500)
 
-    mean_df = sa_gen.create_mean_sa_table(
-        PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list_2500
-    )
+    mean_df = sa_gen.create_mean_sa_table(PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list_2500)
 
     quantile_list = sa_gen.extract_quantiles(mini_hcurves_hdf5_path)
 
@@ -94,19 +86,12 @@ def test_unreduced_unrounded_PGAs(
     # print("Christchurch,0.5782371974177063,0.576551165606152,0.6741478781297515")
     print(expected_df)
 
-    assert (
-        pytest.approx(float(expected_df[site_class].iloc[0]))
-        == sa_gen_df[("APoE: 1/2500", site_class, "PGA")][city]
-    )
+    assert pytest.approx(float(expected_df[site_class].iloc[0])) == sa_gen_df[("APoE: 1/2500", site_class, "PGA")][city]
 
 
-@pytest.mark.parametrize(
-    "site_class", ["Site Class VI", "Site Class V", "Site Class IV"]
-)
+@pytest.mark.parametrize("site_class", ["Site Class VI", "Site Class V", "Site Class IV"])
 @pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
-def test_reduce_PGAs_main_cities_FAST(
-    site_class, city, mini_hcurves_hdf5_path, pga_reduced_rp_2500, monkeypatch
-):
+def test_reduce_PGAs_main_cities_FAST(site_class, city, mini_hcurves_hdf5_path, pga_reduced_rp_2500, monkeypatch):
     """faster because we only process one return period"""
 
     site_list = list(sa_gen.extract_sites(mini_hcurves_hdf5_path).index)
@@ -131,13 +116,9 @@ def test_reduce_PGAs_main_cities_FAST(
         2,
     )  # 6 vs30, 4 sites, 27 IMT, 1 RP, 2 stats
 
-    mean_Td = sa_gen.fit_Td_array(
-        PGA, Sas, Tc, acc_spectra_2500, imtls, site_list, vs30_list, hazard_rp_list_2500
-    )
+    mean_Td = sa_gen.fit_Td_array(PGA, Sas, Tc, acc_spectra_2500, imtls, site_list, vs30_list, hazard_rp_list_2500)
 
-    mean_df = sa_gen.create_mean_sa_table(
-        PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list_2500
-    )
+    mean_df = sa_gen.create_mean_sa_table(PGA, Sas, PSV, Tc, mean_Td, site_list, vs30_list, hazard_rp_list_2500)
 
     quantile_list = sa_gen.extract_quantiles(mini_hcurves_hdf5_path)
 
@@ -164,9 +145,7 @@ def test_reduce_PGAs_main_cities_FAST(
     )
 
 
-@pytest.mark.parametrize(
-    "site_class", [f"Site Class {sc}" for sc in "IV,V,VI".split(",")]
-)
+@pytest.mark.parametrize("site_class", [f"Site Class {sc}" for sc in "IV,V,VI".split(",")])
 @pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
 @pytest.mark.parametrize(
     "return_period, pga_table",
@@ -175,9 +154,7 @@ def test_reduce_PGAs_main_cities_FAST(
         (500, lf("pga_reduced_rp_500")),
     ],
 )
-def test_create_sa_table_reduced_pga(
-    sa_table_reduced, city, site_class, return_period, pga_table
-):
+def test_create_sa_table_reduced_pga(sa_table_reduced, city, site_class, return_period, pga_table):
 
     df0 = sa_table_reduced
 
@@ -227,9 +204,7 @@ def test_create_sa_table_reduced_pga(
 
 
 ## Annes test....
-@pytest.mark.parametrize(
-    "site_class", ["Site Class V", "Site Class VI", "Site Class IV"]
-)
+@pytest.mark.parametrize("site_class", ["Site Class V", "Site Class VI", "Site Class IV"])
 @pytest.mark.parametrize("city", ["Auckland", "Christchurch", "Dunedin", "Wellington"])
 @pytest.mark.parametrize(
     "return_period, pga_original_table, pga_reduced_table",
@@ -238,9 +213,7 @@ def test_create_sa_table_reduced_pga(
         (500, lf("pga_original_rp_500"), lf("pga_reduced_rp_500")),
     ],
 )
-def test_PGA_reduction(
-    site_class, city, return_period, pga_original_table, pga_reduced_table
-):
+def test_PGA_reduction(site_class, city, return_period, pga_original_table, pga_reduced_table):
     """PGA reduction on CdlT's original PGAs"""
 
     sc = site_class.split(" ")[-1]
@@ -248,9 +221,7 @@ def test_PGA_reduction(
     df_original = pga_original_table.set_index("City")
     df_reduced = pga_reduced_table.set_index("City")
 
-    pga_original = df_original.loc[
-        city, site_class
-    ]  # get the single PGA vlue using city/site_class indices
+    pga_original = df_original.loc[city, site_class]  # get the single PGA vlue using city/site_class indices
     pga_reduced = sa_gen.calc_reduced_PGA(
         pga_original, sc
     )  # get the single PGA value using our formulae and NSHM hazard tables
@@ -260,9 +231,7 @@ def test_PGA_reduction(
     print(df_reduced.loc[city, site_class])
 
     # the two values must be equivalent to 8 decimal places
-    assert (
-        pytest.approx(df_reduced.loc[city, site_class], 1e-18) == pga_reduced
-    )  # 0.3433339156821064 (AKL, V, 2500)
+    assert pytest.approx(df_reduced.loc[city, site_class], 1e-18) == pga_reduced  # 0.3433339156821064 (AKL, V, 2500)
 
 
 def test_hdf5_vs30_indices(mini_hcurves_hdf5_path):
@@ -291,12 +260,8 @@ def getpga(pga_array, siteclass, sitelist, city, return_period):
     return pga_array[i_vs30, i_site, i_rp, i_stat]
 
 
-@pytest.mark.parametrize(
-    "site_class", ["Site Class V", "Site Class VI", "Site Class IV"]
-)
-@pytest.mark.parametrize(
-    "city", ["Christchurch", "Dunedin", "Wellington"]
-)  # "Auckland",
+@pytest.mark.parametrize("site_class", ["Site Class V", "Site Class VI", "Site Class IV"])
+@pytest.mark.parametrize("city", ["Christchurch", "Dunedin", "Wellington"])  # "Auckland",
 @pytest.mark.parametrize(
     "return_period, pga_original_table, pga_reduced_table",
     [
@@ -331,6 +296,4 @@ def test_calculate_parameter_arrays_function(
     print(
         df_reduced.loc[city, :],
     )
-    assert pytest.approx(round(test_reduced_pga, 2)) == round(
-        df_reduced.loc[city, site_class], 2
-    )
+    assert pytest.approx(round(test_reduced_pga, 2)) == round(df_reduced.loc[city, site_class], 2)

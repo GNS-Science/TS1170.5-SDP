@@ -28,9 +28,7 @@ from nzssdt_2023.end_user_functions.query_parameters import (
 )
 def test_retrieve_sa_parameters(location_id, apoe_n, site_class, expected_parameters):
 
-    assert expected_parameters == retrieve_sa_parameters(
-        location_id, apoe_n, site_class
-    )
+    assert expected_parameters == retrieve_sa_parameters(location_id, apoe_n, site_class)
 
 
 @pytest.mark.parametrize(
@@ -42,18 +40,14 @@ def test_retrieve_sa_parameters(location_id, apoe_n, site_class, expected_parame
 )
 def test_retrieve_md_parameters(location_id, apoe_n, site_class, expected_parameters):
 
-    assert expected_parameters == retrieve_md_parameters(
-        location_id, apoe_n, site_class
-    )
+    assert expected_parameters == retrieve_md_parameters(location_id, apoe_n, site_class)
 
 
 @pytest.mark.parametrize("location_id", ["Auckland", "Wellington"])
 def test_parameters_by_location_id(location_id, expected_parameters_by_location_id):
 
     df = parameters_by_location_id(location_id).fillna("NULL")
-    expected_df = pd.DataFrame(expected_parameters_by_location_id[location_id]).fillna(
-        "NULL"
-    )
+    expected_df = pd.DataFrame(expected_parameters_by_location_id[location_id]).fillna("NULL")
 
     assert df.equals(expected_df)
 

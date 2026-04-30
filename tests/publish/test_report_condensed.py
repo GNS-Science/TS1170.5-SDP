@@ -7,7 +7,7 @@ from nzssdt_2023.data_creation import constants
 from nzssdt_2023.publish import report_condensed_v2, report_v2
 
 SOIL_CLASSES = ["I", "II", "III", "IV", "V", "VI"]
-APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500]))
+APOE_MAPPINGS = list(zip("abcdefg", [25, 50, 100, 250, 500, 1000, 2500], strict=False))
 
 
 def test_APOE_MAPPINGS_constant():
@@ -35,9 +35,9 @@ def test_generate_table_rows(named_combo_table):
     res = next(rows)
 
     assert res[0][0] == "Kaitaia", "first location is Kaitaia"
-    assert next(res[1]) == next(
-        report_condensed_v2.generate_location_block(named_combo_table, "Kaitaia")
-    ), "Kaitaia table entries"
+    assert next(res[1]) == next(report_condensed_v2.generate_location_block(named_combo_table, "Kaitaia")), (
+        "Kaitaia table entries"
+    )
 
 
 # helper functions
@@ -55,11 +55,7 @@ def validate_d_and_m(row, d_and_m_df):
     print()
     print("validate_d_and_m", location, apoe, row)
     loc_df = d_and_m_df
-    df0 = loc_df[
-        (loc_df.Location == location)
-        & (loc_df["APoE (1/n)"] == apoe)
-        & (loc_df["Site Class"] == "I")
-    ]
+    df0 = loc_df[(loc_df.Location == location) & (loc_df["APoE (1/n)"] == apoe) & (loc_df["Site Class"] == "I")]
 
     print(df0)
     # rec = d_and_m_df.loc[location, apoe]
@@ -75,7 +71,7 @@ def get_block_location(extracted, current_idx, location_names):
             continue
         row = line.split(" ")
         # print(f"gbl idx: {idx} row: {row}")
-        if not row[0] in location_names:
+        if row[0] not in location_names:
             continue
         return row[0]
 
@@ -87,9 +83,7 @@ def validate_sa_values(row, location_df):
     loc_df = location_df[location_df.Location == location]
 
     for idx, site_class in enumerate(site_classes):
-        apoe_df = loc_df[
-            (loc_df["APoE (1/n)"] == apoe) & (loc_df["Site Class"] == site_class)
-        ]
+        apoe_df = loc_df[(loc_df["APoE (1/n)"] == apoe) & (loc_df["Site Class"] == site_class)]
 
         for sc_tup in apoe_df.itertuples():
             df_row = [
@@ -111,7 +105,7 @@ def validate_page(extracted: str, combo_df):
         row = line.split(" ")
 
         # standardise the row
-        if not row[0] in location_names:  # prepend the location
+        if row[0] not in location_names:  # prepend the location
             row = [current_location] + row
 
         if (not apoe_value(row[1])) or (row[0] == "page"):
@@ -141,9 +135,7 @@ def test_report_pdf_values_named(named_combo_table, monkeypatch):
 
     report: Document = Document()
 
-    for page in report_condensed_v2.build_pdf_report_pages(
-        named_combo_table, "named", "by location name"
-    ):
+    for page in report_condensed_v2.build_pdf_report_pages(named_combo_table, "named", "by location name"):
         print("added page")
         report.add_page(page)
 
@@ -168,9 +160,7 @@ def test_report_pdf_values_gridded(grid_combo_table, monkeypatch):
 
     report: Document = Document()
 
-    for page in report_condensed_v2.build_pdf_report_pages(
-        grid_combo_table, "gridded", "by grid point"
-    ):
+    for page in report_condensed_v2.build_pdf_report_pages(grid_combo_table, "gridded", "by grid point"):
         print("added page")
         report.add_page(page)
 

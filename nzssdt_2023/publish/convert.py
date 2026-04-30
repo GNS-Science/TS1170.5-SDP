@@ -2,7 +2,6 @@
 
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Union
 
 import pandas as pd
 
@@ -19,7 +18,7 @@ class SatTable:
         flat = self.flatten()
         return flat.join(dm_df, how="left", on=["Location", "APoE (1/n)"])
 
-    @lru_cache
+    @lru_cache  # noqa: B019
     def flatten(self):
         return OG_flatten_sat_df(self.raw_table)
 
@@ -76,9 +75,7 @@ def flatten_sat_df(df: pd.DataFrame):
     So for now, we're using OG_flatten_sat_df() instead.
     """
     df2 = df.stack().stack().stack()
-    df2 = df2.unstack(
-        level=1, sort=False
-    ).reset_index()  # not supported yet - will it work
+    df2 = df2.unstack(level=1, sort=False).reset_index()  # not supported yet - will it work
 
     df2.level_1 = df2.level_1.apply(lambda x: x.replace("Site Class ", ""))
     df2.level_2 = df2.level_2.apply(lambda x: int(x.replace("APoE: 1/", "")))
@@ -93,9 +90,7 @@ def flatten_sat_df(df: pd.DataFrame):
     return df2
 
 
-def sat_table_json_path(
-    root_folder: Union[Path, str], named_sites: bool = True, site_limit=0, combo=False
-):
+def sat_table_json_path(root_folder: Path | str, named_sites: bool = True, site_limit=0, combo=False):
     """get path for json files
 
     Args:
@@ -116,9 +111,7 @@ def sat_table_json_path(
         return Path(root_folder, file_name.replace("TYPE", "grid"))
 
 
-def sat_table_to_json(
-    hf_path: Path, version_folder: Union[str, Path], site_limit: int = 0
-):
+def sat_table_to_json(hf_path: Path, version_folder: str | Path, site_limit: int = 0):
     """Creates sat table and saves to json
 
     Args:
@@ -153,7 +146,7 @@ class DistMagTable:
     def __init__(self, raw_table: pd.DataFrame):
         self.raw_table = raw_table
 
-    @lru_cache
+    @lru_cache  # noqa: B019
     def flatten(self):
         df2 = self.raw_table
         df2["Location"] = df2.index
@@ -170,8 +163,8 @@ class DistMagTable:
 
 def d_and_m_table_to_json(
     version_folder,
-    site_list: List[str],
-    rp_list: List[int] = constants.DEFAULT_RPS,
+    site_list: list[str],
+    rp_list: list[int] = constants.DEFAULT_RPS,
     no_cache: bool = False,
     legacy: bool = False,
     site_limit: int = 0,
@@ -186,9 +179,7 @@ def d_and_m_table_to_json(
         legacy: if True double rounds magnitudes to match original mean mags from v1 of the workflow.
         site_limit: for building test fixtures
     """
-    dm_df = dm_gen.create_D_and_M_df(
-        site_list, rp_list=rp_list, no_cache=no_cache, legacy=legacy
-    )
+    dm_df = dm_gen.create_D_and_M_df(site_list, rp_list=rp_list, no_cache=no_cache, legacy=legacy)
     dandm = DistMagTable(dm_df)
 
     out_path = (

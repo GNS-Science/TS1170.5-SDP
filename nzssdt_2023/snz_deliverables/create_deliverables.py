@@ -5,14 +5,13 @@ This module compiles the deliverable for Standards New Zealand from the reports 
 import csv
 import zipfile
 from pathlib import Path, PurePath
-from typing import List
 
 import pandas as pd
 
 from nzssdt_2023.config import WORKING_FOLDER
 
 
-def copy_files_to_deliverable(gns_files: List[Path], snz_files: List[Path]):
+def copy_files_to_deliverable(gns_files: list[Path], snz_files: list[Path]):
     """
     copy files directly to the deliverables folder
 
@@ -22,17 +21,14 @@ def copy_files_to_deliverable(gns_files: List[Path], snz_files: List[Path]):
 
     """
 
-    for gns_file, snz_file in zip(gns_files, snz_files):
-
+    for gns_file, snz_file in zip(gns_files, snz_files, strict=False):
         if gns_file.suffix == ".pdf":
             snz_file.write_bytes(gns_file.read_bytes())
         else:
             snz_file.write_text(gns_file.read_text())
 
 
-def copy_csv_reports_to_deliverable(
-    gns_csv_files: List[Path], snz_csv_files: List[Path]
-):
+def copy_csv_reports_to_deliverable(gns_csv_files: list[Path], snz_csv_files: list[Path]):
     """
     modify and re-encode the csv files for default Excel import then add them to the deliverables folder
 
@@ -42,7 +38,7 @@ def copy_csv_reports_to_deliverable(
 
     """
 
-    for gns_file, snz_file in zip(gns_csv_files, snz_csv_files):
+    for gns_file, snz_file in zip(gns_csv_files, snz_csv_files, strict=False):
         df = pd.read_csv(gns_file, keep_default_na=True)
         apoes = df["apoe"]
         df["apoe"] = [f" {apoe}" for apoe in apoes]
@@ -133,38 +129,22 @@ def create_deliverables_zipfile(
     gns_jsons = [gns_named_json, gns_grid_json]
 
     # set relevant paths for snz deliverable
-    snz_named_report_pdf = Path(
-        deliverables_folder, f"{snz_name_prefix}_Table3-1_{publication_year}.pdf"
-    )
-    snz_grid_report_pdf = Path(
-        deliverables_folder, f"{snz_name_prefix}_Table3-2_{publication_year}.pdf"
-    )
+    snz_named_report_pdf = Path(deliverables_folder, f"{snz_name_prefix}_Table3-1_{publication_year}.pdf")
+    snz_grid_report_pdf = Path(deliverables_folder, f"{snz_name_prefix}_Table3-2_{publication_year}.pdf")
     snz_pdf_files = [snz_grid_report_pdf, snz_named_report_pdf]
 
-    snz_named_report_csv = Path(
-        deliverables_folder, f"{snz_name_prefix}_Table3-1_{publication_year}.csv"
-    )
-    snz_grid_report_csv = Path(
-        deliverables_folder, f"{snz_name_prefix}_Table3-2_{publication_year}.csv"
-    )
+    snz_named_report_csv = Path(deliverables_folder, f"{snz_name_prefix}_Table3-1_{publication_year}.csv")
+    snz_grid_report_csv = Path(deliverables_folder, f"{snz_name_prefix}_Table3-2_{publication_year}.csv")
     snz_csv_files = [snz_grid_report_csv, snz_named_report_csv]
 
-    snz_named_json = Path(
-        deliverables_folder, f"{snz_name_prefix}_Table3-1_{publication_year}.json"
-    )
-    snz_grid_json = Path(
-        deliverables_folder, f"{snz_name_prefix}_Table3-2_{publication_year}.json"
-    )
+    snz_named_json = Path(deliverables_folder, f"{snz_name_prefix}_Table3-1_{publication_year}.json")
+    snz_grid_json = Path(deliverables_folder, f"{snz_name_prefix}_Table3-2_{publication_year}.json")
     snz_polygons = Path(
         deliverables_folder,
         f"{snz_name_prefix}_Figure3-2_{publication_year}.geojson",
     )
-    snz_grid_points = Path(
-        deliverables_folder, f"{snz_name_prefix}_GridPoints_{publication_year}.geojson"
-    )
-    snz_faults = Path(
-        deliverables_folder, f"{snz_name_prefix}_MajorFaults_{publication_year}.geojson"
-    )
+    snz_grid_points = Path(deliverables_folder, f"{snz_name_prefix}_GridPoints_{publication_year}.geojson")
+    snz_faults = Path(deliverables_folder, f"{snz_name_prefix}_MajorFaults_{publication_year}.geojson")
     snz_geojsons = [snz_polygons, snz_grid_points, snz_faults]
     snz_jsons = [snz_named_json, snz_grid_json]
 
@@ -180,15 +160,12 @@ def create_deliverables_zipfile(
         | (not snz_grid_points.exists())
         | (not snz_faults.exists())
     ):
-
         # create deliverables version folder
         if not deliverables_folder.is_dir():
             deliverables_folder.mkdir()
 
         # copy files for zip folder
-        copy_files_to_deliverable(
-            gns_pdf_files + gns_geojsons, snz_pdf_files + snz_geojsons
-        )
+        copy_files_to_deliverable(gns_pdf_files + gns_geojsons, snz_pdf_files + snz_geojsons)
         copy_csv_reports_to_deliverable(gns_csv_files, snz_csv_files)
         zip_path = archive_zip_folder(deliverables_folder, zip_path)
 

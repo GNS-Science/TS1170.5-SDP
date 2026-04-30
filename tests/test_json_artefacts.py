@@ -88,10 +88,7 @@ def test_d_and_m_json_serialisation(mean_mags_fixture, workingfolder_fixture):
     assert rehydrated.index.to_frame()["Location"].unique().tolist() == site_list
 
     # check we have all the APOES
-    assert (
-        rehydrated.index.to_frame()["APoE (1/n)"].unique().tolist()
-        == constants.DEFAULT_RPS
-    )
+    assert rehydrated.index.to_frame()["APoE (1/n)"].unique().tolist() == constants.DEFAULT_RPS
 
     # or ...
     # assert rehydrated.index.to_frame()['APoE (1/n)'].unique().tolist() == sorted(list(constants.RP_TO_POE.keys()))

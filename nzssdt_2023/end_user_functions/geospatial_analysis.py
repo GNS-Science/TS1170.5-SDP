@@ -22,7 +22,6 @@ def identify_location_id(longitude: float, latitude: float) -> str:
 
     # check whether point falls within New Zealand
     if sum(NZ_MAP.contains(Point(longitude, latitude))) > 0:
-
         # identify polygons that the point falls within
         point_location = Point(longitude, latitude)
         within_idx = POLYGONS.contains(point_location)
@@ -36,9 +35,7 @@ def identify_location_id(longitude: float, latitude: float) -> str:
         # if point does not fall in a polygon
         else:
             # calculate distance to all grid points
-            grid_dist = GRID_PTS.geometry.apply(
-                lambda x: point_location.distance(x)
-            ).round(4)
+            grid_dist = GRID_PTS.geometry.apply(lambda x: point_location.distance(x)).round(4)
             # find the closest locations (ordered by northwest, NE, SW, SE)
             closest_idx = np.where(grid_dist == grid_dist.min())[0]
             # for equidistant points, take the first
@@ -68,8 +65,6 @@ def calculate_distance_to_fault(longitude: float, latitude: float) -> float:
     faults_nztm = FAULTS.to_crs(epsg=2193)
 
     # calculate minimum distance to fault
-    d = round(
-        latlon_nztm.geometry.apply(lambda x: faults_nztm.distance(x).min()) / 1000.0
-    )
+    d = round(latlon_nztm.geometry.apply(lambda x: faults_nztm.distance(x).min()) / 1000.0)
 
     return d[0]

@@ -85,9 +85,7 @@ def build_nshm(nzshm_model, verbose, site_limit):
         AWS_PROFILE=toshi_batch_devops
     """
     if verbose:
-        click.echo(
-            f"Build the HDF5 from a given model : {nzshm_model} with  {site_limit} sites"
-        )
+        click.echo(f"Build the HDF5 from a given model : {nzshm_model} with  {site_limit} sites")
 
     site_list = get_site_list(site_limit)
     get_hazard_curves(site_list=site_list, site_limit=site_limit, hazard_id=nzshm_model)
@@ -119,16 +117,14 @@ def build_tables(version_id, nzshm_model, verbose, no_cache, site_limit):
 def build_geometry(version_id, verbose):
     """Build the geojson artefacts."""
     if verbose:
-        click.echo("geojsons for version: %s" % version_id)
+        click.echo(f"geojsons for version: {version_id}")
 
     create_geojsons(version_id, overwrite=True)
 
 
 @cli.command("05-report")
 @click.argument("version_id")
-@click.option(
-    "--final", is_flag=True, default=False, help="Final version has no DRAFT watermark"
-)
+@click.option("--final", is_flag=True, default=False, help="Final version has no DRAFT watermark")
 @click.option("--verbose", "-V", is_flag=True, default=False)
 @click.option(
     "--site-limit",
@@ -153,19 +149,15 @@ def build_geometry(version_id, verbose):
 def build_reports(version_id, final, verbose, site_limit, report_limit, table):
     """Build PDF reports and csv files from json tables."""
     if verbose:
-        click.echo("report for version: %s" % version_id)
+        click.echo(f"report for version: {version_id}")
         click.echo(f"table(s): {table}")
 
     output_folder = Path(RESOURCES_FOLDER).parent / "reports" / f"v{version_id}"
     version_folder = Path(RESOURCES_FOLDER).parent / "resources" / f"v{version_id}"
 
     # data paths
-    named_path = sat_table_json_path(
-        version_folder, named_sites=True, site_limit=site_limit, combo=True
-    )
-    gridded_path = sat_table_json_path(
-        version_folder, named_sites=False, site_limit=site_limit, combo=True
-    )
+    named_path = sat_table_json_path(version_folder, named_sites=True, site_limit=site_limit, combo=True)
+    gridded_path = sat_table_json_path(version_folder, named_sites=False, site_limit=site_limit, combo=True)
 
     if "named" in table:
         named_df = pd.read_json(named_path, orient="table")
@@ -212,7 +204,7 @@ def publish(version_id, nzshm_model, description, verbose, update):
 def build_deliverable(version_id, verbose):
     """Build the deliverable artifacts."""
     if verbose:
-        click.echo("deliverables for version: %s" % version_id)
+        click.echo(f"deliverables for version: {version_id}")
 
     create_deliverables(version_id, overwrite=True)
 
