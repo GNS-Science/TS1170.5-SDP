@@ -64,7 +64,7 @@ doc = [
     "mkdocs-material-extensions",
     "mkdocs-material",
     "mkdocs",
-    "mkdocstrings-python>=1.18.2,<2.0.0",
+    "mkdocstrings-python>=1.18.2,<3.0.0",
     "mkdocstrings",
     "mkdocs-with-pdf"
 ]
