@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+ - deps: patch (4 pkgs: ruff, boto3, botocore, nh3)
+ - deps: minor (4 pkgs: packaging, pip, typer, tzdata)
+ - deps: major: griffe 1→2.0.2, mkdocstrings-python 1→2.0.3, cryptography 46→47
+
 ## [0.8.0] 2025-10-15
 
 ### Changed
