@@ -57,7 +57,7 @@ dev = [
 ]
 
 doc = [
-    "griffe>=1.14.0,<2.0.0",
+    "griffe>=1.14.0,<3.0.0",
     "mkdocs-autorefs",
     "mkdocs-click>=0.9.0,<0.10.0",
     "mkdocs-include-markdown-plugin",
