@@ -1,5 +1,12 @@
 # New Zealand | Aotearoa Seismic Site Demand Table 2023 (NZSSDT-2023)
 
+> ## ⚠️ UNMAINTAINED ⚠️
+>
+> **This repository is currently not maintained.**
+>
+> Dependencies, tooling, and instructions may be **out of date**. Use at your own risk. Expect breakage. Issues and PRs may not receive a response.
+
+
 [![Build Status](https://github.com/GNS-Science/TS1170.5-SDP/actions/workflows/dev.yml/badge.svg)](https://github.com/GNS-Science/TS1170.5-SDP/actions/workflows/dev.yml)
 [![codecov](https://codecov.io/github/GNS-Science/TS1170.5-SDP/graph/badge.svg?token=KUYH4800QM)](https://app.codecov.io/github/GNS-Science/TS1170.5-SDP)
 
