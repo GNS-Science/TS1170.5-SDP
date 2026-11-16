@@ -14,7 +14,7 @@ on:
 
 jobs:
   release-and-distribute:
-    uses:  GNS-Science/nshm-github-actions/.github/workflows/python-release.yml@main
+    uses:  GNS-Science/nshm-github-actions/.github/workflows/python-release.yml@poetry
     with:
       python-version:  '3.12'
       pypi-publish: False

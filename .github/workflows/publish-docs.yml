@@ -12,7 +12,7 @@ on:
 
 jobs:
   deploy-docs:
-    uses:  GNS-Science/nshm-github-actions/.github/workflows/python-deploy-docs.yml@main
+    uses:  GNS-Science/nshm-github-actions/.github/workflows/python-deploy-docs.yml@poetry
     with:
       python-version:  '3.12'
       optional-dependency-groups: 'doc'
